@@ -3,6 +3,7 @@
     "startCommand": "dotnet ./publish/NqeyApi.dll",
     "outputDirectory": "./publish",
     "runtime": {
-        "type": "dotnet-8.0"
+        "type": "dotnet",
+        "version": "8.0"
     }
 }
