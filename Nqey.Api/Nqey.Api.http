@@ -1,0 +1,6 @@
+@Nqey.Api_HostAddress = http://localhost:5077
+
+GET {{Nqey.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
