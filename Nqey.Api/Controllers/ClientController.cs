@@ -26,14 +26,14 @@ namespace Nqey.Api.Controllers
 
         [HttpGet]
         
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetClients()
         {
-            var users = await _clientRepo.GetClientsAsync();
-            if (users == null)
-                return NotFound(new ApiResponse<Client>(false, "Users not found"));
-            var mappedUsers = _mapper.Map<List<ClientGetDto>>(users);
+            var clients = await _clientRepo.GetClientsAsync();
+            if (clients == null)
+                return NotFound(new ApiResponse<Client>(false, "Clients not found"));
+            var mappedClients = _mapper.Map<List<ClientGetDto>>(clients);
 
-            return Ok(new ApiResponse<List<ClientGetDto>>(true, "Success List of Users",mappedUsers));
+            return Ok(new ApiResponse<List<ClientGetDto>>(true, "List of Clients", mappedClients));
         
         }
         [HttpGet]
@@ -44,7 +44,7 @@ namespace Nqey.Api.Controllers
             if (client == null)
                 return NotFound(new ApiResponse<Client>(false, "Client not found"));
             var mappedClient = _mapper.Map<ClientGetDto>(client);
-            return Ok(new ApiResponse<ClientGetDto>(true,"User retrieved successfully",mappedClient));
+            return Ok(new ApiResponse<ClientGetDto>(true,"Client retrieved successfully",mappedClient));
 
         }
 
