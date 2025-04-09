@@ -1,5 +1,8 @@
 {
     "buildCommand": "dotnet restore && dotnet publish -c Release -o ./publish",
     "startCommand": "dotnet ./publish/NqeyApi.dll",
-    "outputDirectory": "./publish"
+    "outputDirectory": "./publish",
+    "runtime": {
+        "type": "dotnet-8.0"
+    }
 }
