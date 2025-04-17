@@ -24,8 +24,6 @@ namespace Nqey.Api.Controllers
         {
            var users = await _userRepo.GetUsersAsync();
             var usersGet = _mapper.Map<List<UserGetDto>>(users);
-
-
             return Ok(new ApiResponse<List<UserGetDto>>(true, "List of users ",usersGet));
         }
 

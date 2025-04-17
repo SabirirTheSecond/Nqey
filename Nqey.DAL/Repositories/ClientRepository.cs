@@ -64,5 +64,16 @@ namespace Nqey.DAL.Repositories
 
             return client;
         }
+       public async Task<int?> GetClientIdByUserNameAsync(string userName)
+        {
+            var clientId = await _dataContext.Clients
+                .Where(c => c.UserName == userName)
+                .Select(c => (int?)c.ClientId)
+                .FirstOrDefaultAsync();
+            if (clientId == null)
+                return null;
+
+            return clientId;
+        }
     }
 }

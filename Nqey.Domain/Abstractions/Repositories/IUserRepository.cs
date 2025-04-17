@@ -10,9 +10,11 @@ namespace Nqey.Domain.Abstractions.Repositories
     {
         Task<List<User>> GetUsersAsync();
         Task<User> GetByIdAsync(int id);
+        Task<User> GetUserByUserNameAsync(string userName);
         Task<User> AddUserAsync(User user);
         Task<User> UpdateUserAsync(User user);
         Task<User> DeleteUserAsync(int id);
-
+        Task<int?> GetUserIdByUserNameAsync(string userName);
+       
     }
 }

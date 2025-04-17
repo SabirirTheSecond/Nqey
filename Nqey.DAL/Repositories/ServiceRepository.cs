@@ -13,10 +13,12 @@ namespace Nqey.DAL.Repositories
     public class ServiceRepository : IServiceRepository
     {
         private readonly DataContext _dataContext;
+        private readonly IUserRepository _userRepo;
 
-        public ServiceRepository(DataContext dataContext)
+        public ServiceRepository(DataContext dataContext, IUserRepository userRepository)
         {
             _dataContext = dataContext;
+            _userRepo = userRepository;
         }
 
 
@@ -62,6 +64,7 @@ namespace Nqey.DAL.Repositories
             await _dataContext.SaveChangesAsync();
             return updatedService;
         }
+        
         public async Task<List<Provider>> GetAllProviderAsync(int ServiceId)
         {
             var providers = await _dataContext.Providers.Where(p=> p.ServiceId == ServiceId).ToListAsync();
@@ -92,5 +95,34 @@ namespace Nqey.DAL.Repositories
             await _dataContext.SaveChangesAsync();
             return provider;
         }
+        public async Task<Provider> ActivateProviderAsync(int serviceId, Provider provider)
+        {
+            var service = await _dataContext.Services.FirstOrDefaultAsync(s => s.ServiceId ==serviceId);
+            if (service == null)
+                return null;
+
+            var user = await _userRepo.GetUserByUserNameAsync(provider.UserName);
+            provider.AccountStatus = AccountStatus.Active;
+            user.AccountStatus = AccountStatus.Active;
+            _dataContext.Providers.Update(provider);
+            
+            await _dataContext.SaveChangesAsync();
+            return provider;
+        }
+
+       public async Task<int?> GetProviderIdByUserNameAsync(string userName)
+        {
+            var providerId = await _dataContext.Providers
+                .Where(p => p.UserName == userName)
+                .Select(p => (int?)p.ProviderId)
+                .FirstOrDefaultAsync();
+            
+            if (providerId == null)
+                return null;
+
+            return providerId;
+
+        }
+
     }
 }

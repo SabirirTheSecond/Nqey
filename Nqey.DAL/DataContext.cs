@@ -4,17 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Nqey.Domain;
 using Nqey.Domain.Common;
 
 namespace Nqey.DAL
 {
-    public class DataContext : DbContext
+    public class DataContext : IdentityDbContext<IdentityUser>
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options) 
         {
-
         
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

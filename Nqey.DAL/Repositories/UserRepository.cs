@@ -56,6 +56,13 @@ namespace Nqey.DAL.Repositories
             return users;
             
         }
+        public async Task<User> GetUserByUserNameAsync(string userName)
+        {
+            var user = await _dataContext.Users.FirstOrDefaultAsync(u=> u.UserName == userName);
+            if (user == null)
+                return null;
+            return user;
+        }
 
        public async Task<User> UpdateUserAsync(User user)
         {
@@ -65,5 +72,16 @@ namespace Nqey.DAL.Repositories
             
         }
 
+        public async Task<int?> GetUserIdByUserNameAsync(string userName)
+        {
+            var userId = await _dataContext.Users
+                .Where(c => c.UserName == userName)
+                .Select(c => (int?)c.UserId)
+                .FirstOrDefaultAsync();
+            if (userId == null)
+                return null;
+
+            return userId;
+        }
     }
 }

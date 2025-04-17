@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -21,11 +21,17 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.8.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Nqey.DAL\Nqey.DAL.csproj" />
+    <ProjectReference Include="..\Nqey.Domain\Nqey.Domain.csproj" />
     <ProjectReference Include="..\Nqey.Services\Nqey.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Other\" />
   </ItemGroup>
 
 </Project>

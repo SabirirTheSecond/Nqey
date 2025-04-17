@@ -10,6 +10,7 @@ namespace Nqey.Domain.Abstractions.Repositories
     {
         Task<List<Client>> GetClientsAsync();
         Task<Client> GetClientByIdAsync(int id);
+        Task<int?> GetClientIdByUserNameAsync(string userName);
         Task<Client> AddClientAsync(Client client);
         Task<Client> UpdateClientAsync(Client client);
         Task<Client> DeleteClientAsync(int id);

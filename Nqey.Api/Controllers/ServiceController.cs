@@ -6,6 +6,7 @@ using AutoMapper;
 using Nqey.Domain;
 using Nqey.Domain.Common;
 using Nqey.Domain.Abstractions.Repositories;
+using Microsoft.AspNetCore.Authorization;
 namespace Nqey.Api.Controllers
 {
     [ApiController]
@@ -26,6 +27,7 @@ namespace Nqey.Api.Controllers
 
         }
 
+        [Authorize(Roles = "Client,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetServices()
 
@@ -34,9 +36,10 @@ namespace Nqey.Api.Controllers
             var servicesGet = _mapper.Map<List<ServiceGetDto>>(services);
             return Ok(new ApiResponse<List<ServiceGetDto>>(true, "Services List", servicesGet));
         }
+
+        [Authorize(Roles = "Client,Admin")]
         [Route("{serviceId}")]
         [HttpGet]
-
         public async Task<IActionResult> GetServiceById(int serviceId)
         {
             var service = await _serviceRepository.GetServiceByIdAsync(serviceId);
@@ -44,9 +47,18 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ServiceGetDto>(true, "Services List", serviceGet));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddService([FromBody] ServicePostPutDto servicePostPut)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.ToDictionary(
+                key => key.Key,
+                value => value.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+                return BadRequest(new ApiResponse<Dictionary<string, string[]>>(false, "Validation errors", errors));
+            }
 
             var domainService = _mapper.Map<Service>(servicePostPut);
 
@@ -57,6 +69,8 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ServiceGetDto>(true, $"Service {serviceGet.Name} Added ", serviceGet));
             //return Ok(serviceGet);
         }
+
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> UpdateService(ServicePostPutDto servicePostPut, int id)
@@ -69,15 +83,15 @@ namespace Nqey.Api.Controllers
             }
 
              _mapper.Map(servicePostPut, existingService);
-            
-            
-
+           
             await _serviceRepository.UpdateServiceAsync(existingService);
             var mappedService = _mapper.Map<ServiceGetDto>(existingService);
             return Ok(new ApiResponse<ServiceGetDto>(true,$" Service is updated to {mappedService.Name}",null));
 
 
         }
+
+        [Authorize(Roles = "Admin")]
         [HttpDelete]
         [Route("{id}")]
 
@@ -92,6 +106,7 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ServiceGetDto>(true,"Service Deleted",null));
         }
 
+        [Authorize(Roles = "Client,Admin")]
         [HttpGet]
         [Route("{serviceId}/providers")]
         public async Task<ActionResult<List<Provider>>> GetProviders(int serviceId)
@@ -99,10 +114,19 @@ namespace Nqey.Api.Controllers
             var providers = await _serviceRepository.GetAllProviderAsync(serviceId);
             var mappedProviders = _mapper.Map<List<ProviderGetDto>>(providers);
             var serviceName = await _serviceRepository.GetServiceByIdAsync(serviceId);
+           
+            // check the existence of the service
+            if (serviceName == null)
+                return NotFound(new ApiResponse<Provider>(false,"Service Not Found"));
+            
+            /* check if the providers list isn't empty and notify if otherwise*/
+            if (providers == null)
+                return Ok(new ApiResponse<List<ProviderGetDto>>(true, $" {serviceName.Name} has no providers yet", mappedProviders));
 
             return Ok(new ApiResponse<List<ProviderGetDto>>(true,$"List of {serviceName.Name} service providers",mappedProviders));
 
         }
+        [Authorize(Roles = "Client,Admin")]
         [HttpGet]
         [Route("{serviceId}/providers/{providerId}")]
         public async Task<IActionResult> GetProviderById(int serviceId, int providerId)
@@ -116,6 +140,7 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ProviderGetDto>(true, "Provider retrieved successfully",mappedProvider));
 
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("{serviceId}/providers")]
         public async Task<IActionResult> AddProvider(int serviceId, [FromBody] ProviderPostPutDto providerPostPut)
@@ -134,6 +159,26 @@ namespace Nqey.Api.Controllers
             var mappedProvider = _mapper.Map<ProviderGetDto>(domainProvider);
 
             return Ok(new ApiResponse<ProviderGetDto>(true, "Provider Added Successfully", mappedProvider));
+        }
+        // Validate a provider's account
+        [Authorize(Roles ="Admin")]
+        [HttpPut]
+        [Route("{serviceId}/providers/{providerId}/ActivateProvider")]
+
+        public async Task<IActionResult> ActivateProviderAccount(int serviceId, int providerId)
+        {
+            var service = await _serviceRepository.GetServiceByIdAsync(serviceId);
+            if (service == null)
+                return NotFound(new ApiResponse<Service>(false,"Service Not Found"));
+
+            var provider = await _serviceRepository.GetProviderByIdAsync(serviceId,providerId);
+            
+            if(provider == null)
+                return NotFound(new ApiResponse<Provider>(false, "Provider Not Found"));
+
+            await _serviceRepository.ActivateProviderAsync(serviceId, provider);
+            return Ok(new ApiResponse<ProviderGetDto>(true, $"Provider {provider.UserName}'s Account Is Now Active"));
+
         }
 
     }

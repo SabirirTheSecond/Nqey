@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nqey.Api.Dtos;
 using Nqey.Domain;
@@ -30,6 +31,9 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<List<ReservationGetDto>>(true,"Reservations Retrieved Succussfully"
                 ,mappedReservations));
         }
+        [Authorize(Roles ="Admin,Provider")]
+        [Authorize(Policy ="ActiveAccountOnly")]
+        [Authorize(Policy ="IsOwner")]
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult> GetReservationById(int id)
@@ -40,6 +44,8 @@ namespace Nqey.Api.Controllers
             var mappedReservation = _mapper.Map<ReservationGetDto>(reservation);
             return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation retrieved Successfully", mappedReservation));
         }
+
+        [Authorize(Roles = "Client")]
         [HttpPost]
         public async Task<IActionResult> MakeReservation(int clientId, int providerId,
            [FromBody] ReservationPostPutDto reservationPostPut)
@@ -68,13 +74,15 @@ namespace Nqey.Api.Controllers
 
         }
 
+        [Authorize(Roles = "Client")]
         [HttpPut]
         [Route("{id}/change")]
         public async Task<IActionResult> ChangeReservation(int clientId,int providerId,
             int id, [FromBody] ReservationPostPutDto reservationPostPut)
         {
+            
             var existingReservation = await _reservationService.GetReservationByIdAsync(id);
-
+            
             if (existingReservation == null)
                 return NotFound(new ApiResponse<Reservation>(false, "Reservation Not Found"));
             
@@ -89,6 +97,8 @@ namespace Nqey.Api.Controllers
             var mappedReservation = _mapper.Map<ReservationGetDto>(existingReservation);
             return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Updated Successfully", mappedReservation));
         }
+
+        [Authorize(Roles = "Client")]
         [HttpPut]
         [Route("{id}/cancel")]
         public async Task<IActionResult> CancelReservation(int id)
@@ -106,6 +116,9 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<Reservation>(true, "Reservation Cancelled"));
         }
 
+        [Authorize(Roles ="Provider")]
+        [Authorize(Policy ="ActiveAccountOnly")]
+        [Authorize(Policy = "IsOwner")]
         [HttpPut]
         [Route("{id}/accept")]
         public async Task<IActionResult> AcceptReservation(int id)
@@ -124,6 +137,8 @@ namespace Nqey.Api.Controllers
             return BadRequest(new ApiResponse<Reservation>(false, "Reservation Is Either Accepted Already Or Cancelled"));
 
         }
+
+        [Authorize(Roles = "Client")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteReservations(int id)
