@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 namespace Nqey.Api.Controllers
 {
     [ApiController]
-    [Route("/[Controller]")]
+    [Route("api/[Controller]")]
     public class ClientController : Controller
     {
         private readonly IMapper _mapper;

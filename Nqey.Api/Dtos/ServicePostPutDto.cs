@@ -7,6 +7,6 @@ namespace Nqey.Api.Dtos
         
         public string Name { get; set; }
 
-        //public List<Provider>? Providers { get; set; }
+        
     }
 }

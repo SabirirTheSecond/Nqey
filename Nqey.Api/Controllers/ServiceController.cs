@@ -27,7 +27,7 @@ namespace Nqey.Api.Controllers
 
         }
 
-        [Authorize(Roles = "Client,Admin")]
+        //[Authorize(Roles = "Client,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetServices()
 
@@ -37,7 +37,7 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<List<ServiceGetDto>>(true, "Services List", servicesGet));
         }
 
-        [Authorize(Roles = "Client,Admin")]
+        //[Authorize(Roles = "Client,Admin")]
         [Route("{serviceId}")]
         [HttpGet]
         public async Task<IActionResult> GetServiceById(int serviceId)
