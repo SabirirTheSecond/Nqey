@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Nqey.Api.Dtos;
+using Nqey.Api.Dtos.ReservationDtos;
 using Nqey.Domain;
 
 namespace Nqey.Api.Automapper

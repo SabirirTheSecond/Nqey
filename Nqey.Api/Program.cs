@@ -17,6 +17,7 @@ using Nqey.Domain;
 using Nqey.Domain.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Nqey.Services.Authorization;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Default");
@@ -24,12 +25,13 @@ var connectionString = builder.Configuration.GetConnectionString("Default");
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-});
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+}); 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
+    
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Nqey API", Version = "v1" });
 
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

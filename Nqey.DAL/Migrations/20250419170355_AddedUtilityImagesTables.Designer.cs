@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nqey.DAL;
 
@@ -11,9 +12,11 @@ using Nqey.DAL;
 namespace Nqey.DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250419170355_AddedUtilityImagesTables")]
+    partial class AddedUtilityImagesTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -236,10 +239,6 @@ namespace Nqey.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("ProfilePictureProfileImageId")
                         .HasColumnType("int");
 
@@ -322,9 +321,6 @@ namespace Nqey.DAL.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ProfileImageId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("ProfileImage");
                 });
@@ -434,9 +430,6 @@ namespace Nqey.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProfilePictureProfileImageId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("ReviewId")
                         .HasColumnType("int");
 
@@ -454,8 +447,6 @@ namespace Nqey.DAL.Migrations
                     b.HasKey("ProviderId");
 
                     b.HasIndex("LocationId");
-
-                    b.HasIndex("ProfilePictureProfileImageId");
 
                     b.HasIndex("ReviewId");
 
@@ -655,17 +646,6 @@ namespace Nqey.DAL.Migrations
                     b.Navigation("Provider");
                 });
 
-            modelBuilder.Entity("Nqey.Domain.Common.ProfileImage", b =>
-                {
-                    b.HasOne("Nqey.Domain.User", "User")
-                        .WithOne("ProfilePicture")
-                        .HasForeignKey("Nqey.Domain.Common.ProfileImage", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Nqey.Domain.Message", b =>
                 {
                     b.HasOne("Nqey.Domain.Client", null)
@@ -691,10 +671,6 @@ namespace Nqey.DAL.Migrations
                         .WithMany()
                         .HasForeignKey("LocationId");
 
-                    b.HasOne("Nqey.Domain.Common.ProfileImage", "ProfilePicture")
-                        .WithMany()
-                        .HasForeignKey("ProfilePictureProfileImageId");
-
                     b.HasOne("Nqey.Domain.Common.Review", "Review")
                         .WithMany()
                         .HasForeignKey("ReviewId");
@@ -706,8 +682,6 @@ namespace Nqey.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Location");
-
-                    b.Navigation("ProfilePicture");
 
                     b.Navigation("Review");
 
@@ -758,11 +732,6 @@ namespace Nqey.DAL.Migrations
             modelBuilder.Entity("Nqey.Domain.Service", b =>
                 {
                     b.Navigation("Providers");
-                });
-
-            modelBuilder.Entity("Nqey.Domain.User", b =>
-                {
-                    b.Navigation("ProfilePicture");
                 });
 #pragma warning restore 612, 618
         }

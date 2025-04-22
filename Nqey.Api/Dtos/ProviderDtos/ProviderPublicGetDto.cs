@@ -1,18 +1,21 @@
 ﻿using Nqey.Domain.Common;
 using Nqey.Domain;
 
-namespace Nqey.Api.Dtos
+namespace Nqey.Api.Dtos.ProviderDtos
 {
-    public class ProviderGetDto
+    public class ProviderPublicGetDto
     {
         public int ProviderId { get; set; }
         public string UserName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+
         //public string? IdentityPiece { get; set; }
+
+        public ProfileImage ProfilePicture { get; set; }
         public string ServiceDescription { get; set; }
         public string Email { get; set; }
-        
+
         public string PhoneNumber { get; set; }
 
         public Location? Location { get; set; }
@@ -20,7 +23,6 @@ namespace Nqey.Api.Dtos
         public int ServiceId { get; set; }
         //public Service Service { get; set; }
         //public Review? Review { get; set; }
-        public virtual ICollection<Message>? SentMessages { get; set; } = new List<Message>();
-        public virtual ICollection<Message>? ReceivedMessages { get; set; } = new List<Message>();
+        
     }
 }

@@ -26,6 +26,32 @@ namespace Nqey.DAL
 
            
             modelBuilder.Entity<Location>().OwnsOne(l=> l.Position);
+           
+            modelBuilder.Entity<Provider>()
+                .HasMany(p => p.Portfolio)
+                .WithOne(i => i.Provider)
+                .HasForeignKey(i => i.ProviderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.ProfilePicture)
+                .WithOne(p => p.User)
+                .HasForeignKey<ProfileImage>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //modelBuilder.Entity<Client>()
+            //.HasOne(c => c.ProfilePicture)
+            //.WithOne()
+            //.HasForeignKey<ProfileImage>(p => p.UserId)
+            //.OnDelete(DeleteBehavior.Cascade);
+
+            //modelBuilder.Entity<Provider>()
+            //    .HasOne(p => p.ProfilePicture)
+            //    .WithOne()
+            //    .HasForeignKey<ProfileImage>(p => p.UserId)
+            //    .OnDelete(DeleteBehavior.Cascade);
+            //    ;
+
         }
 
         public DbSet<User> Users { get; set; }

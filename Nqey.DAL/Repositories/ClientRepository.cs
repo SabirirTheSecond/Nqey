@@ -38,6 +38,7 @@ namespace Nqey.DAL.Repositories
        public async Task<Client> GetClientByIdAsync(int id)
         {
             var client = await _dataContext.Clients
+                .Include(c => c.ProfilePicture)
                 .FirstOrDefaultAsync(c => c.ClientId == id);
 
             if (client == null)

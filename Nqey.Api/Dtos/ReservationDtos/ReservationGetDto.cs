@@ -1,7 +1,7 @@
 ﻿using Nqey.Domain.Common;
 using Nqey.Domain;
 
-namespace Nqey.Api.Dtos
+namespace Nqey.Api.Dtos.ReservationDtos
 {
     public class ReservationGetDto
     {

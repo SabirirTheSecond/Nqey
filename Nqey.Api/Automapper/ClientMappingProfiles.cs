@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Nqey.Api.Dtos;
+using Nqey.Api.Dtos.ClientDtos;
 using Nqey.Domain;
 
 namespace Nqey.Api.Automapper
@@ -8,8 +9,15 @@ namespace Nqey.Api.Automapper
     {
         public ClientMappingProfiles() 
         {
-            CreateMap<ClientPostPutDto, Client>();
-            CreateMap<Client, ClientGetDto>();
+            CreateMap<ClientPostPutDto, Client>()
+                 .ForMember(dest => dest.ProfilePicture, opt => opt.Ignore());
+
+            CreateMap<Client, ClientPublicGetDto>()
+                .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.ProfilePicture));
+           
+            CreateMap<Client, ClientAdminGetDto>()
+                 .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.ProfilePicture));
+
             CreateMap<ClientPostPutDto, UserPostPutDto>();
 
         }

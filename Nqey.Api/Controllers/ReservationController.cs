@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Nqey.Api.Dtos;
+using Nqey.Api.Dtos.ReservationDtos;
 using Nqey.Domain;
 using Nqey.Domain.Abstractions.Repositories;
 using Nqey.Domain.Abstractions.Services;
@@ -31,10 +31,12 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<List<ReservationGetDto>>(true,"Reservations Retrieved Succussfully"
                 ,mappedReservations));
         }
+
         [Authorize(Roles ="Admin,Provider")]
         [Authorize(Policy ="ActiveAccountOnly")]
         [Authorize(Policy ="IsOwner")]
         [HttpGet]
+
         [Route("{id}")]
         public async Task<ActionResult> GetReservationById(int id)
         {

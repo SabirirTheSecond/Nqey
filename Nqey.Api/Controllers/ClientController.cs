@@ -6,6 +6,9 @@ using Nqey.Domain;
 using Nqey.Domain.Abstractions.Repositories;
 using Nqey.Domain.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Nqey.Api.Dtos.ClientDtos;
+using System.Security.Claims;
 namespace Nqey.Api.Controllers
 {
     [ApiController]
@@ -24,36 +27,74 @@ namespace Nqey.Api.Controllers
 
         }
 
+
+        [Authorize(Roles ="Admin")]
         [HttpGet]
-        
         public async Task<IActionResult> GetClients()
         {
             var clients = await _clientRepo.GetClientsAsync();
             if (clients == null)
                 return NotFound(new ApiResponse<Client>(false, "Clients not found"));
-            var mappedClients = _mapper.Map<List<ClientGetDto>>(clients);
+            var mappedClients = _mapper.Map<List<ClientPublicGetDto>>(clients);
 
-            return Ok(new ApiResponse<List<ClientGetDto>>(true, "List of Clients", mappedClients));
+            return Ok(new ApiResponse<List<ClientPublicGetDto>>(true, "List of Clients", mappedClients));
         
         }
+        //[Authorize(Roles = "Admin,Provider")]
         [HttpGet]
-        [Route("id")]
+        [Route("{id}")]
         public async Task<IActionResult> GetClientById(int id)
         {
             var client = await _clientRepo.GetClientByIdAsync(id);
             if (client == null)
                 return NotFound(new ApiResponse<Client>(false, "Client not found"));
-            var mappedClient = _mapper.Map<ClientGetDto>(client);
-            return Ok(new ApiResponse<ClientGetDto>(true,"Client retrieved successfully",mappedClient));
+            
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            if(User.Identity.IsAuthenticated == true && role == Role.Admin.ToString())
+            {
+                var mappedClient = _mapper.Map<ClientAdminGetDto>(client);
+                return Ok(new ApiResponse<ClientAdminGetDto>(true, "Admin view of the client: ", mappedClient));
+            }
+
+            else
+            {
+                var mappedClient = _mapper.Map<ClientPublicGetDto>(client);
+                return Ok(new ApiResponse<ClientPublicGetDto>(true, "Client retrieved successfully", mappedClient));
+            }
+                
 
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddClient([FromBody] ClientPostPutDto clientPostPut)
+        public async Task<IActionResult> AddClient([FromForm] ClientPostPutDto clientPostPut)
         {
+
+            string? imagePath = null;
+
+            if (clientPostPut.ProfilePicture != null)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(clientPostPut.ProfilePicture.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await clientPostPut.ProfilePicture.CopyToAsync(stream);
+                }
+
+                imagePath = Path.Combine("images", "profiles", uniqueFileName);
+            }
+
+
             var domainClient = _mapper.Map<Client>(clientPostPut);
+          
             var userPostPut = _mapper.Map<UserPostPutDto>(clientPostPut);
             var domainUser = _mapper.Map<User>(userPostPut);
+
+           
+
             domainUser.SetPassword(userPostPut.Password);
             domainUser.UserRole = Role.Client;
             domainUser.AccountStatus = AccountStatus.Active;
@@ -62,9 +103,24 @@ namespace Nqey.Api.Controllers
 
             await _clientRepo.AddClientAsync(domainClient);
             await _userRepo.AddUserAsync(domainUser);
-            var mappedClient = _mapper.Map<ClientGetDto>(domainClient);
-            return Ok(new ApiResponse<ClientGetDto>(true, "Client Added Successfully ", mappedClient));
+            if (imagePath != null)
+            {
+                
+
+                domainClient.ProfilePicture = new ProfileImage
+                {
+                    ImagePath = imagePath,
+                    UserId = domainUser.UserId // If you generate ID before save, otherwise leave out and EF will link after
+               
+                };
+                await _clientRepo.UpdateClientAsync(domainClient);
+                
+            }
+
+            var mappedClient = _mapper.Map<ClientPublicGetDto>(domainClient);
+            return Ok(new ApiResponse<ClientPublicGetDto>(true, "Client Added Successfully ", mappedClient));
         }
+
 
         [HttpPut]
         [Route("{id}")]
@@ -73,13 +129,17 @@ namespace Nqey.Api.Controllers
             var oldClient = await _clientRepo.GetClientByIdAsync(id);
             if (oldClient == null)
                 return NotFound(new ApiResponse<Client>(false, "Client not found"));
+           
             _mapper.Map(clientPostPut, oldClient);
+            
+
             await _clientRepo.UpdateClientAsync(oldClient);
 
-            var mappedClient = _mapper.Map<ClientGetDto>(oldClient);
-            return Ok(new ApiResponse<ClientGetDto>(true,"Client Updated Successfully", mappedClient));
+            var mappedClient = _mapper.Map<ClientPublicGetDto>(oldClient);
+            return Ok(new ApiResponse<ClientPublicGetDto>(true,"Client Updated Successfully", mappedClient));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteClient(int id)

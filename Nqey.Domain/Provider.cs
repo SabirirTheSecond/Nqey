@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Nqey.Domain.Common;
 
 namespace Nqey.Domain
@@ -15,21 +16,22 @@ namespace Nqey.Domain
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string? IdentityPiece { get; set; }
+        public ProfileImage? ProfilePicture { get; set; }
         public string ServiceDescription { get; set; }
         public string Email { get; set; }
         public string PasswordHash { get;  set; }
         public string PhoneNumber { get; set; }
-        
         public  Location? Location { get; set; }
         public AccountStatus AccountStatus { get; set; } = AccountStatus.Blocked;
         public int ServiceId { get; set; }
         public Service Service { get; set; }
-        
         public int? ReviewId { get; set; }
         public Review? Review { get; set; }
         public virtual ICollection<Message>? SentMessages { get; set; } = new List<Message>();
         public virtual ICollection<Message>? ReceivedMessages { get; set; } = new List<Message>();
 
+        
+        public List<PortfolioImage>? Portfolio{ get; set; } = new List<PortfolioImage>();
 
         public void SetPassword(string password)
         {

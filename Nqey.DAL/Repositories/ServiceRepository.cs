@@ -124,5 +124,15 @@ namespace Nqey.DAL.Repositories
 
         }
 
+        public async Task<Provider> UpdateProviderAsync(int serviceId,int providerId, Provider provider)
+        {
+           var service = _dataContext.Services.FirstOrDefault(s => s.ServiceId== serviceId);
+           
+            _dataContext.Update(provider);
+
+            await _dataContext.SaveChangesAsync();
+
+            return provider;
+        }
     }
 }

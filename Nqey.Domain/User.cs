@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Nqey.Domain.Common;
 
 namespace Nqey.Domain
 {
@@ -27,7 +28,7 @@ namespace Nqey.Domain
         public Role UserRole { get; set; }
         [Required]
         public AccountStatus AccountStatus { get; set; }
-
+        public ProfileImage? ProfilePicture { get; set; }
         
 
 

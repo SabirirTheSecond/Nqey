@@ -7,6 +7,9 @@ using Nqey.Domain;
 using Nqey.Domain.Common;
 using Nqey.Domain.Abstractions.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using Nqey.Api.Dtos.ProviderDtos;
+using Nqey.Api.Dtos.ServiceDtos;
+using Nqey.Api.Dtos.ClientDtos;
 namespace Nqey.Api.Controllers
 {
     [ApiController]
@@ -33,8 +36,8 @@ namespace Nqey.Api.Controllers
 
         {
             var services = await _serviceRepository.GetServicesAsync();
-            var servicesGet = _mapper.Map<List<ServiceGetDto>>(services);
-            return Ok(new ApiResponse<List<ServiceGetDto>>(true, "Services List", servicesGet));
+            var servicesGet = _mapper.Map<List<ServicePublicGetDto>>(services);
+            return Ok(new ApiResponse<List<ServicePublicGetDto>>(true, "Services List", servicesGet));
         }
 
         //[Authorize(Roles = "Client,Admin")]
@@ -43,8 +46,8 @@ namespace Nqey.Api.Controllers
         public async Task<IActionResult> GetServiceById(int serviceId)
         {
             var service = await _serviceRepository.GetServiceByIdAsync(serviceId);
-            var serviceGet = _mapper.Map<ServiceGetDto>(service);
-            return Ok(new ApiResponse<ServiceGetDto>(true, "Services List", serviceGet));
+            var serviceGet = _mapper.Map<ServicePublicGetDto>(service);
+            return Ok(new ApiResponse<ServicePublicGetDto>(true, "Services List", serviceGet));
         }
 
         [Authorize(Roles = "Admin")]
@@ -64,9 +67,9 @@ namespace Nqey.Api.Controllers
 
             await _serviceRepository.AddServiceAsync(domainService);
 
-            var serviceGet = _mapper.Map<ServiceGetDto>(domainService);
+            var serviceGet = _mapper.Map<ServicePublicGetDto>(domainService);
 
-            return Ok(new ApiResponse<ServiceGetDto>(true, $"Service {serviceGet.Name} Added ", serviceGet));
+            return Ok(new ApiResponse<ServicePublicGetDto>(true, $"Service {serviceGet.Name} Added ", serviceGet));
             //return Ok(serviceGet);
         }
 
@@ -79,14 +82,14 @@ namespace Nqey.Api.Controllers
            
             if (existingService == null)
             {
-                return NotFound(new ApiResponse<ServiceGetDto>(false, "Service not found", null));
+                return NotFound(new ApiResponse<ServicePublicGetDto>(false, "Service not found", null));
             }
 
              _mapper.Map(servicePostPut, existingService);
            
             await _serviceRepository.UpdateServiceAsync(existingService);
-            var mappedService = _mapper.Map<ServiceGetDto>(existingService);
-            return Ok(new ApiResponse<ServiceGetDto>(true,$" Service is updated to {mappedService.Name}",null));
+            var mappedService = _mapper.Map<ServicePublicGetDto>(existingService);
+            return Ok(new ApiResponse<ServicePublicGetDto>(true,$" Service is updated to {mappedService.Name}",null));
 
 
         }
@@ -99,20 +102,20 @@ namespace Nqey.Api.Controllers
         {
             var toDelete = await _serviceRepository.GetServiceByIdAsync(id);
             if (toDelete == null)
-                return NotFound(new ApiResponse<ServiceGetDto>(false, "Service not found", null));
+                return NotFound(new ApiResponse<ServicePublicGetDto>(false, "Service not found", null));
 
             await _serviceRepository.DeleteServiceAsync(id);
 
-            return Ok(new ApiResponse<ServiceGetDto>(true,"Service Deleted",null));
+            return Ok(new ApiResponse<ServicePublicGetDto>(true,"Service Deleted",null));
         }
 
-        [Authorize(Roles = "Client,Admin")]
+        [Authorize(Roles = "Client,Admin,Provider")]
         [HttpGet]
         [Route("{serviceId}/providers")]
         public async Task<ActionResult<List<Provider>>> GetProviders(int serviceId)
         {
             var providers = await _serviceRepository.GetAllProviderAsync(serviceId);
-            var mappedProviders = _mapper.Map<List<ProviderGetDto>>(providers);
+            var mappedProviders = _mapper.Map<List<ProviderPublicGetDto>>(providers);
             var serviceName = await _serviceRepository.GetServiceByIdAsync(serviceId);
            
             // check the existence of the service
@@ -121,30 +124,51 @@ namespace Nqey.Api.Controllers
             
             /* check if the providers list isn't empty and notify if otherwise*/
             if (providers == null)
-                return Ok(new ApiResponse<List<ProviderGetDto>>(true, $" {serviceName.Name} has no providers yet", mappedProviders));
+                return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true, $" {serviceName.Name} has no providers yet", mappedProviders));
 
-            return Ok(new ApiResponse<List<ProviderGetDto>>(true,$"List of {serviceName.Name} service providers",mappedProviders));
+            return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true,$"List of {serviceName.Name} service providers",mappedProviders));
 
         }
-        [Authorize(Roles = "Client,Admin")]
+        [Authorize(Roles = "Client,Admin,Provider")]
         [HttpGet]
         [Route("{serviceId}/providers/{providerId}")]
         public async Task<IActionResult> GetProviderById(int serviceId, int providerId)
         {
             var provider = await _serviceRepository.GetProviderByIdAsync(serviceId, providerId);
             if (provider == null)
-                return NotFound(new ApiResponse<ProviderGetDto>(false, "provider not found", null));
+                return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "provider not found", null));
 
-            var mappedProvider = _mapper.Map<ProviderGetDto>(provider);
+            var mappedProvider = _mapper.Map<ProviderPublicGetDto>(provider);
 
-            return Ok(new ApiResponse<ProviderGetDto>(true, "Provider retrieved successfully",mappedProvider));
+            return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider retrieved successfully",mappedProvider));
 
         }
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin,Provider")]
         [HttpPost]
         [Route("{serviceId}/providers")]
-        public async Task<IActionResult> AddProvider(int serviceId, [FromBody] ProviderPostPutDto providerPostPut)
+        public async Task<IActionResult> AddProvider(int serviceId, [FromForm] ProviderPostPutDto providerPostPut)
         {
+            string? imagePath = null;
+
+            if (providerPostPut.ProfilePicture != null)
+            {
+                Console.WriteLine($"Profile image: {providerPostPut.ProfilePicture} not null");
+
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(providerPostPut.ProfilePicture.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await providerPostPut.ProfilePicture.CopyToAsync(stream);
+                }
+
+                imagePath = Path.Combine("images", "profiles", uniqueFileName);
+            }
+            else Console.WriteLine($"Profile image: {providerPostPut.ProfilePicture} is null");
+
             var domainProvider = _mapper.Map<Provider>(providerPostPut);
 
             var userPostPut = _mapper.Map<UserPostPutDto>(providerPostPut);
@@ -156,9 +180,25 @@ namespace Nqey.Api.Controllers
             domainProvider.SetPassword(providerPostPut.Password);
             await _serviceRepository.AddProviderAsync(serviceId, domainProvider);
             await _userRepository.AddUserAsync(domainUser);
-            var mappedProvider = _mapper.Map<ProviderGetDto>(domainProvider);
 
-            return Ok(new ApiResponse<ProviderGetDto>(true, "Provider Added Successfully", mappedProvider));
+            if (imagePath != null)
+            {
+                Console.WriteLine($"image path: {imagePath} not null");
+                domainProvider.ProfilePicture = new ProfileImage
+                {
+
+                    ImagePath = imagePath,
+                    UserId = domainUser.UserId // If you generate ID before save, otherwise leave out and EF will link after
+
+                };
+
+                await _serviceRepository.UpdateProviderAsync(serviceId,domainProvider.ProviderId,domainProvider);
+
+            }
+            else Console.WriteLine($" image path: {imagePath} is null");
+            var mappedProvider = _mapper.Map<ProviderPublicGetDto>(domainProvider);
+
+            return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider Added Successfully", mappedProvider));
         }
         // Validate a provider's account
         [Authorize(Roles ="Admin")]
@@ -177,7 +217,28 @@ namespace Nqey.Api.Controllers
                 return NotFound(new ApiResponse<Provider>(false, "Provider Not Found"));
 
             await _serviceRepository.ActivateProviderAsync(serviceId, provider);
-            return Ok(new ApiResponse<ProviderGetDto>(true, $"Provider {provider.UserName}'s Account Is Now Active"));
+            return Ok(new ApiResponse<ProviderPublicGetDto>(true, $"Provider {provider.UserName}'s Account Is Now Active"));
+
+        }
+
+
+        [Authorize(Roles =("Provider,Admin"))]
+        //[Authorize(Policy ="IsOwner")] IsOwner is only for reservations for the moment
+        [HttpPut]
+        [Route("{serviceId}/providers/{providerId}/update")]
+        public async Task<IActionResult> UpdateProvider(int serviceId,int providerId,[FromForm] ProviderPostPutDto providerPostPut)
+        {
+            var service = _serviceRepository.GetServiceByIdAsync(serviceId);
+            
+            if (service == null)
+                return NotFound(new ApiResponse<Service>(false, "Service Not Found"));
+
+            var existingProvider = await _serviceRepository.GetProviderByIdAsync(serviceId, providerId);
+            _mapper.Map(providerPostPut, existingProvider);
+
+            var mappedProvider = _mapper.Map<ProviderPublicGetDto>(existingProvider);
+            return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider Updated Successfully", mappedProvider));
+
 
         }
 

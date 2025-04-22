@@ -10,6 +10,7 @@ namespace Nqey.Domain
     public enum ReservationStatus {Accepted, Pending, Cancelled};
     public class Reservation
     {
+
         public int ReservationId { get; set; }
         public int ClientId { get; set; }
         public Client Client { get; set; }
@@ -19,5 +20,7 @@ namespace Nqey.Domain
         public Location? Location { get; set; }
         public ReservationStatus Status { get; set; }
         public DateTime createdAt {  get; set; } = DateTime.UtcNow;
+        
+
     }
 }
