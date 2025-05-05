@@ -115,8 +115,8 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy
-             .WithOrigins("nqey-production.up.railway.app")
-            //.AllowAnyOrigin() // Or use .WithOrigins("https://yourdomain.com") for security
+            //.WithOrigins("nqey-production.up.railway.app")
+            .AllowAnyOrigin() // Or use .WithOrigins("https://yourdomain.com") for security
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -137,7 +137,7 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
-app.UseCors();
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
