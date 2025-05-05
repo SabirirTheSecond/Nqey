@@ -138,8 +138,8 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseRouting();
-if (!app.Environment.IsDevelopment())
-    app.UseHttpsRedirection();
+//if (!app.Environment.IsDevelopment())
+//    app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 app.UseForwardedHeaders(new ForwardedHeadersOptions
