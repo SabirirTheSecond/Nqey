@@ -28,7 +28,7 @@ namespace Nqey.Domain
         public Role UserRole { get; set; }
         [Required]
         public AccountStatus AccountStatus { get; set; }
-        public ProfileImage? ProfilePicture { get; set; }
+        public ProfileImage? ProfileImage { get; set; }
         
 
 

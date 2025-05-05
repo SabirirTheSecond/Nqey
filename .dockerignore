@@ -1,8 +1,15 @@
+# ignore all bin and obj dirs anywhere
+**/bin
+**/bin/**
+**/obj
+**/obj/**
 
-**/bin/
-**/obj/
-*.md
+# ignore IDE and Git stuff
+.vs
 .git
-.vscode
-docker-compose*
+.gitignore
+
+# ignore docs, env, compose
+*.md
 .env
+docker-compose*

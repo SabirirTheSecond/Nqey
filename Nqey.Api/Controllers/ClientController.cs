@@ -11,6 +11,7 @@ using Nqey.Api.Dtos.ClientDtos;
 using System.Security.Claims;
 namespace Nqey.Api.Controllers
 {
+
     [ApiController]
     [Route("api/[Controller]")]
     public class ClientController : Controller
@@ -21,10 +22,11 @@ namespace Nqey.Api.Controllers
 
         public ClientController(IMapper mapper, IClientRepository clientRepo, IUserRepository userRepository)
         {
+
             _mapper = mapper;
             _clientRepo = clientRepo;
             _userRepo = userRepository;
-
+         
         }
 
 
@@ -71,17 +73,17 @@ namespace Nqey.Api.Controllers
 
             string? imagePath = null;
 
-            if (clientPostPut.ProfilePicture != null)
+            if (clientPostPut.ProfileImage != null)
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles");
                 Directory.CreateDirectory(uploadsFolder);
 
-                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(clientPostPut.ProfilePicture.FileName);
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(clientPostPut.ProfileImage.FileName);
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    await clientPostPut.ProfilePicture.CopyToAsync(stream);
+                    await clientPostPut.ProfileImage.CopyToAsync(stream);
                 }
 
                 imagePath = Path.Combine("images", "profiles", uniqueFileName);
@@ -107,7 +109,7 @@ namespace Nqey.Api.Controllers
             {
                 
 
-                domainClient.ProfilePicture = new ProfileImage
+                domainClient.ProfileImage = new ProfileImage
                 {
                     ImagePath = imagePath,
                     UserId = domainUser.UserId // If you generate ID before save, otherwise leave out and EF will link after

@@ -150,24 +150,24 @@ namespace Nqey.Api.Controllers
         {
             string? imagePath = null;
 
-            if (providerPostPut.ProfilePicture != null)
+            if (providerPostPut.ProfileImage != null)
             {
-                Console.WriteLine($"Profile image: {providerPostPut.ProfilePicture} not null");
+                Console.WriteLine($"Profile image: {providerPostPut.ProfileImage} not null");
 
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles");
                 Directory.CreateDirectory(uploadsFolder);
 
-                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(providerPostPut.ProfilePicture.FileName);
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(providerPostPut.ProfileImage.FileName);
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    await providerPostPut.ProfilePicture.CopyToAsync(stream);
+                    await providerPostPut.ProfileImage.CopyToAsync(stream);
                 }
 
                 imagePath = Path.Combine("images", "profiles", uniqueFileName);
             }
-            else Console.WriteLine($"Profile image: {providerPostPut.ProfilePicture} is null");
+            else Console.WriteLine($"Profile image: {providerPostPut.ProfileImage} is null");
 
             var domainProvider = _mapper.Map<Provider>(providerPostPut);
 
@@ -184,7 +184,7 @@ namespace Nqey.Api.Controllers
             if (imagePath != null)
             {
                 Console.WriteLine($"image path: {imagePath} not null");
-                domainProvider.ProfilePicture = new ProfileImage
+                domainProvider.ProfileImage = new ProfileImage
                 {
 
                     ImagePath = imagePath,

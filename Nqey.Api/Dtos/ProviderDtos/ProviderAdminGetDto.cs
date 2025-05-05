@@ -1,5 +1,6 @@
 ﻿using Nqey.Domain.Common;
 using Nqey.Domain;
+using Nqey.Api.Dtos.ProfileImageDtos;
 
 namespace Nqey.Api.Dtos.ProviderDtos
 {
@@ -9,7 +10,7 @@ namespace Nqey.Api.Dtos.ProviderDtos
         public string UserName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public ProfileImage? ProfilePicture { get; set; }
+        public ProfileImageGetDto? ProfileImage { get; set; }
         public string IdentityPiece { get; set; }
         public string ServiceDescription { get; set; }
         public string Email { get; set; }

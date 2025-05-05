@@ -23,8 +23,6 @@ namespace Nqey.DAL
 
             var passwordHasher = new PasswordHasher<Provider>();
 
-
-           
             modelBuilder.Entity<Location>().OwnsOne(l=> l.Position);
            
             modelBuilder.Entity<Provider>()
@@ -34,23 +32,30 @@ namespace Nqey.DAL
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<User>()
-                .HasOne(u => u.ProfilePicture)
+                .HasOne(u => u.ProfileImage)
                 .WithOne(p => p.User)
                 .HasForeignKey<ProfileImage>(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //modelBuilder.Entity<Client>()
-            //.HasOne(c => c.ProfilePicture)
-            //.WithOne()
-            //.HasForeignKey<ProfileImage>(p => p.UserId)
-            //.OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Provider>()
+                .HasOne(p => p.ProfileImage)
+                .WithOne()
+                .HasForeignKey<Provider>(p => p.PImageId)
+                .IsRequired(false);
 
-            //modelBuilder.Entity<Provider>()
-            //    .HasOne(p => p.ProfilePicture)
-            //    .WithOne()
-            //    .HasForeignKey<ProfileImage>(p => p.UserId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-            //    ;
+            modelBuilder.Entity<Client>()
+                .HasOne(c => c.ProfileImage)
+                .WithOne()
+                .HasForeignKey<Client>(c => c.PImageId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<SubService>()
+                .HasOne(s => s.Provider)
+                .WithMany(p => p.SubServices)
+                .HasForeignKey(s => s.ProviderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+           
 
         }
 

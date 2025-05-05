@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nqey.Api.Dtos.ReservationDtos;
@@ -15,11 +16,15 @@ namespace Nqey.Api.Controllers
     {
         private readonly IReservationService _reservationService;
         private readonly IMapper _mapper;
-
-       public ReservationController(IMapper mapper, IReservationService reservationService) 
+        private readonly IUserRepository _userRepository;
+        private readonly IClientRepository _clientRepository;
+       public ReservationController(IMapper mapper, IReservationService reservationService,
+           IUserRepository userRepository, IClientRepository clientRepository) 
         {
             _mapper = mapper;
             _reservationService = reservationService;
+            _userRepository = userRepository;
+            _clientRepository = clientRepository;
         }
         [HttpGet]
         public async Task<ActionResult> GetReservations()
@@ -49,12 +54,15 @@ namespace Nqey.Api.Controllers
 
         [Authorize(Roles = "Client")]
         [HttpPost]
-        public async Task<IActionResult> MakeReservation(int clientId, int providerId,
+        public async Task<IActionResult> MakeReservation( int providerId,
            [FromBody] ReservationPostPutDto reservationPostPut)
         {
             
             var domainReservation = _mapper.Map<Reservation>(reservationPostPut);
-            
+            var userIdClaim = User.FindFirst("userId");
+            Console.WriteLine($" userIdClaim after declaration : {userIdClaim}");
+            if (userIdClaim == null)
+                Console.WriteLine($" userIdClaim error : {userIdClaim}");
             //if (!ModelState.IsValid)
             //{
             //    var errors = ModelState.ToDictionary(
@@ -63,9 +71,17 @@ namespace Nqey.Api.Controllers
             //        value => value.Value.Errors.Select(e=> e.ErrorMessage).ToArray()
             //        );
             //    //return BadRequest(new ApiResponse<string>(false, "Validation Errors",errors));
-            
+
             //}
-            domainReservation.ClientId = clientId;
+            var userId = int.Parse(userIdClaim.Value);
+            Console.WriteLine($"userId: {userId}");
+            var user = await _userRepository.GetByIdAsync(userId);
+            var clientId = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
+            Console.WriteLine($"clientId: {clientId}");
+            if (clientId == null)
+                return BadRequest(new ApiResponse<Reservation>(false, "Cannot determine client id"));
+
+            domainReservation.ClientId = (int)clientId;
             domainReservation.ProviderId = providerId;
             domainReservation.Status = ReservationStatus.Pending;
 

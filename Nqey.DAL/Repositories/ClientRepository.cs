@@ -38,7 +38,7 @@ namespace Nqey.DAL.Repositories
        public async Task<Client> GetClientByIdAsync(int id)
         {
             var client = await _dataContext.Clients
-                .Include(c => c.ProfilePicture)
+                .Include(c => c.ProfileImage)
                 .FirstOrDefaultAsync(c => c.ClientId == id);
 
             if (client == null)
@@ -49,7 +49,9 @@ namespace Nqey.DAL.Repositories
 
        public async Task<List<Client>> GetClientsAsync()
         {
-            var clients = await _dataContext.Clients.ToListAsync();
+            var clients = await _dataContext.Clients
+                .Include(c => c.ProfileImage)
+                .ToListAsync();
             if (clients == null)
                 return null;
             return clients;

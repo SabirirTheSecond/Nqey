@@ -44,7 +44,7 @@ namespace Nqey.Services.Authorization
                 return ;
             }
             
-            // Change this later to a getProviderByUsername
+            // Change this later to a getProviderByUsername... Done
             var providerId = await _serviceRepo.GetProviderIdByUserNameAsync(user.UserName);
             var reservationId = httpContext.Request.RouteValues["id"]?.ToString();
             if (string.IsNullOrEmpty(reservationId) || !int.TryParse(reservationId, out var resId))

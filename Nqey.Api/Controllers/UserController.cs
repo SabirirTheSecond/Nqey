@@ -8,7 +8,7 @@ using Nqey.Domain.Common;
 namespace Nqey.Api.Controllers
 {
     [ApiController]
-    [Route("/[Controller]")]
+    [Route("api/[Controller]")]
     public class UserController : Controller
     {
         private readonly IUserRepository _userRepo;

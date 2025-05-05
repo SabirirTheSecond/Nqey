@@ -1,5 +1,6 @@
 ﻿using Nqey.Domain.Common;
 using Nqey.Domain;
+using Nqey.Api.Dtos.ProfileImageDtos;
 
 namespace Nqey.Api.Dtos.ProviderDtos
 {
@@ -11,7 +12,8 @@ namespace Nqey.Api.Dtos.ProviderDtos
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
-        public ProfileImage ProfilePicture { get; set; }
+        // you probably need to put it as ProfileImageDto 
+        public ProfileImageGetDto? ProfileImage { get; set; }
         public string ServiceDescription { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }

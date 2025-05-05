@@ -2,22 +2,37 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-COPY Nqey.Domain/Nqey.Domain.csproj Nqey.Domain/
-COPY Nqey.DAL/Nqey.DAL.csproj Nqey.DAL/
-COPY Nqey.Services/Nqey.Services.csproj Nqey.Services/
-COPY Nqey.Api/Nqey.Api.csproj Nqey.Api/
-COPY Nqey.sln .
+# Copy solution and project files
+COPY *.sln .
+COPY Nqey.Domain/ Nqey.Domain/
+COPY Nqey.DAL/ Nqey.DAL/
+COPY Nqey.Services/ Nqey.Services/
+COPY Nqey.Api/ Nqey.Api/
 
-
+# Restore dependencies
+WORKDIR /app/Nqey.Api
 RUN dotnet restore
 
-COPY . .
+# Copy source code
+WORKDIR /app
+COPY Nqey.Domain/ Nqey.Domain/
+COPY Nqey.DAL/ Nqey.DAL/
+COPY Nqey.Services/ Nqey.Services/
+COPY Nqey.Api/ Nqey.Api/
+
+# Ensure no leftover build artifacts
 WORKDIR /app/Nqey.Api
-RUN dotnet publish Nqey.Api.csproj -c Release -o out
+RUN rm -rf bin obj
+
+# Publish to a clean folder
+RUN dotnet publish Nqey.Api.csproj -c Release -o /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/out .
-
+# Make sure the app listens on port 80 inside the container
+ENV ASPNETCORE_URLS=http://+:80
+EXPOSE 80
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "Nqey.Api.dll"]
+

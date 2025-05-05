@@ -10,13 +10,13 @@ namespace Nqey.Api.Automapper
         public ClientMappingProfiles() 
         {
             CreateMap<ClientPostPutDto, Client>()
-                 .ForMember(dest => dest.ProfilePicture, opt => opt.Ignore());
+                 .ForMember(dest => dest.ProfileImage, opt => opt.Ignore());
 
             CreateMap<Client, ClientPublicGetDto>()
-                .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.ProfilePicture));
+                .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.ProfileImage));
            
             CreateMap<Client, ClientAdminGetDto>()
-                 .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.ProfilePicture));
+                 .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.ProfileImage));
 
             CreateMap<ClientPostPutDto, UserPostPutDto>();
 

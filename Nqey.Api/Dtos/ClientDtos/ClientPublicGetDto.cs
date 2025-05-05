@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Nqey.Api.Dtos.ProfileImageDtos;
 using Nqey.Domain;
 using Nqey.Domain.Common;
 
@@ -11,7 +12,7 @@ namespace Nqey.Api.Dtos.ClientDtos
 
         public string Email { get; set; }
 
-        public ProfileImage ProfileImage { get; set; }
+        public ProfileImageGetDto? ProfileImage { get; set; }
 
 
         

@@ -67,17 +67,23 @@ namespace Nqey.DAL.Repositories
         
         public async Task<List<Provider>> GetAllProviderAsync(int ServiceId)
         {
-            var providers = await _dataContext.Providers.Where(p=> p.ServiceId == ServiceId).ToListAsync();
+            var providers = await _dataContext.Providers
+                .Where(p=> p.ServiceId == ServiceId)
+                .Include(p => p.ProfileImage)
+                .ToListAsync();
             if(providers == null)
                 return null;
             return providers;
         }
         public async Task<Provider> GetProviderByIdAsync(int serviceId, int providerId)
         {
-            var provider = await _dataContext.Providers.FirstOrDefaultAsync(p =>  
-                p.ServiceId == serviceId &&
-                p.ProviderId == providerId
-                );
+            var provider = await _dataContext.Providers
+                .Include(p => p.ProfileImage)
+                .FirstOrDefaultAsync(p =>  
+                        p.ServiceId == serviceId &&
+                        p.ProviderId == providerId
+                    );
+
             if (provider == null)
                 return null;
             return provider;

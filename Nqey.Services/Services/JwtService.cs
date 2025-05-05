@@ -25,9 +25,9 @@ namespace Nqey.Services.Services
         {
             var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.Role, user.UserRole.ToString())
+            new Claim("userId", user.UserId.ToString()),
+            new Claim("userName", user.UserName),
+            new Claim("role", user.UserRole.ToString())
         };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SigningKey));

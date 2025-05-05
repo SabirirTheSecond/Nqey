@@ -13,7 +13,8 @@ namespace Nqey.Domain
     {
         public int ClientId { get; set; }
         public string UserName { get; set; }
-        public ProfileImage? ProfilePicture { get; set; }
+        public int? PImageId {  get; set; } 
+        public ProfileImage? ProfileImage { get; set; }
         public string Email { get; set; }
         public string PasswordHash { get;  set; }
         public string PhoneNumber { get; set; }

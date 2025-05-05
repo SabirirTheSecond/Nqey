@@ -16,7 +16,8 @@ namespace Nqey.Domain
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string? IdentityPiece { get; set; }
-        public ProfileImage? ProfilePicture { get; set; }
+        public int? PImageId { get; set; }
+        public ProfileImage? ProfileImage { get; set; }
         public string ServiceDescription { get; set; }
         public string Email { get; set; }
         public string PasswordHash { get;  set; }
@@ -26,12 +27,12 @@ namespace Nqey.Domain
         public int ServiceId { get; set; }
         public Service Service { get; set; }
         public int? ReviewId { get; set; }
-        public Review? Review { get; set; }
+        public List<Review>? Reviews { get; set; } = new List<Review>();
+        public List<SubService>? SubServices { get; set; } = new List<SubService>();
         public virtual ICollection<Message>? SentMessages { get; set; } = new List<Message>();
         public virtual ICollection<Message>? ReceivedMessages { get; set; } = new List<Message>();
-
-        
         public List<PortfolioImage>? Portfolio{ get; set; } = new List<PortfolioImage>();
+
 
         public void SetPassword(string password)
         {
