@@ -137,6 +137,7 @@ if (app.Environment.IsDevelopment())
 }
 
 
+app.UseRouting();
 if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 
