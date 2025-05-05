@@ -136,16 +136,16 @@ if (app.Environment.IsDevelopment())
 
 }
 
-
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 app.UseRouting();
 //if (!app.Environment.IsDevelopment())
 //    app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
+
 app.UseAuthentication();
 app.UseAuthorization();
 
