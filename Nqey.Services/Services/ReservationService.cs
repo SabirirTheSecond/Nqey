@@ -31,6 +31,13 @@ namespace Nqey.Services.Services
             var existing = await GetReservationByIdAsync(id);
             if (existing == null)
                 return null;
+
+            reservation.Events.Add(new ReservationEvent
+            { ReservationEventType = ReservationEventType.Changed,
+                CreatedAt = DateTime.UtcNow,
+            Notes = "Reservation updated"
+            }
+            );
             _dataContext.Reservations.Update(reservation);
             await _dataContext.SaveChangesAsync();
 
@@ -49,6 +56,15 @@ namespace Nqey.Services.Services
                 return null;
 
             toAccept.Status = ReservationStatus.Accepted;
+            // Booking timeline tracker
+            toAccept.Events.Add(
+                new ReservationEvent
+                {
+                    ReservationEventType = ReservationEventType.Accepted,
+                    CreatedAt = DateTime.UtcNow,
+                    Notes = "Reservation Accepted"
+                }
+                );
             await _dataContext.SaveChangesAsync();
             return toAccept;
 
@@ -67,6 +83,14 @@ namespace Nqey.Services.Services
 
 
             toCancel.Status = ReservationStatus.Cancelled;
+            toCancel.Events.Add(
+               new ReservationEvent
+               {
+                   ReservationEventType = ReservationEventType.Cancelled,
+                   CreatedAt = DateTime.UtcNow,
+                   Notes = "Reservation Cancelled"
+               }
+               );
             await _dataContext.SaveChangesAsync();
             return toCancel;
             
@@ -94,6 +118,7 @@ namespace Nqey.Services.Services
             var reservation = await _dataContext.Reservations
                 .Include(r=> r.Provider)
                 .Include(r=> r.Client)
+                .Include(r => r.Events)
                 .FirstOrDefaultAsync(r => r.ReservationId == id);
 
             if (reservation == null)
@@ -108,6 +133,7 @@ namespace Nqey.Services.Services
             var reservations = await _dataContext.Reservations
                 .Include(r => r.Client)
                 .Include(r => r.Provider)
+                .Include(r => r.Events)
                 .ToListAsync();
             if (reservations == null)
                 return null;

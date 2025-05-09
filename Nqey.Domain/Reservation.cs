@@ -21,6 +21,7 @@ namespace Nqey.Domain
         public ReservationStatus Status { get; set; }
         public DateTime createdAt {  get; set; } = DateTime.UtcNow;
         
+        public ICollection<ReservationEvent> Events { get; set; } = new List<ReservationEvent>();
 
     }
 }

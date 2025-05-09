@@ -37,7 +37,7 @@ namespace Nqey.Api.Controllers
                 ,mappedReservations));
         }
 
-        [Authorize(Roles ="Admin,Provider")]
+        [Authorize(Roles ="Admin,Provider,Client")]
         [Authorize(Policy ="ActiveAccountOnly")]
         [Authorize(Policy ="IsOwner")]
         [HttpGet]
@@ -84,6 +84,16 @@ namespace Nqey.Api.Controllers
             domainReservation.ClientId = (int)clientId;
             domainReservation.ProviderId = providerId;
             domainReservation.Status = ReservationStatus.Pending;
+    
+            // Booking timeline tracker
+            domainReservation.Events.Add(
+                new ReservationEvent
+                {
+                    ReservationEventType = ReservationEventType.Pending,
+                    CreatedAt = DateTime.UtcNow,
+                    Notes = "Reservation Added"
+                }
+                );
 
             await _reservationService.MakeReservationAsync(domainReservation);
 

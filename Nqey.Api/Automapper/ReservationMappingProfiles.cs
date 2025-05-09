@@ -11,6 +11,10 @@ namespace Nqey.Api.Automapper
 
             CreateMap<ReservationPostPutDto, Reservation>();
             CreateMap<Reservation, ReservationGetDto>();
+            CreateMap<ReservationEvent, ReservationEventDto>()
+               //.ForMember(dest => dest.EventType, opt => opt.MapFrom(src => src.ReservationEventType.ToString()))
+                ;
+
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using Nqey.Domain;
 using Nqey.Domain.Abstractions.Repositories;
@@ -29,10 +30,10 @@ namespace Nqey.Services.Authorization
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, ActiveAccountRequirement requirement)
         {
-            var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = context.User.FindFirst("userId");
             if (userIdClaim == null)
             {
-                Console.WriteLine("ActiveAccount policy failed: No NameIdentifier claim found");
+                Console.WriteLine("ActiveAccount policy failed: No userId claim found");
                 context.Fail();
                 return;
             }
@@ -51,6 +52,7 @@ namespace Nqey.Services.Authorization
                     fullUser = await _clientRepo.GetClientIdByUserNameAsync(user.UserName);
                     break;
                 default:
+                    
                     throw new Exception("Unsupported role");
             }
             if(fullUser == null)

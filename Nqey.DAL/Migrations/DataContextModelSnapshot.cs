@@ -509,6 +509,34 @@ namespace Nqey.DAL.Migrations
                     b.ToTable("Reservations");
                 });
 
+            modelBuilder.Entity("Nqey.Domain.ReservationEvent", b =>
+                {
+                    b.Property<int>("ReservationEventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReservationEventId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReservationEventType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReservationEventId");
+
+                    b.HasIndex("ReservationId");
+
+                    b.ToTable("ReservationEvents");
+                });
+
             modelBuilder.Entity("Nqey.Domain.Service", b =>
                 {
                     b.Property<int>("ServiceId")
@@ -780,6 +808,17 @@ namespace Nqey.DAL.Migrations
                     b.Navigation("Provider");
                 });
 
+            modelBuilder.Entity("Nqey.Domain.ReservationEvent", b =>
+                {
+                    b.HasOne("Nqey.Domain.Reservation", "Reservation")
+                        .WithMany("Events")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reservation");
+                });
+
             modelBuilder.Entity("Nqey.Domain.SubService", b =>
                 {
                     b.HasOne("Nqey.Domain.Provider", "Provider")
@@ -809,6 +848,11 @@ namespace Nqey.DAL.Migrations
                     b.Navigation("SentMessages");
 
                     b.Navigation("SubServices");
+                });
+
+            modelBuilder.Entity("Nqey.Domain.Reservation", b =>
+                {
+                    b.Navigation("Events");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Service", b =>

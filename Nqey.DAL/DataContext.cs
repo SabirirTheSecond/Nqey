@@ -55,8 +55,16 @@ namespace Nqey.DAL
                 .HasForeignKey(s => s.ProviderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-           
 
+            modelBuilder.Entity<Reservation>()
+                 .HasMany(r => r.Events)
+                 .WithOne(e => e.Reservation)
+                 .HasForeignKey(r => r.ReservationId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ReservationEvent>()
+                .Property(e => e.ReservationEventType)
+                .HasConversion<string>();
         }
 
         public DbSet<User> Users { get; set; }
@@ -64,6 +72,7 @@ namespace Nqey.DAL
         public DbSet<Provider> Providers { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
+        public DbSet<ReservationEvent> ReservationEvents { get; set; }
 
     }
 }
