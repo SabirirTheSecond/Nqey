@@ -59,6 +59,7 @@ namespace Nqey.Api.Controllers
         {
             
             var domainReservation = _mapper.Map<Reservation>(reservationPostPut);
+            var location = _mapper.Map<Location>(reservationPostPut.LocationDto);
             var userIdClaim = User.FindFirst("userId");
             Console.WriteLine($" userIdClaim after declaration : {userIdClaim}");
             if (userIdClaim == null)
@@ -84,7 +85,7 @@ namespace Nqey.Api.Controllers
             domainReservation.ClientId = (int)clientId;
             domainReservation.ProviderId = providerId;
             domainReservation.Status = ReservationStatus.Pending;
-    
+            domainReservation.Location = location;
             // Booking timeline tracker
             domainReservation.Events.Add(
                 new ReservationEvent

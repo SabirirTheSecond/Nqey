@@ -119,6 +119,7 @@ namespace Nqey.Services.Services
                 .Include(r=> r.Provider)
                 .Include(r=> r.Client)
                 .Include(r => r.Events)
+                .Include(r => r.Location)
                 .FirstOrDefaultAsync(r => r.ReservationId == id);
 
             if (reservation == null)
@@ -134,6 +135,7 @@ namespace Nqey.Services.Services
                 .Include(r => r.Client)
                 .Include(r => r.Provider)
                 .Include(r => r.Events)
+                .Include(r=> r.Location)
                 .ToListAsync();
             if (reservations == null)
                 return null;

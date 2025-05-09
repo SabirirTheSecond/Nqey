@@ -11,7 +11,7 @@ namespace Nqey.Api.Dtos.ReservationDtos
         public int ProviderId { get; set; }
         //public Provider Provider { get; set; }
         public string JobDescription { get; set; }
-        public Location? Location { get; set; }
+        public LocationDto? Location { get; set; }
         public ReservationStatus Status { get; set; }
         public ICollection<ReservationEventDto> Events { get; set; }
         public DateTime createdAt { get; set; }
