@@ -10,7 +10,9 @@ namespace Nqey.Api.Dtos.ClientDtos
         public string Email { get; set; }
         public string Password { get; set; }
         public string PhoneNumber { get; set; }
+        public LocationDto Location { get; set; }
         public IFormFile? ProfileImage { get; set; }
+
 
     }
 }

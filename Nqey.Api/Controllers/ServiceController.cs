@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Authorization;
 using Nqey.Api.Dtos.ProviderDtos;
 using Nqey.Api.Dtos.ServiceDtos;
 using Nqey.Api.Dtos.ClientDtos;
+using System.Security.Claims;
+using Nqey.Domain.Abstractions.Services;
+using Nqey.Domain.Helpers;
 namespace Nqey.Api.Controllers
 {
     [ApiController]
@@ -18,13 +21,16 @@ namespace Nqey.Api.Controllers
     {
         private readonly IServiceRepository _serviceRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IClientRepository _clientRepository ;
         private readonly IMapper _mapper;
 
 
-        public ServiceController(IServiceRepository serviceRepository,IUserRepository userRepository, IMapper mapper)
+        public ServiceController(IServiceRepository serviceRepository,IUserRepository userRepository
+            , IMapper mapper, IClientRepository clientRepository)
         {
             _serviceRepository = serviceRepository;
             _userRepository = userRepository;
+            _clientRepository = clientRepository;
             _mapper = mapper;
 
 
@@ -112,12 +118,13 @@ namespace Nqey.Api.Controllers
         [Authorize(Roles = "Client,Admin,Provider")]
         [HttpGet]
         [Route("{serviceId}/providers")]
-        public async Task<ActionResult<List<Provider>>> GetProviders(int serviceId)
+        public async Task<ActionResult> GetProviders(int serviceId)
         {
             var providers = await _serviceRepository.GetAllProviderAsync(serviceId);
             var mappedProviders = _mapper.Map<List<ProviderPublicGetDto>>(providers);
             var serviceName = await _serviceRepository.GetServiceByIdAsync(serviceId);
            
+
             // check the existence of the service
             if (serviceName == null)
                 return NotFound(new ApiResponse<Provider>(false,"Service Not Found"));
@@ -126,7 +133,36 @@ namespace Nqey.Api.Controllers
             if (providers == null)
                 return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true, $" {serviceName.Name} has no providers yet", mappedProviders));
 
-            return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true,$"List of {serviceName.Name} service providers",mappedProviders));
+
+            var role = User.FindFirst("role")?.Value;
+
+            if (role == "Client")
+            {
+                var userIdClaim = User.FindFirst("userId")?.Value;
+
+                if (int.TryParse(userIdClaim, out var userId))
+                {
+                    var user = await _userRepository.GetByIdAsync(userId);
+                    if (user != null)
+                    {
+                        var clientIdNullable = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
+                        if (clientIdNullable is not int clientId)
+                            return BadRequest(new ApiResponse<Reservation>(false, "Cannot determine client id"));
+
+                        var client = await _clientRepository.GetClientByIdAsync(clientId);
+                        if (client?.Location?.Position != null)
+                        {
+                            providers = providers
+                                .Select(p => new { Provider = p, Score = ScoreCalculator.CalculateScore(client, p) })
+                                .OrderByDescending(p => p.Score)
+                                .Select(p => p.Provider)
+                                .ToList();
+                        }
+                    }
+                }
+            }
+
+                return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true,$"List of {serviceName.Name} service providers",mappedProviders));
 
         }
         [Authorize(Roles = "Client,Admin,Provider")]

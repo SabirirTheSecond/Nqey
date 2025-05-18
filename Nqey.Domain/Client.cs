@@ -18,6 +18,7 @@ namespace Nqey.Domain
         public string Email { get; set; }
         public string PasswordHash { get;  set; }
         public string PhoneNumber { get; set; }
+        public Location? Location { get; set; }
         public AccountStatus Status { get; set; } = AccountStatus.Active;
         public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();
         public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();

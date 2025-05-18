@@ -8,6 +8,7 @@ using Nqey.DAL;
 using Nqey.Domain;
 using Nqey.Domain.Abstractions.Repositories;
 using Nqey.Domain.Abstractions.Services;
+using Nqey.Domain.Common;
 
 namespace Nqey.Services.Services
 {
@@ -157,6 +158,14 @@ namespace Nqey.Services.Services
             await _dataContext.SaveChangesAsync();
             return reservation;
             
+        }
+
+        public  Location GetReservationLocation(Reservation reservation)
+        {
+            if(reservation.Location == null)
+              return null;
+
+            return reservation.Location;
         }
     }
 }

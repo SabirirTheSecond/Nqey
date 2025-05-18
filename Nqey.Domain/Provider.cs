@@ -32,8 +32,8 @@ namespace Nqey.Domain
         public virtual ICollection<Message>? SentMessages { get; set; } = new List<Message>();
         public virtual ICollection<Message>? ReceivedMessages { get; set; } = new List<Message>();
         public List<PortfolioImage>? Portfolio{ get; set; } = new List<PortfolioImage>();
-
-
+        public int JobsDone { get; set; } = 0;
+        
         public void SetPassword(string password)
         {
             var hasher = new PasswordHasher<Provider>(); 

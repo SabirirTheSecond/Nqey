@@ -13,9 +13,10 @@ namespace Nqey.Api.Dtos.ClientDtos
         public string Email { get; set; }
 
         public ProfileImageGetDto? ProfileImage { get; set; }
+        public LocationDto Location { get; set; }
 
 
-        
+
 
     }
 }

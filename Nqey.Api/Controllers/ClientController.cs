@@ -123,7 +123,7 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ClientPublicGetDto>(true, "Client Added Successfully ", mappedClient));
         }
 
-
+        [Authorize(Roles ="Admin,Client")]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> UpdateClient(int id, ClientPostPutDto clientPostPut)

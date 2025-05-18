@@ -65,6 +65,21 @@ namespace Nqey.DAL
             modelBuilder.Entity<ReservationEvent>()
                 .Property(e => e.ReservationEventType)
                 .HasConversion<string>();
+
+            modelBuilder.Entity<Provider>()
+                .Property(p=>p.AccountStatus)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Client>()
+                .Property(c => c.Status)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.AccountStatus)
+                .HasConversion<string>();
+            modelBuilder.Entity<User>()
+                .Property(u => u.UserRole)
+                .HasConversion<string>();
         }
 
         public DbSet<User> Users { get; set; }
