@@ -75,7 +75,7 @@ namespace Nqey.Api.Controllers
 
             var serviceGet = _mapper.Map<ServicePublicGetDto>(domainService);
 
-            return Ok(new ApiResponse<ServicePublicGetDto>(true, $"Service {serviceGet.Name} Added ", serviceGet));
+            return Ok(new ApiResponse<ServicePublicGetDto>(true, $"Service {serviceGet.NameEn} Added ", serviceGet));
             //return Ok(serviceGet);
         }
 
@@ -95,7 +95,7 @@ namespace Nqey.Api.Controllers
            
             await _serviceRepository.UpdateServiceAsync(existingService);
             var mappedService = _mapper.Map<ServicePublicGetDto>(existingService);
-            return Ok(new ApiResponse<ServicePublicGetDto>(true,$" Service is updated to {mappedService.Name}",null));
+            return Ok(new ApiResponse<ServicePublicGetDto>(true,$" Service is updated to {mappedService.NameEn}",null));
 
 
         }
@@ -116,12 +116,13 @@ namespace Nqey.Api.Controllers
         }
 
         [Authorize(Roles = "Client,Admin,Provider")]
+        //[AllowAnonymous]
         [HttpGet]
         [Route("{serviceId}/providers")]
         public async Task<ActionResult> GetProviders(int serviceId)
         {
             var providers = await _serviceRepository.GetAllProviderAsync(serviceId);
-            var mappedProviders = _mapper.Map<List<ProviderPublicGetDto>>(providers);
+            
             var serviceName = await _serviceRepository.GetServiceByIdAsync(serviceId);
            
 
@@ -131,38 +132,49 @@ namespace Nqey.Api.Controllers
             
             /* check if the providers list isn't empty and notify if otherwise*/
             if (providers == null)
-                return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true, $" {serviceName.Name} has no providers yet", mappedProviders));
+                return Ok(new ApiResponse<Provider>(true, $" {serviceName.NameEn} has no providers yet"));
 
 
-            var role = User.FindFirst("role")?.Value;
+            var roleClaim = User.FindFirst("role");
+            Console.WriteLine($"roleClaim = {roleClaim}");
+            var role = roleClaim?.Value;
+            Console.WriteLine($"before if statement , role = {role}");
+
 
             if (role == "Client")
             {
                 var userIdClaim = User.FindFirst("userId")?.Value;
-
+                Console.WriteLine($"Inside the if role part and userIdClaim= {userIdClaim}");
                 if (int.TryParse(userIdClaim, out var userId))
                 {
                     var user = await _userRepository.GetByIdAsync(userId);
                     if (user != null)
                     {
+                        Console.WriteLine($"Inside the if user!=null part and user= {user}");
                         var clientIdNullable = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
                         if (clientIdNullable is not int clientId)
-                            return BadRequest(new ApiResponse<Reservation>(false, "Cannot determine client id"));
+                        {
 
+                        
+                        Console.WriteLine($"Inside the nullable client id: {clientIdNullable }");
+                        return BadRequest(new ApiResponse<Reservation>(false, "Cannot determine client id"));
+                        }
                         var client = await _clientRepository.GetClientByIdAsync(clientId);
                         if (client?.Location?.Position != null)
                         {
+
                             providers = providers
                                 .Select(p => new { Provider = p, Score = ScoreCalculator.CalculateScore(client, p) })
                                 .OrderByDescending(p => p.Score)
                                 .Select(p => p.Provider)
                                 .ToList();
+                            Console.WriteLine($"We are inside the part that works {providers}");
                         }
                     }
                 }
             }
-
-                return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true,$"List of {serviceName.Name} service providers",mappedProviders));
+            var mappedProviders = _mapper.Map<List<ProviderPublicGetDto>>(providers);
+            return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true,$"List of {serviceName.NameEn} service providers",mappedProviders));
 
         }
         [Authorize(Roles = "Client,Admin,Provider")]
