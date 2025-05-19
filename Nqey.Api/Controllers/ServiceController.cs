@@ -135,8 +135,16 @@ namespace Nqey.Api.Controllers
                 return Ok(new ApiResponse<Provider>(true, $" {serviceName.NameEn} has no providers yet"));
 
 
-            var roleClaim = User.FindFirst("role");
+            foreach(var claim in User.Claims)
+            {
+                Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
+            }
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
             Console.WriteLine($"roleClaim = {roleClaim}");
+
+            var userIdClaim0= User.FindFirst("userId")?.Value;
+            Console.WriteLine($"userIdClaim0 = {userIdClaim0}");
+            
             var role = roleClaim?.Value;
             Console.WriteLine($"before if statement , role = {role}");
 
