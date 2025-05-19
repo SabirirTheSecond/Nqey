@@ -58,7 +58,7 @@ namespace Nqey.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> AddService([FromBody] ServicePostPutDto servicePostPut)
+        public async Task<IActionResult> AddService([FromForm] ServicePostPutDto servicePostPut)
         {
             if (!ModelState.IsValid)
             {
@@ -68,10 +68,41 @@ namespace Nqey.Api.Controllers
                 );
                 return BadRequest(new ApiResponse<Dictionary<string, string[]>>(false, "Validation errors", errors));
             }
+            string? imagePath = null;
+
+            if (servicePostPut.Image != null)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "services");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(servicePostPut.Image.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await servicePostPut.Image.CopyToAsync(stream);
+                }
+
+                imagePath = Path.Combine("images", "services", uniqueFileName);
+            }
+
 
             var domainService = _mapper.Map<Service>(servicePostPut);
 
             await _serviceRepository.AddServiceAsync(domainService);
+
+            if (imagePath != null)
+            {
+
+
+                domainService.ServiceImage = new Image
+                {
+                    ImagePath = imagePath 
+
+                };
+                await _serviceRepository.UpdateServiceAsync(domainService);
+
+            }
 
             var serviceGet = _mapper.Map<ServicePublicGetDto>(domainService);
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nqey.DAL;
 
@@ -11,9 +12,11 @@ using Nqey.DAL;
 namespace Nqey.DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250519143601_AddedImageToServiceModel")]
+    partial class AddedImageToServiceModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -263,23 +266,6 @@ namespace Nqey.DAL.Migrations
                         .HasFilter("[PImageId] IS NOT NULL");
 
                     b.ToTable("Clients");
-                });
-
-            modelBuilder.Entity("Nqey.Domain.Common.Image", b =>
-                {
-                    b.Property<int>("imageId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("imageId"));
-
-                    b.Property<string>("ImagePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("imageId");
-
-                    b.ToTable("Image");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Common.Location", b =>
@@ -570,6 +556,9 @@ namespace Nqey.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServiceId"));
 
+                    b.Property<int?>("ImageId")
+                        .HasColumnType("int");
+
                     b.Property<string>("NameAr")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -582,14 +571,11 @@ namespace Nqey.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ServiceImageId")
-                        .HasColumnType("int");
-
                     b.HasKey("ServiceId");
 
-                    b.HasIndex("ServiceImageId")
+                    b.HasIndex("ImageId")
                         .IsUnique()
-                        .HasFilter("[ServiceImageId] IS NOT NULL");
+                        .HasFilter("[ImageId] IS NOT NULL");
 
                     b.ToTable("Services");
                 });
@@ -869,11 +855,11 @@ namespace Nqey.DAL.Migrations
 
             modelBuilder.Entity("Nqey.Domain.Service", b =>
                 {
-                    b.HasOne("Nqey.Domain.Common.Image", "ServiceImage")
+                    b.HasOne("Nqey.Domain.Common.ProfileImage", "Image")
                         .WithOne()
-                        .HasForeignKey("Nqey.Domain.Service", "ServiceImageId");
+                        .HasForeignKey("Nqey.Domain.Service", "ImageId");
 
-                    b.Navigation("ServiceImage");
+                    b.Navigation("Image");
                 });
 
             modelBuilder.Entity("Nqey.Domain.SubService", b =>

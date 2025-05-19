@@ -49,6 +49,12 @@ namespace Nqey.DAL
                 .HasForeignKey<Client>(c => c.PImageId)
                 .IsRequired(false);
 
+            modelBuilder.Entity<Service>()
+                .HasOne(s => s.ServiceImage)
+                .WithOne()
+                .HasForeignKey<Service>(s => s.ServiceImageId)
+                .IsRequired(false);
+
             modelBuilder.Entity<SubService>()
                 .HasOne(s => s.Provider)
                 .WithMany(p => p.SubServices)

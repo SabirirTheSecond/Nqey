@@ -26,6 +26,7 @@ namespace Nqey.DAL.Repositories
         {
             var services = await _dataContext.Services
                 .Include(s=>s.Providers)
+                .Include(s=> s.ServiceImage)
                 .ToListAsync();
             return services;
             
@@ -50,8 +51,10 @@ namespace Nqey.DAL.Repositories
 
        public async Task<Service> GetServiceByIdAsync(int id)
         {
-            var service = _dataContext.Services.Include(s=>s.Providers)
-                .SingleOrDefault(s=>s.ServiceId == id);
+            var service = await _dataContext.Services
+                .Include(s=>s.Providers)
+                .Include(s => s.ServiceImage)
+                .FirstOrDefaultAsync(s=>s.ServiceId == id);
             if (service == null)
                 return null;
             return service;
