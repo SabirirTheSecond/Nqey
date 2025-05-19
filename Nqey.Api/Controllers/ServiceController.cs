@@ -115,8 +115,8 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ServicePublicGetDto>(true,"Service Deleted",null));
         }
 
-        [Authorize(Roles = "Client,Admin,Provider")]
-        //[AllowAnonymous]
+        //[Authorize(Roles = "Client,Admin,Provider")]
+        [AllowAnonymous]
         [HttpGet]
         [Route("{serviceId}/providers")]
         public async Task<ActionResult> GetProviders(int serviceId)
