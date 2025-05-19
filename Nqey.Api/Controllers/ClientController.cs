@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Nqey.Api.Dtos.ClientDtos;
 using System.Security.Claims;
+using Nqey.Domain.Abstractions.Services;
 namespace Nqey.Api.Controllers
 {
 
@@ -19,13 +20,15 @@ namespace Nqey.Api.Controllers
         private readonly IMapper _mapper;
         private readonly IClientRepository _clientRepo;
         private readonly IUserRepository _userRepo;
-
-        public ClientController(IMapper mapper, IClientRepository clientRepo, IUserRepository userRepository)
+        private readonly IImageUploaderService _imageUploaderService;
+        public ClientController(IMapper mapper, IClientRepository clientRepo
+            , IUserRepository userRepository, IImageUploaderService imageUploader)
         {
 
             _mapper = mapper;
             _clientRepo = clientRepo;
             _userRepo = userRepository;
+            _imageUploaderService = imageUploader;
          
         }
 
@@ -75,18 +78,26 @@ namespace Nqey.Api.Controllers
 
             if (clientPostPut.ProfileImage != null)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles");
-                Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(clientPostPut.ProfileImage.FileName);
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                try
                 {
-                    await clientPostPut.ProfileImage.CopyToAsync(stream);
+                    imagePath = await _imageUploaderService.UploadImageToSupabase(clientPostPut.ProfileImage);
                 }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new ApiResponse<string>(false, "Failed to upload image to Supabase", ex.Message));
+                }
+                //var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles");
+                //Directory.CreateDirectory(uploadsFolder);
 
-                imagePath = Path.Combine("images", "profiles", uniqueFileName);
+                //var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(clientPostPut.ProfileImage.FileName);
+                //var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                //using (var stream = new FileStream(filePath, FileMode.Create))
+                //{
+                //    await clientPostPut.ProfileImage.CopyToAsync(stream);
+                //}
+
+                //imagePath = Path.Combine("images", "profiles", uniqueFileName);
             }
 
 

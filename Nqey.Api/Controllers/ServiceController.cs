@@ -238,22 +238,30 @@ namespace Nqey.Api.Controllers
 
             if (providerPostPut.ProfileImage != null)
             {
-                Console.WriteLine($"Profile image: {providerPostPut.ProfileImage} not null");
-
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles");
-                Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(providerPostPut.ProfileImage.FileName);
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                try
                 {
-                    await providerPostPut.ProfileImage.CopyToAsync(stream);
+                    imagePath = await _imageUploader.UploadImageToSupabase(providerPostPut.ProfileImage);
                 }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new ApiResponse<string>(false, "Failed to upload image to Supabase", ex.Message));
+                }
+                //Console.WriteLine($"Profile image: {providerPostPut.ProfileImage} not null");
 
-                imagePath = Path.Combine("images", "profiles", uniqueFileName);
+                //var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles");
+                //Directory.CreateDirectory(uploadsFolder);
+
+                //var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(providerPostPut.ProfileImage.FileName);
+                //var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                //using (var stream = new FileStream(filePath, FileMode.Create))
+                //{
+                //    await providerPostPut.ProfileImage.CopyToAsync(stream);
+                //}
+
+                //imagePath = Path.Combine("images", "profiles", uniqueFileName);
             }
-            else Console.WriteLine($"Profile image: {providerPostPut.ProfileImage} is null");
+            
 
             var domainProvider = _mapper.Map<Provider>(providerPostPut);
 
@@ -269,7 +277,7 @@ namespace Nqey.Api.Controllers
 
             if (imagePath != null)
             {
-                Console.WriteLine($"image path: {imagePath} not null");
+                
                 domainProvider.ProfileImage = new ProfileImage
                 {
 
@@ -281,7 +289,7 @@ namespace Nqey.Api.Controllers
                 await _serviceRepository.UpdateProviderAsync(serviceId,domainProvider.ProviderId,domainProvider);
 
             }
-            else Console.WriteLine($" image path: {imagePath} is null");
+            
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(domainProvider);
 
             return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider Added Successfully", mappedProvider));
