@@ -22,16 +22,18 @@ namespace Nqey.Api.Controllers
         private readonly IServiceRepository _serviceRepository;
         private readonly IUserRepository _userRepository;
         private readonly IClientRepository _clientRepository ;
+        private readonly IImageUploaderService _imageUploader;
         private readonly IMapper _mapper;
 
 
         public ServiceController(IServiceRepository serviceRepository,IUserRepository userRepository
-            , IMapper mapper, IClientRepository clientRepository)
+            , IMapper mapper, IClientRepository clientRepository, IImageUploaderService imageUploader)
         {
             _serviceRepository = serviceRepository;
             _userRepository = userRepository;
             _clientRepository = clientRepository;
             _mapper = mapper;
+            _imageUploader = imageUploader;
 
 
         }
@@ -68,22 +70,19 @@ namespace Nqey.Api.Controllers
                 );
                 return BadRequest(new ApiResponse<Dictionary<string, string[]>>(false, "Validation errors", errors));
             }
+
             string? imagePath = null;
 
             if (servicePostPut.Image != null)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "services");
-                Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(servicePostPut.Image.FileName);
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                try
                 {
-                    await servicePostPut.Image.CopyToAsync(stream);
+                    imagePath = await _imageUploader.UploadImageToSupabase(servicePostPut.Image);
                 }
-
-                imagePath = Path.Combine("images", "services", uniqueFileName);
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new ApiResponse<string>(false, "Failed to upload image to Supabase", ex.Message));
+                }
             }
 
 
