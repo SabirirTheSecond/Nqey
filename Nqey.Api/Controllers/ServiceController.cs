@@ -215,7 +215,8 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true,$"List of {serviceName.NameEn} service providers",mappedProviders));
 
         }
-        [Authorize(Roles = "Client,Admin,Provider")]
+        //[Authorize(Roles = "Client,Admin,Provider")]
+        [AllowAnonymous]
         [HttpGet]
         [Route("{serviceId}/providers/{providerId}")]
         public async Task<IActionResult> GetProviderById(int serviceId, int providerId)
