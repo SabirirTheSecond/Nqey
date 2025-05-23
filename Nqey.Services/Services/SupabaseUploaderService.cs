@@ -11,7 +11,7 @@ namespace Nqey.Services.Services
     public class SupabaseUploaderService : IImageUploaderService
     {
         private readonly string _supabaseUrl= "https://odutwxnxiynwsgaydetg.supabase.co";
-        // service-role key .. yep
+        // this is the service-role key .. yep
         private readonly string _supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kdXR3eG54aXlud3NnYXlkZXRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzY3NTY5OCwiZXhwIjoyMDYzMjUxNjk4fQ.pdGOka67qj2aws23WdxFGzobZF2lcZhSvFgq33wQanw";
         private readonly string _bucket = "service-image";
         private readonly HttpClient _httpClient;

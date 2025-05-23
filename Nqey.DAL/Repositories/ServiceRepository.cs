@@ -74,6 +74,7 @@ namespace Nqey.DAL.Repositories
                 .Where(p=> p.ServiceId == ServiceId)
                 .Include(p => p.ProfileImage)
                 .Include(p => p.Location)
+                .Include(p => p.Portfolio)
                 .ToListAsync();
             if(providers == null)
                 return null;
@@ -84,6 +85,7 @@ namespace Nqey.DAL.Repositories
             var provider = await _dataContext.Providers
                 .Include(p => p.ProfileImage)
                 .Include(p=> p.Location)
+                .Include(p => p.Portfolio)
                 .FirstOrDefaultAsync(p =>  
                         p.ServiceId == serviceId &&
                         p.ProviderId == providerId

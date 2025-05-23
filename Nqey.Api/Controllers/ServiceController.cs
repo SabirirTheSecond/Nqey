@@ -181,6 +181,7 @@ namespace Nqey.Api.Controllers
 
             if (role == "Client")
             {
+
                 var userIdClaim = User.FindFirst("userId")?.Value;
                 Console.WriteLine($"Inside the if role part and userIdClaim= {userIdClaim}");
                 if (int.TryParse(userIdClaim, out var userId))
@@ -230,6 +231,7 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider retrieved successfully",mappedProvider));
 
         }
+
         //[Authorize(Roles = "Admin,Provider")]
         [HttpPost]
         [Route("{serviceId}/providers")]
@@ -247,20 +249,7 @@ namespace Nqey.Api.Controllers
                 {
                     return StatusCode(500, new ApiResponse<string>(false, "Failed to upload image to Supabase", ex.Message));
                 }
-                //Console.WriteLine($"Profile image: {providerPostPut.ProfileImage} not null");
-
-                //var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles");
-                //Directory.CreateDirectory(uploadsFolder);
-
-                //var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(providerPostPut.ProfileImage.FileName);
-                //var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                //using (var stream = new FileStream(filePath, FileMode.Create))
-                //{
-                //    await providerPostPut.ProfileImage.CopyToAsync(stream);
-                //}
-
-                //imagePath = Path.Combine("images", "profiles", uniqueFileName);
+               
             }
             
 
@@ -287,10 +276,33 @@ namespace Nqey.Api.Controllers
 
                 };
 
-                await _serviceRepository.UpdateProviderAsync(serviceId,domainProvider.ProviderId,domainProvider);
 
             }
-            
+            //Uploading Portfolio images:
+            if (providerPostPut.Portfolio != null && providerPostPut.Portfolio.Any())
+            {
+                domainProvider.Portfolio = new List<PortfolioImage>();
+                foreach (var file in providerPostPut.Portfolio)
+                {
+                    try
+                    {
+                        imagePath = await _imageUploader.UploadImageToSupabase(file);
+                        domainProvider.Portfolio.Add(new PortfolioImage
+                        {
+                            ImagePath = imagePath,
+                            ProviderId = domainProvider.ProviderId
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(500, new ApiResponse<string>(false, "Failed to upload portfolio image to Supabase", ex.Message));
+
+                    }
+                }
+            }
+
+            await _serviceRepository.UpdateProviderAsync(serviceId,domainProvider.ProviderId,domainProvider);
+
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(domainProvider);
 
             return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider Added Successfully", mappedProvider));

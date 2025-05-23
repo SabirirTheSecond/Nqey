@@ -14,6 +14,7 @@ namespace Nqey.Api.Dtos.ProviderDtos
 
         // you probably need to put it as ProfileImageDto 
         public ProfileImageGetDto? ProfileImage { get; set; }
+        public List<PortfolioImageDto>? Portfolio { get; set; }
         public string ServiceDescription { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
