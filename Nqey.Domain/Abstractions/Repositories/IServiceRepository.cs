@@ -13,7 +13,8 @@ namespace Nqey.Domain.Abstractions.Repositories
         Task<Service> AddServiceAsync(Service service);
         Task<Service> UpdateServiceAsync(Service service);
         Task<Service> DeleteServiceAsync(int id);
-        Task<List<Provider>> GetAllProviderAsync(int serviceId);
+        Task<List<Provider>> GetProvidersByServicAsync(int serviceId);
+        Task<List<Provider>> GetAllProvidersAsync();
         Task<Provider> GetProviderByIdAsync(int serviceId, int providerId);
         Task<int?> GetProviderIdByUserNameAsync(string userName);
         Task<Provider> AddProviderAsync(int serviceId,Provider provider);

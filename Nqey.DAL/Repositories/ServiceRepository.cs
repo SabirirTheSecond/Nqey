@@ -67,8 +67,22 @@ namespace Nqey.DAL.Repositories
             await _dataContext.SaveChangesAsync();
             return updatedService;
         }
-        
-        public async Task<List<Provider>> GetAllProviderAsync(int ServiceId)
+
+        public async Task<List<Provider>> GetAllProvidersAsync()
+        {
+            var providers = await _dataContext.Providers
+               
+               .Include(p => p.ProfileImage)
+               .Include(p => p.Location)
+               .Include(p => p.Portfolio)
+               .ToListAsync();
+            
+            if (providers == null)
+                return null;
+            return providers;
+
+        }
+        public async Task<List<Provider>> GetProvidersByServicAsync(int ServiceId)
         {
             var providers = await _dataContext.Providers
                 .Where(p=> p.ServiceId == ServiceId)

@@ -145,13 +145,13 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ServicePublicGetDto>(true,"Service Deleted",null));
         }
 
-        //[Authorize(Roles = "Client,Admin,Provider")]
+        // This endpoint returns a given service providers
         [AllowAnonymous]
         [HttpGet]
         [Route("{serviceId}/providers")]
-        public async Task<ActionResult> GetProviders(int serviceId)
+        public async Task<ActionResult> GetServiceProviders(int serviceId)
         {
-            var providers = await _serviceRepository.GetAllProviderAsync(serviceId);
+            var providers = await _serviceRepository.GetProvidersByServicAsync(serviceId);
             
             var serviceName = await _serviceRepository.GetServiceByIdAsync(serviceId);
            
@@ -214,6 +214,71 @@ namespace Nqey.Api.Controllers
             }
             var mappedProviders = _mapper.Map<List<ProviderPublicGetDto>>(providers);
             return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true,$"List of {serviceName.NameEn} service providers",mappedProviders));
+
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("providers")]
+        public async Task<ActionResult> GetAllProviders()
+        {
+            var providers = await _serviceRepository.GetAllProvidersAsync();
+
+            
+            /* check if the providers list isn't empty and notify if otherwise*/
+            if (providers == null)
+                return Ok(new ApiResponse<Provider>(true, $"Proivders list is empty "));
+
+
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
+            }
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+            Console.WriteLine($"roleClaim = {roleClaim}");
+
+            var userIdClaim0 = User.FindFirst("userId")?.Value;
+            Console.WriteLine($"userIdClaim0 = {userIdClaim0}");
+
+            var role = roleClaim?.Value;
+            Console.WriteLine($"before if statement , role = {role}");
+
+
+            if (role == "Client")
+            {
+
+                var userIdClaim = User.FindFirst("userId")?.Value;
+                Console.WriteLine($"Inside the if role part and userIdClaim= {userIdClaim}");
+                if (int.TryParse(userIdClaim, out var userId))
+                {
+                    var user = await _userRepository.GetByIdAsync(userId);
+                    if (user != null)
+                    {
+                        Console.WriteLine($"Inside the if user!=null part and user= {user}");
+                        var clientIdNullable = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
+                        if (clientIdNullable is not int clientId)
+                        {
+
+
+                            Console.WriteLine($"Inside the nullable client id: {clientIdNullable}");
+                            return BadRequest(new ApiResponse<Reservation>(false, "Cannot determine client id"));
+                        }
+                        var client = await _clientRepository.GetClientByIdAsync(clientId);
+                        if (client?.Location?.Position != null)
+                        {
+
+                            providers = providers
+                                .Select(p => new { Provider = p, Score = ScoreCalculator.CalculateScore(client, p) })
+                                .OrderByDescending(p => p.Score)
+                                .Select(p => p.Provider)
+                                .ToList();
+                            Console.WriteLine($"We are inside the part that works {providers}");
+                        }
+                    }
+                }
+            }
+            var mappedProviders = _mapper.Map<List<ProviderPublicGetDto>>(providers);
+            return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true, $"List of all providers", mappedProviders));
 
         }
         //[Authorize(Roles = "Client,Admin,Provider")]
