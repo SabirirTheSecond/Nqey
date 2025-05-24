@@ -9,11 +9,12 @@ namespace Nqey.Domain.Abstractions.Services
 {
     public interface IReviewService
     {
-        public Task<Review> AddReviewAsync(Review review, int providerId);
+        public Task<Review> AddReviewAsync(Review review);
 
         public Task<Review> UpdateReviewAsync(Review review);
         public Task<Review> DeleteReviewAsync(Review review);
         public Task<Review> GetReviewByIdAsync(int reviewId);
-        public Task<Review> GetAllReviewsAsync();
+        public Task<List<Review>> GetAllReviewsByProviderIdAsync(int providerId);
+        public Task<List<Review>> GetAllReviewsAsync();
     }
 }

@@ -23,8 +23,8 @@ namespace Nqey.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<User>>> GetAdmins()
         {
-            var admins = await  _dataContext.Users.Where(u => u.UserRole == Domain.Role.Admin).ToListAsync();
-            if( admins== null)
+            var admins = await  _dataContext.Users.Where(u => u.UserRole == Role.Admin).ToListAsync();
+            if( !admins.Any())
                 return NotFound( new ApiResponse<User>(false, "List empty"));
 
             return Ok(new ApiResponse<List<User>>(true,"List of admins",admins));

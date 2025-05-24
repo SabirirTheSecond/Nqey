@@ -1,6 +1,7 @@
 ﻿using Nqey.Domain.Common;
 using Nqey.Domain;
 using Nqey.Api.Dtos.ProfileImageDtos;
+using Nqey.Api.Dtos.ReviewDto;
 
 namespace Nqey.Api.Dtos.ProviderDtos
 {
@@ -22,7 +23,7 @@ namespace Nqey.Api.Dtos.ProviderDtos
         //public AccountStatus AccountStatus { get; set; } = AccountStatus.Blocked;
         public int ServiceId { get; set; }
         //public Service Service { get; set; }
-        //public Review? Review { get; set; }
-        
+        public List<ReviewGetDto>? Reviews { get; set; }
+
     }
 }

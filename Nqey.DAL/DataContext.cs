@@ -94,6 +94,7 @@ namespace Nqey.DAL
         public DbSet<Service> Services { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<ReservationEvent> ReservationEvents { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
     }
 }

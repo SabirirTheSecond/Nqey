@@ -71,7 +71,7 @@ namespace Nqey.DAL.Repositories
         public async Task<List<Provider>> GetAllProvidersAsync()
         {
             var providers = await _dataContext.Providers
-               
+               .Include(p => p.Reviews)
                .Include(p => p.ProfileImage)
                .Include(p => p.Location)
                .Include(p => p.Portfolio)
@@ -86,6 +86,7 @@ namespace Nqey.DAL.Repositories
         {
             var providers = await _dataContext.Providers
                 .Where(p=> p.ServiceId == ServiceId)
+                .Include(p => p.Reviews)
                 .Include(p => p.ProfileImage)
                 .Include(p => p.Location)
                 .Include(p => p.Portfolio)
@@ -97,6 +98,7 @@ namespace Nqey.DAL.Repositories
         public async Task<Provider> GetProviderByIdAsync( int providerId)
         {
             var provider = await _dataContext.Providers
+                .Include(p=> p.Reviews)
                 .Include(p => p.ProfileImage)
                 .Include(p=> p.Location)
                 .Include(p => p.Portfolio)

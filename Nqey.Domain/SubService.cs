@@ -12,9 +12,8 @@ namespace Nqey.Domain
         public int SubServiceId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public double Price { get; set; }
+        public double Cost { get; set; }
         public string Unity {  get; set; }
-        
         public int ProviderId { get; set; }
         public Provider Provider { get; set; }
     }

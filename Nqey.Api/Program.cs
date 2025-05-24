@@ -76,7 +76,7 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IAuthorizationHandler, ActiveAccountHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, IsOwnerHandler>();
 builder.Services.AddHttpClient<IImageUploaderService, SupabaseUploaderService>();
-
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 // Add services to the container.
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Nqey.DAL;
 using Nqey.Domain.Abstractions.Repositories;
 using Nqey.Domain.Abstractions.Services;
@@ -26,20 +27,38 @@ namespace Nqey.Services.Services
 
         }
 
-        public async Task<Review> AddReviewAsync(Review review, int providerId)
+        public async Task<Review> AddReviewAsync(Review review)
         {
-            var provider = await _serviceRepo.GetProviderByIdAsync(providerId);
-            throw new NotImplementedException();
+            var provider = await _serviceRepo.GetProviderByIdAsync(review.ProviderId);
+           
+            if (provider == null)
+                return null;
+
+            await _dataContext.Reviews.AddAsync(review);
+            await _dataContext.SaveChangesAsync();
+
+          return review ;
+            
         }
+       
 
         public Task<Review> DeleteReviewAsync(Review review)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Review> GetAllReviewsAsync()
+        
+
+        public async Task<List<Review>> GetAllReviewsByProviderIdAsync(int providerId)
         {
-            throw new NotImplementedException();
+            var reviews = await _dataContext.Reviews
+                .Where(r => r.ProviderId == providerId)
+                .ToListAsync();
+            if (reviews == null)
+                return null;
+
+                
+            return reviews;
         }
 
         public Task<Review> GetReviewByIdAsync(int reviewId)
@@ -48,6 +67,11 @@ namespace Nqey.Services.Services
         }
 
         public Task<Review> UpdateReviewAsync(Review review)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<Review>> GetAllReviewsAsync()
         {
             throw new NotImplementedException();
         }

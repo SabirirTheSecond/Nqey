@@ -26,7 +26,7 @@ namespace Nqey.Domain
         public AccountStatus AccountStatus { get; set; } = AccountStatus.Blocked;
         public int ServiceId { get; set; }
         public Service Service { get; set; }
-        public int? ReviewId { get; set; }
+        //public int? ReviewId { get; set; }
         public List<Review>? Reviews { get; set; } = new List<Review>();
         public List<SubService>? SubServices { get; set; } = new List<SubService>();
         public  ICollection<Message>? SentMessages { get; set; } = new List<Message>();

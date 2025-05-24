@@ -24,9 +24,6 @@ namespace Nqey.Domain.Common
         public Position Position { get; set; }
         public string? Ville { get; set; }
         public string? Wilaya  { get; set; }
-        
-
-
-       
+    
     }
 }
