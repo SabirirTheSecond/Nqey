@@ -15,7 +15,7 @@ namespace Nqey.Domain.Abstractions.Repositories
         Task<Service> DeleteServiceAsync(int id);
         Task<List<Provider>> GetProvidersByServicAsync(int serviceId);
         Task<List<Provider>> GetAllProvidersAsync();
-        Task<Provider> GetProviderByIdAsync(int serviceId, int providerId);
+        Task<Provider> GetProviderByIdAsync( int providerId);
         Task<int?> GetProviderIdByUserNameAsync(string userName);
         Task<Provider> AddProviderAsync(int serviceId,Provider provider);
         Task<Provider> ActivateProviderAsync(int serviceId,Provider provider);

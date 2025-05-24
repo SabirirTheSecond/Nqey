@@ -29,8 +29,8 @@ namespace Nqey.Domain
         public int? ReviewId { get; set; }
         public List<Review>? Reviews { get; set; } = new List<Review>();
         public List<SubService>? SubServices { get; set; } = new List<SubService>();
-        public virtual ICollection<Message>? SentMessages { get; set; } = new List<Message>();
-        public virtual ICollection<Message>? ReceivedMessages { get; set; } = new List<Message>();
+        public  ICollection<Message>? SentMessages { get; set; } = new List<Message>();
+        public  ICollection<Message>? ReceivedMessages { get; set; } = new List<Message>();
         public List<PortfolioImage>? Portfolio{ get; set; } = new List<PortfolioImage>();
         public int JobsDone { get; set; } = 0;
         

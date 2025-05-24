@@ -22,6 +22,7 @@ namespace Nqey.Domain
         public required string Email { get; set; }
         [Required]
         public  string PasswordHash { get;  set; }
+        public string PhoneNumber { get; set; }
         public string? EmailConfirmed { get; set; }
         public string? PasswordConfirmed { get; set; }
         [Required]

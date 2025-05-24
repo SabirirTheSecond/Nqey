@@ -13,6 +13,9 @@ namespace Nqey.Domain.Common
         [Range(1,5)]
         public int Stars {  get; set; }
         public string? Feedback { get; set; }
-        
+
+        public int ProviderId { get; set; }
+        public Provider Provider { get; set; }
+
     }
 }

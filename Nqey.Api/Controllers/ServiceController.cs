@@ -285,9 +285,9 @@ namespace Nqey.Api.Controllers
         [AllowAnonymous]
         [HttpGet]
         [Route("{serviceId}/providers/{providerId}")]
-        public async Task<IActionResult> GetProviderById(int serviceId, int providerId)
+        public async Task<IActionResult> GetProviderById( int providerId)
         {
-            var provider = await _serviceRepository.GetProviderByIdAsync(serviceId, providerId);
+            var provider = await _serviceRepository.GetProviderByIdAsync( providerId);
             if (provider == null)
                 return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "provider not found", null));
 
@@ -383,7 +383,7 @@ namespace Nqey.Api.Controllers
             if (service == null)
                 return NotFound(new ApiResponse<Service>(false,"Service Not Found"));
 
-            var provider = await _serviceRepository.GetProviderByIdAsync(serviceId,providerId);
+            var provider = await _serviceRepository.GetProviderByIdAsync(providerId);
             
             if(provider == null)
                 return NotFound(new ApiResponse<Provider>(false, "Provider Not Found"));
@@ -400,12 +400,14 @@ namespace Nqey.Api.Controllers
         [Route("{serviceId}/providers/{providerId}/update")]
         public async Task<IActionResult> UpdateProvider(int serviceId,int providerId,[FromForm] ProviderPostPutDto providerPostPut)
         {
+
             var service = _serviceRepository.GetServiceByIdAsync(serviceId);
             
             if (service == null)
                 return NotFound(new ApiResponse<Service>(false, "Service Not Found"));
 
-            var existingProvider = await _serviceRepository.GetProviderByIdAsync(serviceId, providerId);
+            var existingProvider = await _serviceRepository.GetProviderByIdAsync(providerId);
+
             _mapper.Map(providerPostPut, existingProvider);
 
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(existingProvider);

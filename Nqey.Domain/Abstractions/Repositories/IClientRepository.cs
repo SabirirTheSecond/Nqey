@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Nqey.Domain.Common;
 
 namespace Nqey.Domain.Abstractions.Repositories
 {
@@ -14,6 +15,7 @@ namespace Nqey.Domain.Abstractions.Repositories
         Task<Client> AddClientAsync(Client client);
         Task<Client> UpdateClientAsync(Client client);
         Task<Client> DeleteClientAsync(int id);
+        
 
     }
 }

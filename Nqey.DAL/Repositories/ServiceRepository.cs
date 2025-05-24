@@ -94,14 +94,14 @@ namespace Nqey.DAL.Repositories
                 return null;
             return providers;
         }
-        public async Task<Provider> GetProviderByIdAsync(int serviceId, int providerId)
+        public async Task<Provider> GetProviderByIdAsync( int providerId)
         {
             var provider = await _dataContext.Providers
                 .Include(p => p.ProfileImage)
                 .Include(p=> p.Location)
                 .Include(p => p.Portfolio)
                 .FirstOrDefaultAsync(p =>  
-                        p.ServiceId == serviceId &&
+                        
                         p.ProviderId == providerId
                     );
 
