@@ -32,6 +32,7 @@ namespace Nqey.Domain
         public  ICollection<Message>? SentMessages { get; set; } = new List<Message>();
         public  ICollection<Message>? ReceivedMessages { get; set; } = new List<Message>();
         public List<PortfolioImage>? Portfolio{ get; set; } = new List<PortfolioImage>();
+        public Role UserRole { get; set; } = Role.Provider;
         public int JobsDone { get; set; } = 0;
         
         public void SetPassword(string password)

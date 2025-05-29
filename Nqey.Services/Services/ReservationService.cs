@@ -139,6 +139,7 @@ namespace Nqey.Services.Services
                 .Include(r=> r.Location)
                 .ToListAsync();
             if (reservations == null)
+                //throw new NullReferenceException();
                 return null;
 
             return reservations;

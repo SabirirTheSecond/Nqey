@@ -89,7 +89,13 @@ namespace Nqey.Services.Authorization
                 
 
             }
-            
+            else if(user.UserRole == Role.Admin)
+            {
+                Console.WriteLine($"IsOwner Policy Succeeded for Admin");
+                context.Succeed(requirement);
+
+            }
+
 
         }
     }

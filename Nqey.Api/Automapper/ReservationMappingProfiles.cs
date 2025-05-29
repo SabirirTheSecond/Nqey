@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Nqey.Api.Dtos.ReservationDtos;
+using Nqey.Api.Dtos.ReservationDtos.JobDescriptionDtos;
 using Nqey.Domain;
 
 namespace Nqey.Api.Automapper
@@ -14,6 +15,9 @@ namespace Nqey.Api.Automapper
             CreateMap<ReservationEvent, ReservationEventDto>()
                //.ForMember(dest => dest.EventType, opt => opt.MapFrom(src => src.ReservationEventType.ToString()))
                 ;
+            CreateMap<JobDescriptionPostPutDto, JobDescription>();
+            CreateMap<JobDescription, JobDescriptionGetDto>();
+
 
         }
     }

@@ -53,9 +53,12 @@ namespace Nqey.Services.Services
         {
             var reviews = await _dataContext.Reviews
                 .Where(r => r.ProviderId == providerId)
+                .Include(r=> r.Client)
+                    .ThenInclude(c=> c.ProfileImage)
+                
                 .ToListAsync();
             if (reviews == null)
-                return null;
+                throw new NullReferenceException();
 
                 
             return reviews;

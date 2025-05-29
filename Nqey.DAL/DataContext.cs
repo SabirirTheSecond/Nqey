@@ -83,9 +83,18 @@ namespace Nqey.DAL
             modelBuilder.Entity<User>()
                 .Property(u => u.AccountStatus)
                 .HasConversion<string>();
+
             modelBuilder.Entity<User>()
                 .Property(u => u.UserRole)
                 .HasConversion<string>();
+
+            modelBuilder.Entity<Reservation>()
+                .Property(r => r.Status)
+                .HasConversion<string>();
+            modelBuilder.Entity<Provider>()
+                .Property(u => u.UserRole)
+                .HasConversion<string>();
+            
         }
 
         public DbSet<User> Users { get; set; }
@@ -95,6 +104,7 @@ namespace Nqey.DAL
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<ReservationEvent> ReservationEvents { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<JobDescription> JobDescriptions  { get; set; }
 
     }
 }

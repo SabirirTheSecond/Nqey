@@ -25,6 +25,7 @@ namespace Nqey.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostReview([FromBody] ReviewPostPutDto reviewPostPut)
         {
+
             var domainReview = _mapper.Map<Review>(reviewPostPut);
             var provider = await _serviceRepository.GetProviderByIdAsync(reviewPostPut.ProviderId);
             if (provider == null)
@@ -45,9 +46,9 @@ namespace Nqey.Api.Controllers
             var providerReviews = await _reviewService.GetAllReviewsByProviderIdAsync(providerId);
             if( provider == null)
                 return NotFound(new ApiResponse<Review>(false, "Could Not Find The Provider"));
-            
+            var mappedReviews = _mapper.Map<List<ReviewGetDto>>(providerReviews);
             return Ok(new ApiResponse<List<ReviewGetDto>>(true,$"List of {provider.UserName}'s " +
-                $"client reviews"));
+                $"client reviews",mappedReviews));
         }
     }
 }

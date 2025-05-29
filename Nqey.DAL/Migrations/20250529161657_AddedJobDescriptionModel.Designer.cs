@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nqey.DAL;
 
@@ -11,9 +12,11 @@ using Nqey.DAL;
 namespace Nqey.DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250529161657_AddedJobDescriptionModel")]
+    partial class AddedJobDescriptionModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,9 +257,6 @@ namespace Nqey.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserRole")
-                        .HasColumnType("int");
-
                     b.HasKey("ClientId");
 
                     b.HasIndex("LocationId");
@@ -409,8 +409,7 @@ namespace Nqey.DAL.Migrations
 
                     b.HasKey("JobDescriptionId");
 
-                    b.HasIndex("ReservationId")
-                        .IsUnique();
+                    b.HasIndex("ReservationId");
 
                     b.ToTable("JobDescriptions");
                 });
@@ -519,10 +518,6 @@ namespace Nqey.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserRole")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("ProviderId");
 
                     b.HasIndex("LocationId");
@@ -546,6 +541,10 @@ namespace Nqey.DAL.Migrations
 
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
+
+                    b.Property<string>("JobDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("LocationId")
                         .HasColumnType("int");
@@ -852,8 +851,8 @@ namespace Nqey.DAL.Migrations
             modelBuilder.Entity("Nqey.Domain.JobDescription", b =>
                 {
                     b.HasOne("Nqey.Domain.Reservation", "Reservation")
-                        .WithOne("JobDescription")
-                        .HasForeignKey("Nqey.Domain.JobDescription", "ReservationId")
+                        .WithMany()
+                        .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -986,9 +985,6 @@ namespace Nqey.DAL.Migrations
             modelBuilder.Entity("Nqey.Domain.Reservation", b =>
                 {
                     b.Navigation("Events");
-
-                    b.Navigation("JobDescription")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Nqey.Domain.Service", b =>

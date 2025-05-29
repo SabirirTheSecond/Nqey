@@ -31,7 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Dtos\ServiceDtos\NewFolder\" />
     <Folder Include="Other\" />
   </ItemGroup>
 

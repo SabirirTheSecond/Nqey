@@ -163,5 +163,26 @@ namespace Nqey.DAL.Repositories
 
             return provider;
         }
+
+        public async Task<List<Provider>> GetPreRegisteredProviders()
+        {
+            var providers = await _dataContext.Providers.Where(p => p.ServiceId == 35)
+                .ToListAsync();
+            if (!providers.Any())
+            {
+                throw new NullReferenceException();
+            }
+            return providers;
+        }
+        public async Task<Provider> GetPreRegisteredProviderById(int providerId)
+        {
+            var provider = await _dataContext.Providers
+                .FirstOrDefaultAsync(p=>p.ProviderId == providerId);
+            if (provider == null)
+                throw new NullReferenceException();
+            return provider;
+
+
+        }
     }
 }

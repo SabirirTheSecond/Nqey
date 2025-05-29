@@ -20,7 +20,7 @@ namespace Nqey.Api.Dtos.ProviderDtos
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public Location? Location { get; set; }
-        //public AccountStatus AccountStatus { get; set; } = AccountStatus.Blocked;
+        public AccountStatus AccountStatus { get; set; } 
         public int ServiceId { get; set; }
         //public Service Service { get; set; }
         public List<ReviewGetDto>? Reviews { get; set; }

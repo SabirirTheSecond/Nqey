@@ -30,14 +30,21 @@ namespace Nqey.Api.Controllers
         {
             var user = await _userRepository.GetUserByUserNameAsync(loginDto.Username);
 
-            
+            Console.WriteLine($"your userRole is : {user.UserRole}");
 
             if (user == null || !user.VerifyPassword(loginDto.Password))
                 return Unauthorized(new ApiResponse<string>(false, "Invalid credentials", null));
 
-            if (loginDto.AppType != user.UserRole)
-                return Unauthorized(new ApiResponse<string>(false, $"your {user.UserRole} app version" +
-                    $" is not compatible with this version", null)); 
+            if (!Enum.TryParse<Role>(loginDto.AppType, true, out var parsedRole))
+            {
+                return BadRequest(new ApiResponse<string>(false, "Invalid AppType", null));
+            }
+
+            if (user.UserRole != parsedRole)
+            {
+                return Unauthorized(new ApiResponse<string>(false, $"Your {user.UserRole} app version is not compatible", null));
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),

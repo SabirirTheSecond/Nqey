@@ -29,12 +29,16 @@ namespace Nqey.Api.Controllers
         [HttpGet]
         public async Task<ActionResult> GetReservations()
         {
-            var reservations = await _reservationService.GetReservationsAsync();
-            if (reservations == null) 
-                return NotFound(new ApiResponse<Reservation>(false,"Reservations Not Found"));
-            var mappedReservations = _mapper.Map<List<ReservationGetDto>>(reservations);
-            return Ok(new ApiResponse<List<ReservationGetDto>>(true,"Reservations Retrieved Succussfully"
-                ,mappedReservations));
+            
+                var reservations = await _reservationService.GetReservationsAsync();
+                if (reservations == null)
+                    return NotFound(new ApiResponse<Reservation>(false, "Reservations Not Found"));
+                var mappedReservations = _mapper.Map<List<ReservationGetDto>>(reservations);
+                return Ok(new ApiResponse<List<ReservationGetDto>>(true, "Reservations Retrieved Succussfully"
+                    , mappedReservations));
+
+           
+            
         }
 
         [Authorize(Roles ="Admin,Provider,Client")]
@@ -55,7 +59,7 @@ namespace Nqey.Api.Controllers
         [Authorize(Roles = "Client")]
         [HttpPost]
         public async Task<IActionResult> MakeReservation( int providerId,
-           [FromBody] ReservationPostPutDto reservationPostPut)
+           [FromForm] ReservationPostPutDto reservationPostPut)
         {
             
             var domainReservation = _mapper.Map<Reservation>(reservationPostPut);

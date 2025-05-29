@@ -20,6 +20,7 @@ namespace Nqey.Domain.Abstractions.Repositories
         Task<Provider> AddProviderAsync(int serviceId,Provider provider);
         Task<Provider> ActivateProviderAsync(int serviceId,Provider provider);
         Task<Provider> UpdateProviderAsync(int serviceId, int providerId, Provider provider);
-
+        Task<List<Provider>> GetPreRegisteredProviders();
+        Task<Provider> GetPreRegisteredProviderById(int providerId);
     }
 }

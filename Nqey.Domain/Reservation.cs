@@ -16,7 +16,8 @@ namespace Nqey.Domain
         public Client Client { get; set; }
         public int ProviderId { get; set; }
         public Provider Provider { get; set; }
-        public string JobDescription { get; set; }
+        
+        public JobDescription JobDescription { get; set; }
         public Location? Location { get; set; }
         public ReservationStatus Status { get; set; }
         public DateTime createdAt {  get; set; } = DateTime.UtcNow;

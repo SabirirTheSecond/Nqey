@@ -317,7 +317,6 @@ namespace Nqey.Api.Controllers
                
             }
             
-
             var domainProvider = _mapper.Map<Provider>(providerPostPut);
 
             var userPostPut = _mapper.Map<UserPostPutDto>(providerPostPut);
@@ -325,6 +324,7 @@ namespace Nqey.Api.Controllers
             domainUser.SetPassword(userPostPut.Password);
             domainUser.UserRole = Role.Provider;
             domainUser.AccountStatus = AccountStatus.Blocked;
+            domainUser.PhoneNumber = providerPostPut.PhoneNumber;
 
             domainProvider.SetPassword(providerPostPut.Password);
             await _serviceRepository.AddProviderAsync(serviceId, domainProvider);
