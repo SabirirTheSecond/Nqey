@@ -94,7 +94,11 @@ namespace Nqey.DAL
             modelBuilder.Entity<Provider>()
                 .Property(u => u.UserRole)
                 .HasConversion<string>();
-            
+
+            modelBuilder.Entity<JobDescription>()
+                .HasOne(j => j.Reservation)
+                .WithOne(r => r.JobDescription)
+                .HasForeignKey<JobDescription>(j => j.ReservationId);
         }
 
         public DbSet<User> Users { get; set; }

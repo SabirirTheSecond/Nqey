@@ -121,6 +121,7 @@ namespace Nqey.Services.Services
                 .Include(r=> r.Client)
                 .Include(r => r.Events)
                 .Include(r => r.Location)
+                .Include(r => r.JobDescription)
                 .FirstOrDefaultAsync(r => r.ReservationId == id);
 
             if (reservation == null)
@@ -137,6 +138,7 @@ namespace Nqey.Services.Services
                 .Include(r => r.Provider)
                 .Include(r => r.Events)
                 .Include(r=> r.Location)
+                .Include(r => r.JobDescription)
                 .ToListAsync();
             if (reservations == null)
                 //throw new NullReferenceException();
@@ -155,6 +157,8 @@ namespace Nqey.Services.Services
             if (service == null || provider == null || client == null)
                 return null;
 
+            reservation.JobDescription.Reservation = reservation;
+            await _dataContext.JobDescriptions.AddAsync(reservation.JobDescription);
            await _dataContext.Reservations.AddAsync(reservation);
             await _dataContext.SaveChangesAsync();
             return reservation;

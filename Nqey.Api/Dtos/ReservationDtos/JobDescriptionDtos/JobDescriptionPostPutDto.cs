@@ -9,8 +9,8 @@ namespace Nqey.Api.Dtos.ReservationDtos.JobDescriptionDtos
 
         public string? Title { get; set; }
         public string Description { get; set; }
-        public List<ImagePostPutDto>? Images { get; set; }
-        public int ReservationId { get; set; }
+        public List<IFormFile>? Images { get; set; }
+        //public int ReservationId { get; set; }
 
     }
 }

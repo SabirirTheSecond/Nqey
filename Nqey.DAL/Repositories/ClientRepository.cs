@@ -37,14 +37,20 @@ namespace Nqey.DAL.Repositories
 
        public async Task<Client> GetClientByIdAsync(int id)
         {
+            Console.WriteLine($"received id to GetClientByIdAsync: {id.GetType()} ");
             var client = await _dataContext.Clients
-                .Include(c => c.ProfileImage)
-                .Include(c => c.Location)
+                //.Include(c => c.ProfileImage)
+                //.Include(c => c.Location)
                 .FirstOrDefaultAsync(c => c.ClientId == id);
 
             if (client == null)
-                return null;
+            {
+                Console.WriteLine($"Null from GetClientByIdAsync client: {client}");
+                throw new NullReferenceException();
+            }
+                
 
+            Console.WriteLine($"client object from GetClientByIdAsync: {client}");
             return client;
         }
 
@@ -76,7 +82,7 @@ namespace Nqey.DAL.Repositories
                 .Select(c => (int?)c.ClientId)
                 .FirstOrDefaultAsync();
             if (clientId == null)
-                return null;
+                throw new NullReferenceException();
 
             return clientId;
         }

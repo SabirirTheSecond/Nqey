@@ -18,13 +18,16 @@ namespace Nqey.Api.Controllers
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
         private readonly IClientRepository _clientRepository;
+        private readonly IImageUploaderService _imageUploader;
        public ReservationController(IMapper mapper, IReservationService reservationService,
-           IUserRepository userRepository, IClientRepository clientRepository) 
+           IUserRepository userRepository, IClientRepository clientRepository,
+           IImageUploaderService imageUploader) 
         {
             _mapper = mapper;
             _reservationService = reservationService;
             _userRepository = userRepository;
             _clientRepository = clientRepository;
+            _imageUploader = imageUploader;
         }
         [HttpGet]
         public async Task<ActionResult> GetReservations()
@@ -64,6 +67,7 @@ namespace Nqey.Api.Controllers
             
             var domainReservation = _mapper.Map<Reservation>(reservationPostPut);
             var location = _mapper.Map<Location>(reservationPostPut.LocationDto);
+            var jobDescription = _mapper.Map<JobDescription>(reservationPostPut.JobDescription);
             var userIdClaim = User.FindFirst("userId");
             Console.WriteLine($" userIdClaim after declaration : {userIdClaim}");
             if (userIdClaim == null)
@@ -78,11 +82,14 @@ namespace Nqey.Api.Controllers
             //    //return BadRequest(new ApiResponse<string>(false, "Validation Errors",errors));
 
             //}
+             string? imagePath = null;
+            //var images= reservationPostPut.JobDescription.Images ;
+           
             var userId = int.Parse(userIdClaim.Value);
             Console.WriteLine($"userId: {userId}");
             var user = await _userRepository.GetByIdAsync(userId);
             var clientId = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
-            Console.WriteLine($"clientId: {clientId}");
+            Console.WriteLine($"clientId: {clientId.GetType()}");
             if (clientId == null)
                 return BadRequest(new ApiResponse<Reservation>(false, "Cannot determine client id"));
 
@@ -90,6 +97,37 @@ namespace Nqey.Api.Controllers
             domainReservation.ProviderId = providerId;
             domainReservation.Status = ReservationStatus.Pending;
             domainReservation.Location = location;
+            Console.WriteLine($"domainReservation.ClientId {domainReservation.ClientId.GetType()}");
+            
+            
+
+            // 4. Ensure JobDescription exists
+            //var jobDescription = new JobDescription();
+            var images = reservationPostPut.JobDescription?.Images;
+
+            if (images != null && images.Any())
+            {
+                jobDescription.Images = new List<Image>();
+                foreach (var file in reservationPostPut.JobDescription.Images)
+
+                {
+                    try
+                    {
+                        imagePath = await _imageUploader.UploadImageToSupabase((IFormFile)file);
+                        jobDescription.Images.Add(new Image
+                        {
+                            ImagePath = imagePath
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(500, new ApiResponse<string>(false, "Failed to upload job images to Supabase", ex.Message));
+
+                    }
+                }
+
+            }
+            domainReservation.JobDescription = jobDescription;
             // Booking timeline tracker
             domainReservation.Events.Add(
                 new ReservationEvent
@@ -101,7 +139,9 @@ namespace Nqey.Api.Controllers
                 );
 
             await _reservationService.MakeReservationAsync(domainReservation);
-
+            
+            
+            //await _reservationService.UpdateReservationAsync(domainReservation.ReservationId, domainReservation);
             var mappedReservation = _mapper.Map<ReservationGetDto>(domainReservation);
             return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Added Successfully", mappedReservation));
 

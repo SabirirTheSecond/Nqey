@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Nqey.Api.Dtos.ImageDto;
 using Nqey.Api.Dtos.ReservationDtos;
 using Nqey.Api.Dtos.ReservationDtos.JobDescriptionDtos;
 using Nqey.Domain;
+using Nqey.Domain.Common;
 
 namespace Nqey.Api.Automapper
 {
@@ -10,13 +12,21 @@ namespace Nqey.Api.Automapper
         public ReservationMappingProfiles()
         {
 
-            CreateMap<ReservationPostPutDto, Reservation>();
+            CreateMap<ReservationPostPutDto, Reservation>()
+                .ForPath(dest => dest.JobDescription.Images, opt=> opt.Ignore())
+                ;
             CreateMap<Reservation, ReservationGetDto>();
             CreateMap<ReservationEvent, ReservationEventDto>()
-               //.ForMember(dest => dest.EventType, opt => opt.MapFrom(src => src.ReservationEventType.ToString()))
                 ;
-            CreateMap<JobDescriptionPostPutDto, JobDescription>();
-            CreateMap<JobDescription, JobDescriptionGetDto>();
+            CreateMap<JobDescriptionPostPutDto, JobDescription>()
+                .ForMember(dest => dest.Images, opt=> opt.Ignore())
+                ;
+
+            CreateMap<JobDescription, JobDescriptionGetDto>()
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images))
+                ;
+            CreateMap<ImagePostPutDto, Image>();
+            CreateMap<Image, ImageGetDto>();
 
 
         }
