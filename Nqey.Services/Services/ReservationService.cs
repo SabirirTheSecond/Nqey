@@ -122,6 +122,7 @@ namespace Nqey.Services.Services
                 .Include(r => r.Events)
                 .Include(r => r.Location)
                 .Include(r => r.JobDescription)
+                    .ThenInclude(j=> j.Images)
                 .FirstOrDefaultAsync(r => r.ReservationId == id);
 
             if (reservation == null)
@@ -139,6 +140,7 @@ namespace Nqey.Services.Services
                 .Include(r => r.Events)
                 .Include(r=> r.Location)
                 .Include(r => r.JobDescription)
+                    .ThenInclude(j=> j.Images)
                 .ToListAsync();
             if (reservations == null)
                 //throw new NullReferenceException();

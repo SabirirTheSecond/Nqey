@@ -95,6 +95,10 @@ namespace Nqey.DAL
                 .Property(u => u.UserRole)
                 .HasConversion<string>();
 
+            modelBuilder.Entity<Client>()
+               .Property(u => u.UserRole)
+               .HasConversion<string>();
+
             modelBuilder.Entity<JobDescription>()
                 .HasOne(j => j.Reservation)
                 .WithOne(r => r.JobDescription)

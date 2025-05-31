@@ -285,7 +285,7 @@ namespace Nqey.Api.Controllers
         [AllowAnonymous]
         [HttpGet]
         [Route("{serviceId}/providers/{providerId}")]
-        public async Task<IActionResult> GetProviderById( int providerId)
+        public async Task<IActionResult> GetServiceProviderById( int providerId)
         {
             var provider = await _serviceRepository.GetProviderByIdAsync( providerId);
             if (provider == null)
@@ -294,6 +294,20 @@ namespace Nqey.Api.Controllers
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(provider);
 
             return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider retrieved successfully",mappedProvider));
+
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("providers/{providerId}")]
+        public async Task<IActionResult> GetProviderById(int providerId)
+        {
+            var provider = await _serviceRepository.GetProviderByIdAsync(providerId);
+            if (provider == null)
+                return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "provider not found", null));
+
+            var mappedProvider = _mapper.Map<ProviderPublicGetDto>(provider);
+
+            return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider retrieved successfully", mappedProvider));
 
         }
 
