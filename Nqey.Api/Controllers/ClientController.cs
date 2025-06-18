@@ -111,6 +111,7 @@ namespace Nqey.Api.Controllers
             domainUser.SetPassword(userPostPut.Password);
             domainUser.UserRole = Role.Client;
             domainUser.AccountStatus = AccountStatus.Active;
+            domainUser.PhoneNumber = clientPostPut.PhoneNumber;
 
             domainClient.SetPassword(clientPostPut.Password);
 

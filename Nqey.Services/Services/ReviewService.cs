@@ -37,7 +37,11 @@ namespace Nqey.Services.Services
             await _dataContext.Reviews.AddAsync(review);
             await _dataContext.SaveChangesAsync();
 
-          return review ;
+            review.Client = await _dataContext.Clients
+            .Include(c => c.ProfileImage)
+            .FirstOrDefaultAsync(c => c.ClientId == review.ClientId);
+
+            return review ;
             
         }
        
@@ -64,9 +68,13 @@ namespace Nqey.Services.Services
             return reviews;
         }
 
-        public Task<Review> GetReviewByIdAsync(int reviewId)
+        public async Task<Review> GetReviewByIdAsync(int reviewId)
         {
-            throw new NotImplementedException();
+            var review = await _dataContext.Reviews
+                .Where(r => r.ReviewId == reviewId)
+                .Include(r => r.Client)
+                .FirstOrDefaultAsync();
+            return review == null ? throw new NullReferenceException() : review;
         }
 
         public Task<Review> UpdateReviewAsync(Review review)

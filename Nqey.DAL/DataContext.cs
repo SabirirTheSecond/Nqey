@@ -103,6 +103,11 @@ namespace Nqey.DAL
                 .HasOne(j => j.Reservation)
                 .WithOne(r => r.JobDescription)
                 .HasForeignKey<JobDescription>(j => j.ReservationId);
+
+            //modelBuilder.Entity<User>()
+            //    .ToTable("Users");
+            //modelBuilder.Entity<Provider>()
+            //    .ToTable("Providers");
         }
 
         public DbSet<User> Users { get; set; }

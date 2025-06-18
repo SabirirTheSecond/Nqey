@@ -55,8 +55,21 @@ namespace Nqey.Api.Controllers
             var identity = new ClaimsIdentity(claims);
             var token = _jwtService.GenerateToken(user);
             
-
-            return Ok(new ApiResponse<string>(true, "Login successful", token));
+            var payload = new JwtPayloadDto
+            {
+                UserId = user.UserId,
+                UserName = user.UserName,
+                Role = user.UserRole.ToString(),
+                Exp = new DateTimeOffset(token.Expiration).ToUnixTimeSeconds(),
+                Iss = "Nqey",
+                Aud = $"Nqey-{user.UserRole.ToString().ToLower()}"
+            };
+            var authResponse = new AuthResponseDto
+            {
+                Payload = payload,
+                Token = token.Token
+            };
+            return Ok(new ApiResponse<AuthResponseDto>(true, "Login successful", authResponse));
         }
     }
 }

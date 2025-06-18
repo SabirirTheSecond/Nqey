@@ -25,6 +25,7 @@ namespace Nqey.DAL.Repositories
         public async Task<List<Service>> GetServicesAsync()
         {
             var services = await _dataContext.Services
+                .Where(s=>s.ServiceId != 35)
                 .Include(s=>s.Providers)
                 .Include(s=> s.ServiceImage)
                 .ToListAsync();
@@ -166,7 +167,12 @@ namespace Nqey.DAL.Repositories
 
         public async Task<List<Provider>> GetPreRegisteredProviders()
         {
-            var providers = await _dataContext.Providers.Where(p => p.ServiceId == 35)
+            var providers = await _dataContext.Providers
+                .Where(p => p.ServiceId == 35)
+                .Include(p => p.Reviews)
+                .Include(p => p.ProfileImage)
+                .Include(p => p.Location)
+                .Include(p => p.Portfolio)
                 .ToListAsync();
             if (!providers.Any())
             {
@@ -177,6 +183,11 @@ namespace Nqey.DAL.Repositories
         public async Task<Provider> GetPreRegisteredProviderById(int providerId)
         {
             var provider = await _dataContext.Providers
+                .Where(p => p.ServiceId == 35)
+                .Include(p => p.Reviews)
+                .Include(p => p.ProfileImage)
+                .Include(p => p.Location)
+                .Include(p => p.Portfolio)
                 .FirstOrDefaultAsync(p=>p.ProviderId == providerId);
             if (provider == null)
                 throw new NullReferenceException();

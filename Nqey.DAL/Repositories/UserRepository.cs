@@ -41,7 +41,7 @@ namespace Nqey.DAL.Repositories
         {
             var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserId == id);
             if (user == null)
-                return null;
+                 throw new NullReferenceException();
             return user;
         }
 

@@ -21,7 +21,7 @@ namespace Nqey.Services.Services
             _jwtSettings = options.Value;
         }
 
-        public string GenerateToken(User user)
+        public GeneratedToken GenerateToken(User user)
         {
             var claims = new List<Claim>
         {
@@ -32,15 +32,22 @@ namespace Nqey.Services.Services
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SigningKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
+            var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
+            
             var token = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audiences.First(),
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+                expires: expires,
                 signingCredentials: creds);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new GeneratedToken
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Expiration = expires,
+
+            }
+            ;
         }
     }
 
