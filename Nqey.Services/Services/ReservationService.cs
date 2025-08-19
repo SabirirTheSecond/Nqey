@@ -16,13 +16,16 @@ namespace Nqey.Services.Services
     {
         private readonly IServiceRepository _serviceRepository;
         private readonly IClientRepository _clientRepository;
+        private readonly IUserRepository _userRepository;
         private readonly DataContext _dataContext;
 
 
-        public ReservationService(IServiceRepository serviceRepository,IClientRepository clientRepository , DataContext dataContext)
+        public ReservationService(IServiceRepository serviceRepository,
+            IClientRepository clientRepository ,IUserRepository userRepository ,DataContext dataContext)
         {
             _serviceRepository = serviceRepository;
             _clientRepository = clientRepository;
+            _userRepository = userRepository;
             _dataContext = dataContext;
 
         }
@@ -132,6 +135,7 @@ namespace Nqey.Services.Services
             
         }
 
+
        public async Task<List<Reservation>> GetReservationsAsync()
         {
             var reservations = await _dataContext.Reservations
@@ -173,6 +177,54 @@ namespace Nqey.Services.Services
               return null;
 
             return reservation.Location;
+        }
+
+        public async Task<List<Reservation>> GetReservationByClientIdAsync(int clientId)
+        {
+            var reservations = await _dataContext.Reservations
+                .Where(r=> r.ClientId == clientId)
+                .Include(r => r.Client)
+                .Include(r => r.Provider)
+                .Include(r => r.Events)
+                .Include(r => r.Location)
+                .Include(r => r.JobDescription)
+                    .ThenInclude(j => j.Images)
+                .ToListAsync();
+            if (reservations == null)
+                //throw new NullReferenceException();
+                return null;
+
+            return reservations;
+            
+        }
+       public async Task<List<Domain.Reservation>> GetMyReservationsAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            var clientId = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
+         
+            var reservations = await _dataContext.Reservations
+               .Where(r => r.Client == userId || r.Provider.UserId == userId)
+               .ToListAsync();
+
+
+        }
+        public async Task<List<Reservation>> GetReservationByProviderIdAsync(int providerId)
+        {
+            var reservations = await _dataContext.Reservations
+                .Where(r => r.ProviderId == providerId)
+                .Include(r => r.Client)
+                .Include(r => r.Provider)
+                .Include(r => r.Events)
+                .Include(r => r.Location)
+                .Include(r => r.JobDescription)
+                    .ThenInclude(j => j.Images)
+                .ToListAsync();
+            if (reservations == null)
+                //throw new NullReferenceException();
+                return null;
+
+            return reservations;
+
         }
     }
 }

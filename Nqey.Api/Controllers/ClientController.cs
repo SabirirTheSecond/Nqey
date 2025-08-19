@@ -21,15 +21,17 @@ namespace Nqey.Api.Controllers
         private readonly IClientRepository _clientRepo;
         private readonly IUserRepository _userRepo;
         private readonly IImageUploaderService _imageUploaderService;
+        private readonly IImageService _imageService;
         public ClientController(IMapper mapper, IClientRepository clientRepo
-            , IUserRepository userRepository, IImageUploaderService imageUploader)
+            , IUserRepository userRepository, IImageUploaderService imageUploader
+            , IImageService imageService)
         {
 
             _mapper = mapper;
             _clientRepo = clientRepo;
             _userRepo = userRepository;
             _imageUploaderService = imageUploader;
-         
+            _imageService = imageService;
         }
 
 
@@ -74,31 +76,7 @@ namespace Nqey.Api.Controllers
         public async Task<IActionResult> AddClient([FromForm] ClientPostPutDto clientPostPut)
         {
 
-            string? imagePath = null;
-
-            if (clientPostPut.ProfileImage != null)
-            {
-                try
-                {
-                    imagePath = await _imageUploaderService.UploadImageToSupabase(clientPostPut.ProfileImage);
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, new ApiResponse<string>(false, "Failed to upload image to Supabase", ex.Message));
-                }
-                //var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles");
-                //Directory.CreateDirectory(uploadsFolder);
-
-                //var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(clientPostPut.ProfileImage.FileName);
-                //var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                //using (var stream = new FileStream(filePath, FileMode.Create))
-                //{
-                //    await clientPostPut.ProfileImage.CopyToAsync(stream);
-                //}
-
-                //imagePath = Path.Combine("images", "profiles", uniqueFileName);
-            }
+           
 
 
             var domainClient = _mapper.Map<Client>(clientPostPut);
@@ -117,16 +95,13 @@ namespace Nqey.Api.Controllers
 
             await _clientRepo.AddClientAsync(domainClient);
             await _userRepo.AddUserAsync(domainUser);
-            if (imagePath != null)
+            if (clientPostPut.ProfileImage != null)
             {
-                
 
-                domainClient.ProfileImage = new ProfileImage
-                {
-                    ImagePath = imagePath,
-                    UserId = domainUser.UserId // If you generate ID before save, otherwise leave out and EF will link after
-               
-                };
+
+                domainClient.ProfileImage = await _imageService.UploadImageSafe(
+                    clientPostPut.ProfileImage,domainUser.UserId
+                    );
                 await _clientRepo.UpdateClientAsync(domainClient);
                 
             }

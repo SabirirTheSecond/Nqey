@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Nqey.Api.Dtos.ReservationDtos;
 using Nqey.Domain;
 using Nqey.Domain.Abstractions.Repositories;
@@ -30,6 +31,8 @@ namespace Nqey.Api.Controllers
             _imageUploader = imageUploader;
         }
         [HttpGet]
+        [Authorize(Roles ="Admin")]
+        
         public async Task<ActionResult> GetReservations()
         {
             
@@ -57,6 +60,71 @@ namespace Nqey.Api.Controllers
                 return NotFound(new ApiResponse<Reservation>(false, $"Reservation With Id ={id} Not Found"));
             var mappedReservation = _mapper.Map<ReservationGetDto>(reservation);
             return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation retrieved Successfully", mappedReservation));
+        }
+        [HttpGet("my_reservations")]
+        [Authorize] // no custom policy, just authenticated
+        public async Task<IActionResult> GetMyReservations()
+        {
+            var userId = int.Parse(User.FindFirst("userId")!.Value);
+
+            var reservations = await _context.Reservations
+                .Where(r => r.Client.UserId == userId || r.Provider.UserId == userId)
+                .ToListAsync();
+
+            return Ok(reservations);
+        }
+        [Authorize(Roles = "Admin,Client")]
+        [Authorize(Policy = "ActiveAccountOnly")]
+        [Authorize(Policy = "IsOwner")]
+        [HttpGet]
+
+        [Route("client_reservations")]
+        public async Task<ActionResult> GetReservationByClienId()
+        {
+            var userIdClaim = User.FindFirstValue("userId");
+            Console.WriteLine($" userIdClaim value after declaration : {userIdClaim}");
+            if (userIdClaim == null)
+            {
+                Console.WriteLine($" userIdClaim error : {userIdClaim}");
+                return BadRequest(new ApiResponse<Reservation>(false, "Issue With Your Authentication"));
+            }
+
+            var userId = int.Parse(userIdClaim);
+            Console.WriteLine($"userId: {userId}");
+            var user = await _userRepository.GetByIdAsync(userId);
+            var clientId = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
+            Console.WriteLine($"clientId: {clientId.GetType()}");
+            
+            if (clientId == null)
+                return BadRequest(new ApiResponse<Reservation>(false, "Couldn't determine Client Identity"));
+           
+            var reservations = await _reservationService.GetReservationByClientIdAsync((int)clientId);
+            
+            if (reservations == null)
+                return NotFound(new ApiResponse<Reservation>(false, $"Client With Id n°={clientId} has no reservations"));
+
+
+            var mappedReservations = _mapper.Map<List<ReservationGetDto>>(reservations);
+            return Ok(new ApiResponse<List<ReservationGetDto>>(true,
+                "Reservations retrieved Successfully", mappedReservations));
+        }
+
+
+
+        [Authorize(Roles = "Admin,Provider")]
+        [Authorize(Policy = "ActiveAccountOnly")]
+        [Authorize(Policy = "IsOwner")]
+        [HttpGet]
+
+        [Route("provider_reservations/{providerId}")]
+        public async Task<ActionResult> GetReservationByProviderId(int providerId)
+        {
+            var reservations = await _reservationService.GetReservationByProviderIdAsync(providerId);
+            if (reservations == null)
+                return NotFound(new ApiResponse<Reservation>(false, $"Provider With Id n°={providerId} has no reservations"));
+            var mappedReservations = _mapper.Map<List<ReservationGetDto>>(reservations);
+            return Ok(new ApiResponse<List<ReservationGetDto>>(true,
+                "Reservations retrieved Successfully", mappedReservations));
         }
 
         [Authorize(Roles = "Client")]

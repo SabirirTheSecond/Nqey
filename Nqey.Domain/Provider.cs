@@ -17,7 +17,10 @@ namespace Nqey.Domain
         public string UserName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string? IdentityPiece { get; set; }
+        public Image? IdentityPiece { get; set; }
+        public int? IdentityId { get; set; }
+        public Image? SelfieImage { get; set; }
+        public int? SelfieId { get; set; }
         public int? PImageId { get; set; }
         public ProfileImage? ProfileImage { get; set; }
         public string ServiceDescription { get; set; }
@@ -36,6 +39,8 @@ namespace Nqey.Domain
         public List<PortfolioImage>? Portfolio{ get; set; } = new List<PortfolioImage>();
         public Role UserRole { get; set; } = Role.Provider;
         public int JobsDone { get; set; } = 0;
+
+        public bool IsIdentityVerified { get; set; } = false;
 
         public void SetPassword(string password)
         {

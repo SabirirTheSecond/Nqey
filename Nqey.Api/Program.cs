@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 using Nqey.Services.Authorization;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.HttpOverrides;
+using Nqey.Domain.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Default");
@@ -72,11 +73,17 @@ builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IAuthorizationHandler, ActiveAccountHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, IsOwnerHandler>();
 builder.Services.AddHttpClient<IImageUploaderService, SupabaseUploaderService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IRecommendationService, RecommandationService>();
+builder.Services.AddScoped<IFaceRecognitionService, FaceRecognitionService>();
+
+builder.Services.Configure<MLApiOptions>(builder.Configuration.GetSection("MLApi"));
 
 // Add services to the container.
 

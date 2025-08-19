@@ -39,64 +39,86 @@ namespace Nqey.Services.Authorization
                 context.Fail();
                 return;
             }
+
             var userId = int.Parse(userIdClaim.Value);
             Console.WriteLine($"userId : {userId}");
             var user = await _userRepo.GetByIdAsync(userId);
+
             if( !(context.Resource is HttpContext httpContext))
             {
                 Console.WriteLine($"Http Context stuff {context.Resource}");
                 context.Fail();
                 return ;
             }
-            
-            if( user.UserRole== Role.Provider)
+           
+            var routeValues = httpContext.Request.RouteValues;
+           //Case 1: If the route has reservation id :
+            if (routeValues.TryGetValue("id", out var reservationIdObj) 
+                && int.TryParse(reservationIdObj?.ToString(), out var reservationId))
             {
-                // Change this later to a getProviderByUsername... Done
-                var providerId = await _serviceRepo.GetProviderIdByUserNameAsync(user.UserName);
-                var reservationId = httpContext.Request.RouteValues["id"]?.ToString();
-                if (string.IsNullOrEmpty(reservationId) || !int.TryParse(reservationId, out var resId))
+
+                var reservation = await _reservationService.GetReservationByIdAsync(reservationId);
+                if(reservation == null)
                 {
                     Console.WriteLine($"Invalid reservationId: {reservationId}");
                     context.Fail();
-                    return;
-                }
-                var reservation = await _reservationService.GetReservationByIdAsync(resId);
-                if (reservation.ProviderId == providerId)
-                {
-                    Console.WriteLine($"IsOwner Policy Succeeded for providerId: {providerId}");
-                    context.Succeed(requirement);
-
+                    return ;
                 }
 
-            }
-            else if (user.UserRole == Role.Client)
-            {
                 var clientId = await _clientRepo.GetClientIdByUserNameAsync(user.UserName);
-                var reservationId = httpContext.Request.RouteValues["id"]?.ToString();
-                if (string.IsNullOrEmpty(reservationId) || !int.TryParse(reservationId, out var resId))
-                {
-                    Console.WriteLine($"Invalid reservationId: {reservationId}");
-                    context.Fail();
-                    return;
-                }
-                var reservation = await _reservationService.GetReservationByIdAsync(resId);
-                if (reservation.ClientId == clientId)
-                {
-                    Console.WriteLine($"IsOwner Policy Succeeded for clientId: {clientId},");
-                    context.Succeed(requirement);
+                var providerId = await _serviceRepo.GetProviderIdByUserNameAsync(user.UserName);
 
-                }
                 
-
+                    if(reservation?.ProviderId == providerId || reservation?.ClientId == clientId)
+                    {
+                        context.Succeed(requirement);
+                    return;
+                    }
+              context.Fail();
+                return ;
             }
-            else if(user.UserRole == Role.Admin)
+
+            //Case 2: route has clientId:
+
+            //if (routeValues.TryGetValue("clientId", out var clientIdObj) &&
+            //    int.TryParse(clientIdObj?.ToString(), out var clientIdFromRoute))
+            //{
+            //    if (user.UserRole == Role.Client)
+            //    {
+            //        var clientId = await _clientRepo.GetClientIdByUserNameAsync(user.UserName);
+            //        if (clientId == clientIdFromRoute)
+            //        {
+            //            Console.WriteLine($"IsOwner Policy Succeeded for ClientId route {clientId}");
+            //            context.Succeed(requirement);
+            //            return;
+            //        }
+            //    }
+            //}
+
+            //// Case 3: route has providerId:
+            //int? providerIdFromRequest = null;
+            //if (routeValues.TryGetValue("providerId", out var providerIdObj) &&
+            //int.TryParse(providerIdObj?.ToString(), out var providerIdFromRoute))
+            //{
+            //    if (user.UserRole == Role.Provider)
+            //    {
+            //        var providerId = await _serviceRepo.GetProviderIdByUserNameAsync(user.UserName);
+            //        if (providerId == providerIdFromRoute)
+            //        {
+            //            Console.WriteLine($"IsOwner Policy Succeeded for ProviderId route {providerId}");
+            //            context.Succeed(requirement);
+            //            return;
+            //        }
+            //    }
+            //}
+          
+            
+            else if (user.UserRole == Role.Admin)
             {
                 Console.WriteLine($"IsOwner Policy Succeeded for Admin");
                 context.Succeed(requirement);
 
             }
-
-
         }
     }
 }

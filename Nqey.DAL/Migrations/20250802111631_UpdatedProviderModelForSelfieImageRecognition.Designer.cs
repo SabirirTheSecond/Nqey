@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nqey.DAL;
 
@@ -11,9 +12,11 @@ using Nqey.DAL;
 namespace Nqey.DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250802111631_UpdatedProviderModelForSelfieImageRecognition")]
+    partial class UpdatedProviderModelForSelfieImageRecognition
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -487,9 +490,6 @@ namespace Nqey.DAL.Migrations
 
                     b.Property<int?>("IdentityId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsIdentityVerified")
-                        .HasColumnType("bit");
 
                     b.Property<int>("JobsDone")
                         .HasColumnType("int");

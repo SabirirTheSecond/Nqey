@@ -39,8 +39,8 @@ namespace Nqey.DAL.Repositories
         {
             Console.WriteLine($"received id to GetClientByIdAsync: {id.GetType()} ");
             var client = await _dataContext.Clients
-                //.Include(c => c.ProfileImage)
-                //.Include(c => c.Location)
+                .Include(c => c.ProfileImage)
+                .Include(c => c.Location)
                 .FirstOrDefaultAsync(c => c.ClientId == id);
 
             if (client == null)

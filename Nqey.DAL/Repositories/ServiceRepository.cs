@@ -125,9 +125,9 @@ namespace Nqey.DAL.Repositories
             await _dataContext.SaveChangesAsync();
             return provider;
         }
-        public async Task<Provider> ActivateProviderAsync(int serviceId, Provider provider)
+        public async Task<Provider> ActivateProviderAsync( Provider provider)
         {
-            var service = await _dataContext.Services.FirstOrDefaultAsync(s => s.ServiceId ==serviceId);
+            var service = await _dataContext.Services.FirstOrDefaultAsync(s => s.ServiceId ==provider.ServiceId);
             if (service == null)
                 return null;
 

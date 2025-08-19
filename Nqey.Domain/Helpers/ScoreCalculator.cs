@@ -13,7 +13,12 @@ namespace Nqey.Domain.Helpers
         {
             double score = 0;
             double distanceScore = 0;
-            if (client.Location != null && provider != null)
+            if (client?.Location?.Position == null || provider?.Location?.Position == null)
+            {
+                Console.WriteLine("One of the positions is null. Skipping score calculation.");
+                return score;
+            }
+            if (client?.Location?.Position != null && provider != null)
             {
                 var distance = GetDistance(client.Location.Position, provider.Location.Position);
                 // Normalization: inverse scale (0 if >100km 1, if the same) 
@@ -32,7 +37,7 @@ namespace Nqey.Domain.Helpers
             // Account active
             double accountScore = provider.AccountStatus == AccountStatus.Active ? 1.0 : 0.0;
             // Portfolio size
-            //double portfolioScore = provider.Portfolio != null && provider.Portfolio.Count >= 3 ? 1.0 : 0.0;
+            double portfolioScore = provider.Portfolio != null && provider.Portfolio.Count >= 3 ? 1.0 : 0.0;
            
             // Weighted sum
             score = distanceScore * 0.35 +
@@ -40,7 +45,7 @@ namespace Nqey.Domain.Helpers
                     jobScore * 0.2 +
                     accountScore * 0.1 
                     
-                    //+ portfolioScore * 0.05
+                    + portfolioScore * 0.05
                     ;
 
 

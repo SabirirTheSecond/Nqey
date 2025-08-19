@@ -104,6 +104,18 @@ namespace Nqey.DAL
                 .WithOne(r => r.JobDescription)
                 .HasForeignKey<JobDescription>(j => j.ReservationId);
 
+            modelBuilder.Entity<Provider>()
+                .HasOne(p => p.SelfieImage)
+                .WithOne()
+                .HasForeignKey<Provider>(p=> p.SelfieId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Provider>()
+                .HasOne(p => p.IdentityPiece)
+                .WithOne()
+                .HasForeignKey<Provider>(p => p.IdentityId)
+                .IsRequired(false);
+
             //modelBuilder.Entity<User>()
             //    .ToTable("Users");
             //modelBuilder.Entity<Provider>()
