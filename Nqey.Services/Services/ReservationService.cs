@@ -157,9 +157,9 @@ namespace Nqey.Services.Services
        public async Task<Reservation> MakeReservationAsync(Reservation reservation)
         {
             
-            var provider = await _dataContext.Providers.SingleOrDefaultAsync(p => p.ProviderId == reservation.ProviderId);
+            var provider = await _dataContext.Providers.SingleOrDefaultAsync(p => p.UserId == reservation.ProviderUserId);
             var service = await _serviceRepository.GetServiceByIdAsync(provider.ServiceId);
-            var client = await _clientRepository.GetClientByIdAsync(reservation.ClientId);
+            var client = await _clientRepository.GetClientByIdAsync(reservation.ClientUserId);
             if (service == null || provider == null || client == null)
                 return null;
 
@@ -182,7 +182,7 @@ namespace Nqey.Services.Services
         public async Task<List<Reservation>> GetReservationByClientIdAsync(int clientId)
         {
             var reservations = await _dataContext.Reservations
-                .Where(r=> r.ClientId == clientId)
+                .Where(r=> r.ClientUserId == clientId)
                 .Include(r => r.Client)
                 .Include(r => r.Provider)
                 .Include(r => r.Events)
@@ -197,21 +197,21 @@ namespace Nqey.Services.Services
             return reservations;
             
         }
-       public async Task<List<Domain.Reservation>> GetMyReservationsAsync(int userId)
-        {
-            var user = await _userRepository.GetByIdAsync(userId);
-            var clientId = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
+       //public async Task<List<Domain.Reservation>> GetMyReservationsAsync(int userId)
+       // {
+       //     var user = await _userRepository.GetByIdAsync(userId);
+       //     var clientId = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
          
-            var reservations = await _dataContext.Reservations
-               .Where(r => r.Client == userId || r.Provider.UserId == userId)
-               .ToListAsync();
+       //     var reservations = await _dataContext.Reservations
+       //        .Where(r => r.Client == userId || r.Provider.UserId == userId)
+       //        .ToListAsync();
 
 
-        }
+       // }
         public async Task<List<Reservation>> GetReservationByProviderIdAsync(int providerId)
         {
             var reservations = await _dataContext.Reservations
-                .Where(r => r.ProviderId == providerId)
+                .Where(r => r.ProviderUserId == providerId)
                 .Include(r => r.Client)
                 .Include(r => r.Provider)
                 .Include(r => r.Events)

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Nqey.Api.Dtos;
+using Nqey.Api.Dtos.AdminDtos;
 using Nqey.DAL;
 using Nqey.Domain;
 using Nqey.Domain.Common;
@@ -31,17 +32,17 @@ namespace Nqey.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddAdmin(UserPostPutDto userPostPut)
+        public async Task<IActionResult> AddAdmin(AdminPostPutDto admin)
         {
-            var domainAdmin = _mapper.Map<User>(userPostPut);
-            domainAdmin.SetPassword(userPostPut.Password);
+            var domainAdmin = _mapper.Map<Admin>(admin);
+            domainAdmin.SetPassword(admin.Password);
             domainAdmin.UserRole = Domain.Role.Admin;
             domainAdmin.AccountStatus = AccountStatus.Active;
             _dataContext.Users.Add(domainAdmin);
             await _dataContext.SaveChangesAsync();
 
-            var mappedAdmin = _mapper.Map<UserGetDto>(domainAdmin);
-            return Ok(new ApiResponse<UserGetDto>(true,"Admin added successfully",mappedAdmin));
+            var mappedAdmin = _mapper.Map<AdminGetDto>(domainAdmin);
+            return Ok(new ApiResponse<AdminGetDto>(true,"Admin added successfully",mappedAdmin));
         }
     }
 }

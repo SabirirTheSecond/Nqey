@@ -11,7 +11,7 @@
         public string? Name { get; set; }
         public string? Address { get; set; }
         public PositionDto Position { get; set; }
-        public string? Ville { get; set; }
+        public string? City { get; set; }
         public string? Wilaya { get; set; }
     }
 }

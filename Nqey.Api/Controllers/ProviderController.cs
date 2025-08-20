@@ -111,11 +111,11 @@ namespace Nqey.Api.Controllers
             //Uploads portfolio images:
             if (providerPostPut.Portfolio != null && providerPostPut.Portfolio.Any())
             {
-                domainProvider.Portfolio = await _imageService.UploadPortfolioImages(providerPostPut.Portfolio, domainProvider.ProviderId);
+                domainProvider.Portfolio = await _imageService.UploadPortfolioImages(providerPostPut.Portfolio, domainProvider.UserId);
 
             }
 
-            await _serviceRepository.UpdateProviderAsync(serviceId, domainProvider.ProviderId, domainProvider);
+            await _serviceRepository.UpdateProviderAsync(serviceId, domainProvider.UserId, domainProvider);
 
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(domainProvider);
 
@@ -234,7 +234,7 @@ namespace Nqey.Api.Controllers
             //Uploading Portfolio images:
             if (providerPostPut.Portfolio != null && providerPostPut.Portfolio.Any())
             {
-                domainProvider.Portfolio = await _imageService.UploadPortfolioImages(providerPostPut.Portfolio, domainProvider.ProviderId);
+                domainProvider.Portfolio = await _imageService.UploadPortfolioImages(providerPostPut.Portfolio, domainProvider.UserId);
                
 
             }
@@ -255,7 +255,7 @@ namespace Nqey.Api.Controllers
             }
 
 
-            await _serviceRepository.UpdateProviderAsync(serviceId, domainProvider.ProviderId, domainProvider);
+            await _serviceRepository.UpdateProviderAsync(serviceId, domainProvider.UserId, domainProvider);
 
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(domainProvider);
 

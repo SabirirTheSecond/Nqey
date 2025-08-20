@@ -9,33 +9,55 @@ using Nqey.Domain.Common;
 namespace Nqey.Domain
 {
     public enum AccountStatus { Active, Blocked };
-    public class Client
+    public class Client: User
     {
-        public int ClientId { get; set; }
-        public string UserName { get; set; }
-        public int? PImageId {  get; set; } 
-        public ProfileImage? ProfileImage { get; set; }
-        public string Email { get; set; }
-        public string PasswordHash { get;  set; }
-        public string PhoneNumber { get; set; }
+
+
         public Location? Location { get; set; }
-        public AccountStatus Status { get; set; } = AccountStatus.Active;
+
         public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();
         public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
-        public Role UserRole { get; set; } = Role.Client;
+        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
-        public void SetPassword(string password)
+        public Client()
         {
-            var hasher = new PasswordHasher<Client>();
-            PasswordHash = hasher.HashPassword(this, password);
-
+            base.UserRole= Role.Client;
         }
 
-        public bool VerifyPassword(string password)
-        {
-            var hasher = new PasswordHasher<Client>();
-            return hasher.VerifyHashedPassword(this, PasswordHash, password) == PasswordVerificationResult.Success;
-        }
+
+
+
+
+
+
+
+
+
+        //public int ClientId { get; set; }
+        //public string UserName { get; set; }
+        //public int? PImageId {  get; set; } 
+        //public ProfileImage? ProfileImage { get; set; }
+        //public string Email { get; set; }
+        //public string PasswordHash { get;  set; }
+        //public string PhoneNumber { get; set; }
+        //public Location? Location { get; set; }
+        //public AccountStatus Status { get; set; } = AccountStatus.Active;
+        //public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();
+        //public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
+        //public Role UserRole { get; set; } = Role.Client;
+
+        //public void SetPassword(string password)
+        //{
+        //    var hasher = new PasswordHasher<Client>();
+        //    PasswordHash = hasher.HashPassword(this, password);
+
+        //}
+
+        //public bool VerifyPassword(string password)
+        //{
+        //    var hasher = new PasswordHasher<Client>();
+        //    return hasher.VerifyHashedPassword(this, PasswordHash, password) == PasswordVerificationResult.Success;
+        //}
 
     }
 }

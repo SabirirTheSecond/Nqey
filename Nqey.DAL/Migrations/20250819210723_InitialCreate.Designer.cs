@@ -12,8 +12,8 @@ using Nqey.DAL;
 namespace Nqey.DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250529163557_AddedJobDescriptionPropertyToReservationModel")]
-    partial class AddedJobDescriptionPropertyToReservationModel
+    [Migration("20250819210723_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -223,51 +223,6 @@ namespace Nqey.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Nqey.Domain.Client", b =>
-                {
-                    b.Property<int>("ClientId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClientId"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("LocationId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PImageId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ClientId");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("PImageId")
-                        .IsUnique()
-                        .HasFilter("[PImageId] IS NOT NULL");
-
-                    b.ToTable("Clients");
-                });
-
             modelBuilder.Entity("Nqey.Domain.Common.Image", b =>
                 {
                     b.Property<int>("imageId")
@@ -301,10 +256,10 @@ namespace Nqey.DAL.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Ville")
+                    b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Wilaya")
@@ -327,12 +282,12 @@ namespace Nqey.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProviderId")
+                    b.Property<int>("ProviderUserId")
                         .HasColumnType("int");
 
                     b.HasKey("PortfolioImageId");
 
-                    b.HasIndex("ProviderId");
+                    b.HasIndex("ProviderUserId");
 
                     b.ToTable("PortfolioImage");
                 });
@@ -368,13 +323,13 @@ namespace Nqey.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewId"));
 
-                    b.Property<int>("ClientId")
+                    b.Property<int>("ClientUserId")
                         .HasColumnType("int");
 
                     b.Property<string>("Feedback")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProviderId")
+                    b.Property<int>("ProviderUserId")
                         .HasColumnType("int");
 
                     b.Property<int>("Stars")
@@ -382,9 +337,9 @@ namespace Nqey.DAL.Migrations
 
                     b.HasKey("ReviewId");
 
-                    b.HasIndex("ClientId");
+                    b.HasIndex("ClientUserId");
 
-                    b.HasIndex("ProviderId");
+                    b.HasIndex("ProviderUserId");
 
                     b.ToTable("Reviews");
                 });
@@ -423,10 +378,10 @@ namespace Nqey.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ClientId")
+                    b.Property<int?>("ClientUserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ClientId1")
+                    b.Property<int?>("ClientUserId1")
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
@@ -436,10 +391,10 @@ namespace Nqey.DAL.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("ProviderId")
+                    b.Property<int?>("ProviderUserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProviderId1")
+                    b.Property<int?>("ProviderUserId1")
                         .HasColumnType("int");
 
                     b.Property<int>("RecieverId")
@@ -453,83 +408,15 @@ namespace Nqey.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientId");
+                    b.HasIndex("ClientUserId");
 
-                    b.HasIndex("ClientId1");
+                    b.HasIndex("ClientUserId1");
 
-                    b.HasIndex("ProviderId");
+                    b.HasIndex("ProviderUserId");
 
-                    b.HasIndex("ProviderId1");
+                    b.HasIndex("ProviderUserId1");
 
                     b.ToTable("Message");
-                });
-
-            modelBuilder.Entity("Nqey.Domain.Provider", b =>
-                {
-                    b.Property<int>("ProviderId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProviderId"));
-
-                    b.Property<string>("AccountStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IdentityPiece")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("JobsDone")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("LocationId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PImageId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ServiceDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ProviderId");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("PImageId")
-                        .IsUnique()
-                        .HasFilter("[PImageId] IS NOT NULL");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("Providers");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Reservation", b =>
@@ -540,14 +427,26 @@ namespace Nqey.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReservationId"));
 
-                    b.Property<int>("ClientId")
+                    b.Property<int>("ClientUserId")
                         .HasColumnType("int");
+
+                    b.Property<int?>("ClientUserId1")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("LocationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProviderId")
+                    b.Property<int>("ProviderUserId")
                         .HasColumnType("int");
+
+                    b.Property<int?>("ProviderUserId1")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -558,11 +457,15 @@ namespace Nqey.DAL.Migrations
 
                     b.HasKey("ReservationId");
 
-                    b.HasIndex("ClientId");
+                    b.HasIndex("ClientUserId");
+
+                    b.HasIndex("ClientUserId1");
 
                     b.HasIndex("LocationId");
 
-                    b.HasIndex("ProviderId");
+                    b.HasIndex("ProviderUserId");
+
+                    b.HasIndex("ProviderUserId1");
 
                     b.ToTable("Reservations");
                 });
@@ -642,7 +545,7 @@ namespace Nqey.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProviderId")
+                    b.Property<int>("ProviderUserId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -655,7 +558,7 @@ namespace Nqey.DAL.Migrations
 
                     b.HasKey("SubServiceId");
 
-                    b.HasIndex("ProviderId");
+                    b.HasIndex("ProviderUserId");
 
                     b.ToTable("SubService");
                 });
@@ -700,7 +603,77 @@ namespace Nqey.DAL.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
+
+                    b.UseTptMappingStrategy();
+                });
+
+            modelBuilder.Entity("Nqey.Domain.Admin", b =>
+                {
+                    b.HasBaseType("Nqey.Domain.User");
+
+                    b.ToTable("Admins");
+                });
+
+            modelBuilder.Entity("Nqey.Domain.Client", b =>
+                {
+                    b.HasBaseType("Nqey.Domain.User");
+
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("Clients", (string)null);
+                });
+
+            modelBuilder.Entity("Nqey.Domain.Provider", b =>
+                {
+                    b.HasBaseType("Nqey.Domain.User");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("IdentityId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsIdentityVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("JobsDone")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SelfieId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ServiceDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("IdentityId")
+                        .IsUnique()
+                        .HasFilter("[IdentityId] IS NOT NULL");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("SelfieId")
+                        .IsUnique()
+                        .HasFilter("[SelfieId] IS NOT NULL");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("Providers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -754,21 +727,6 @@ namespace Nqey.DAL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Nqey.Domain.Client", b =>
-                {
-                    b.HasOne("Nqey.Domain.Common.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId");
-
-                    b.HasOne("Nqey.Domain.Common.ProfileImage", "ProfileImage")
-                        .WithOne()
-                        .HasForeignKey("Nqey.Domain.Client", "PImageId");
-
-                    b.Navigation("Location");
-
-                    b.Navigation("ProfileImage");
-                });
-
             modelBuilder.Entity("Nqey.Domain.Common.Image", b =>
                 {
                     b.HasOne("Nqey.Domain.JobDescription", null)
@@ -808,7 +766,7 @@ namespace Nqey.DAL.Migrations
                 {
                     b.HasOne("Nqey.Domain.Provider", "Provider")
                         .WithMany("Portfolio")
-                        .HasForeignKey("ProviderId")
+                        .HasForeignKey("ProviderUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -830,14 +788,14 @@ namespace Nqey.DAL.Migrations
                 {
                     b.HasOne("Nqey.Domain.Client", "Client")
                         .WithMany()
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ClientUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Nqey.Domain.Provider", "Provider")
                         .WithMany("Reviews")
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ProviderUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Client");
@@ -860,51 +818,32 @@ namespace Nqey.DAL.Migrations
                 {
                     b.HasOne("Nqey.Domain.Client", null)
                         .WithMany("ReceivedMessages")
-                        .HasForeignKey("ClientId");
+                        .HasForeignKey("ClientUserId");
 
                     b.HasOne("Nqey.Domain.Client", null)
                         .WithMany("SentMessages")
-                        .HasForeignKey("ClientId1");
+                        .HasForeignKey("ClientUserId1");
 
                     b.HasOne("Nqey.Domain.Provider", null)
                         .WithMany("ReceivedMessages")
-                        .HasForeignKey("ProviderId");
+                        .HasForeignKey("ProviderUserId");
 
                     b.HasOne("Nqey.Domain.Provider", null)
                         .WithMany("SentMessages")
-                        .HasForeignKey("ProviderId1");
-                });
-
-            modelBuilder.Entity("Nqey.Domain.Provider", b =>
-                {
-                    b.HasOne("Nqey.Domain.Common.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId");
-
-                    b.HasOne("Nqey.Domain.Common.ProfileImage", "ProfileImage")
-                        .WithOne()
-                        .HasForeignKey("Nqey.Domain.Provider", "PImageId");
-
-                    b.HasOne("Nqey.Domain.Service", "Service")
-                        .WithMany("Providers")
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Location");
-
-                    b.Navigation("ProfileImage");
-
-                    b.Navigation("Service");
+                        .HasForeignKey("ProviderUserId1");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Reservation", b =>
                 {
                     b.HasOne("Nqey.Domain.Client", "Client")
                         .WithMany()
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ClientUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Nqey.Domain.Client", null)
+                        .WithMany("Reservations")
+                        .HasForeignKey("ClientUserId1");
 
                     b.HasOne("Nqey.Domain.Common.Location", "Location")
                         .WithMany()
@@ -912,9 +851,13 @@ namespace Nqey.DAL.Migrations
 
                     b.HasOne("Nqey.Domain.Provider", "Provider")
                         .WithMany()
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ProviderUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Nqey.Domain.Provider", null)
+                        .WithMany("Reservations")
+                        .HasForeignKey("ProviderUserId1");
 
                     b.Navigation("Client");
 
@@ -947,36 +890,75 @@ namespace Nqey.DAL.Migrations
                 {
                     b.HasOne("Nqey.Domain.Provider", "Provider")
                         .WithMany("SubServices")
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ProviderUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Provider");
                 });
 
+            modelBuilder.Entity("Nqey.Domain.Admin", b =>
+                {
+                    b.HasOne("Nqey.Domain.User", null)
+                        .WithOne()
+                        .HasForeignKey("Nqey.Domain.Admin", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Nqey.Domain.Client", b =>
                 {
-                    b.Navigation("ReceivedMessages");
+                    b.HasOne("Nqey.Domain.Common.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId");
 
-                    b.Navigation("SentMessages");
+                    b.HasOne("Nqey.Domain.User", null)
+                        .WithOne()
+                        .HasForeignKey("Nqey.Domain.Client", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("Nqey.Domain.Provider", b =>
+                {
+                    b.HasOne("Nqey.Domain.Common.Image", "IdentityPiece")
+                        .WithOne()
+                        .HasForeignKey("Nqey.Domain.Provider", "IdentityId");
+
+                    b.HasOne("Nqey.Domain.Common.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId");
+
+                    b.HasOne("Nqey.Domain.Common.Image", "SelfieImage")
+                        .WithOne()
+                        .HasForeignKey("Nqey.Domain.Provider", "SelfieId");
+
+                    b.HasOne("Nqey.Domain.Service", "Service")
+                        .WithMany("Providers")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Nqey.Domain.User", null)
+                        .WithOne()
+                        .HasForeignKey("Nqey.Domain.Provider", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("IdentityPiece");
+
+                    b.Navigation("Location");
+
+                    b.Navigation("SelfieImage");
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("Nqey.Domain.JobDescription", b =>
                 {
                     b.Navigation("Images");
-                });
-
-            modelBuilder.Entity("Nqey.Domain.Provider", b =>
-                {
-                    b.Navigation("Portfolio");
-
-                    b.Navigation("ReceivedMessages");
-
-                    b.Navigation("Reviews");
-
-                    b.Navigation("SentMessages");
-
-                    b.Navigation("SubServices");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Reservation", b =>
@@ -995,6 +977,30 @@ namespace Nqey.DAL.Migrations
             modelBuilder.Entity("Nqey.Domain.User", b =>
                 {
                     b.Navigation("ProfileImage");
+                });
+
+            modelBuilder.Entity("Nqey.Domain.Client", b =>
+                {
+                    b.Navigation("ReceivedMessages");
+
+                    b.Navigation("Reservations");
+
+                    b.Navigation("SentMessages");
+                });
+
+            modelBuilder.Entity("Nqey.Domain.Provider", b =>
+                {
+                    b.Navigation("Portfolio");
+
+                    b.Navigation("ReceivedMessages");
+
+                    b.Navigation("Reservations");
+
+                    b.Navigation("Reviews");
+
+                    b.Navigation("SentMessages");
+
+                    b.Navigation("SubServices");
                 });
 #pragma warning restore 612, 618
         }

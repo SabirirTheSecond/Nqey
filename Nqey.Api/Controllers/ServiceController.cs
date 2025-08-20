@@ -47,6 +47,10 @@ namespace Nqey.Api.Controllers
 
         {
             var services = await _serviceRepository.GetServicesAsync();
+            if (services == null)
+            {
+                return NotFound(new ApiResponse<List<ServicePublicGetDto>>(false, "Services List Is Empty"));
+            }
             var servicesGet = _mapper.Map<List<ServicePublicGetDto>>(services);
             return Ok(new ApiResponse<List<ServicePublicGetDto>>(true, "Services List", servicesGet));
         }

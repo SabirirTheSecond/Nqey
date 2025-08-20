@@ -12,9 +12,9 @@ namespace Nqey.Domain
     {
 
         public int ReservationId { get; set; }
-        public int ClientId { get; set; }
+        public int ClientUserId { get; set; }
         public Client Client { get; set; }
-        public int ProviderId { get; set; }
+        public int ProviderUserId { get; set; }
         public Provider Provider { get; set; }
         
         public JobDescription JobDescription { get; set; }

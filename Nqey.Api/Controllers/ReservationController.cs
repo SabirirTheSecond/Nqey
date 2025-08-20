@@ -61,18 +61,18 @@ namespace Nqey.Api.Controllers
             var mappedReservation = _mapper.Map<ReservationGetDto>(reservation);
             return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation retrieved Successfully", mappedReservation));
         }
-        [HttpGet("my_reservations")]
-        [Authorize] // no custom policy, just authenticated
-        public async Task<IActionResult> GetMyReservations()
-        {
-            var userId = int.Parse(User.FindFirst("userId")!.Value);
+        //[HttpGet("my_reservations")]
+        //[Authorize] // no custom policy, just authenticated
+        //public async Task<IActionResult> GetMyReservations()
+        //{
+        //    var userId = int.Parse(User.FindFirst("userId")!.Value);
 
-            var reservations = await _context.Reservations
-                .Where(r => r.Client.UserId == userId || r.Provider.UserId == userId)
-                .ToListAsync();
+        //    var reservations = await _context.Reservations
+        //        .Where(r => r.Client.UserId == userId || r.Provider.UserId == userId)
+        //        .ToListAsync();
 
-            return Ok(reservations);
-        }
+        //    return Ok(reservations);
+        //}
         [Authorize(Roles = "Admin,Client")]
         [Authorize(Policy = "ActiveAccountOnly")]
         [Authorize(Policy = "IsOwner")]
@@ -161,11 +161,11 @@ namespace Nqey.Api.Controllers
             if (clientId == null)
                 return BadRequest(new ApiResponse<Reservation>(false, "Cannot determine client id"));
 
-            domainReservation.ClientId = (int)clientId;
-            domainReservation.ProviderId = providerId;
+            domainReservation.ClientUserId = (int)clientId;
+            domainReservation.ProviderUserId = providerId;
             domainReservation.Status = ReservationStatus.Pending;
             domainReservation.Location = location;
-            Console.WriteLine($"domainReservation.ClientId {domainReservation.ClientId.GetType()}");
+            Console.WriteLine($"domainReservation.ClientId {domainReservation.ClientUserId.GetType()}");
             
             
 
@@ -231,8 +231,8 @@ namespace Nqey.Api.Controllers
                 return BadRequest(new ApiResponse<Reservation>(false, "Reservation Is Already Accepted"));
 
             _mapper.Map(reservationPostPut, existingReservation);
-            existingReservation.ProviderId = providerId;
-            existingReservation.ClientId = clientId;
+            existingReservation.ProviderUserId = providerId;
+            existingReservation.ClientUserId = clientId;
             
             await _reservationService.UpdateReservationAsync(id, existingReservation);
             var mappedReservation = _mapper.Map<ReservationGetDto>(existingReservation);

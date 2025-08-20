@@ -29,6 +29,10 @@ namespace Nqey.DAL.Repositories
                 .Include(s=>s.Providers)
                 .Include(s=> s.ServiceImage)
                 .ToListAsync();
+            if (!services.Any())
+            {
+                return null;
+            } 
             return services;
             
         }
@@ -105,7 +109,7 @@ namespace Nqey.DAL.Repositories
                 .Include(p => p.Portfolio)
                 .FirstOrDefaultAsync(p =>  
                         
-                        p.ProviderId == providerId
+                        p.UserId == providerId
                     );
 
             if (provider == null)
@@ -144,7 +148,7 @@ namespace Nqey.DAL.Repositories
         {
             var providerId = await _dataContext.Providers
                 .Where(p => p.UserName == userName)
-                .Select(p => (int?)p.ProviderId)
+                .Select(p => (int?)p.UserId)
                 .FirstOrDefaultAsync();
             
             if (providerId == null)
@@ -188,7 +192,7 @@ namespace Nqey.DAL.Repositories
                 .Include(p => p.ProfileImage)
                 .Include(p => p.Location)
                 .Include(p => p.Portfolio)
-                .FirstOrDefaultAsync(p=>p.ProviderId == providerId);
+                .FirstOrDefaultAsync(p=>p.UserId == providerId);
             if (provider == null)
                 throw new NullReferenceException();
             return provider;

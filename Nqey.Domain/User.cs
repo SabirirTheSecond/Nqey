@@ -12,7 +12,7 @@ namespace Nqey.Domain
     public enum Role { Client, Provider, Admin }
     
 
-    public class User
+    public abstract class User
     {
 
         public int UserId { get; set; }
@@ -29,6 +29,8 @@ namespace Nqey.Domain
         public Role UserRole { get; set; }
         [Required]
         public AccountStatus AccountStatus { get; set; }
+       
+        
         public ProfileImage? ProfileImage { get; set; }
         
 

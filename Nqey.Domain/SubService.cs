@@ -14,7 +14,7 @@ namespace Nqey.Domain
         public string Description { get; set; }
         public double Cost { get; set; }
         public string Unity {  get; set; }
-        public int ProviderId { get; set; }
+        public int ProviderUserId { get; set; }
         public Provider Provider { get; set; }
     }
 }

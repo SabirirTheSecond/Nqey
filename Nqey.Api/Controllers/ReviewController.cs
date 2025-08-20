@@ -51,7 +51,7 @@ namespace Nqey.Api.Controllers
                     if (clientId== null)
                         return NotFound(new ApiResponse<Reservation>(false, "Cannot determine client id"));
 
-                    domainReview.ClientId =(int)clientId;
+                    domainReview.ClientUserId =(int)clientId;
                 }
             }
             await _reviewService.AddReviewAsync(domainReview);

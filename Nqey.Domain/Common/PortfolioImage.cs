@@ -10,7 +10,7 @@ namespace Nqey.Domain.Common
     {
         public int PortfolioImageId { get; set; }
         public string ImagePath { get; set; }
-        public int ProviderId { get; set; }
+        public int ProviderUserId { get; set; }
         public Provider Provider { get; set; }
 
     }

@@ -48,7 +48,7 @@ namespace Nqey.DAL.Repositories
                .Include(p => p.Portfolio)
                .FirstOrDefaultAsync(p =>
 
-                       p.ProviderId == providerId
+                       p.UserId == providerId
                    );
 
             if (provider == null)

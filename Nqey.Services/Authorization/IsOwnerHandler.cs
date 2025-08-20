@@ -69,7 +69,7 @@ namespace Nqey.Services.Authorization
                 var providerId = await _serviceRepo.GetProviderIdByUserNameAsync(user.UserName);
 
                 
-                    if(reservation?.ProviderId == providerId || reservation?.ClientId == clientId)
+                    if(reservation?.ProviderUserId == providerId || reservation?.ClientUserId == clientId)
                     {
                         context.Succeed(requirement);
                     return;

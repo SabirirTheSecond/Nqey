@@ -29,7 +29,7 @@ namespace Nqey.Services.Services
 
         public async Task<Review> AddReviewAsync(Review review)
         {
-            var provider = await _serviceRepo.GetProviderByIdAsync(review.ProviderId);
+            var provider = await _serviceRepo.GetProviderByIdAsync(review.ProviderUserId);
            
             if (provider == null)
                 return null;
@@ -39,7 +39,7 @@ namespace Nqey.Services.Services
 
             review.Client = await _dataContext.Clients
             .Include(c => c.ProfileImage)
-            .FirstOrDefaultAsync(c => c.ClientId == review.ClientId);
+            .FirstOrDefaultAsync(c => c.UserId == review.ClientUserId);
 
             return review ;
             
@@ -56,7 +56,7 @@ namespace Nqey.Services.Services
         public async Task<List<Review>> GetAllReviewsByProviderIdAsync(int providerId)
         {
             var reviews = await _dataContext.Reviews
-                .Where(r => r.ProviderId == providerId)
+                .Where(r => r.ProviderUserId == providerId)
                 .Include(r=> r.Client)
                     .ThenInclude(c=> c.ProfileImage)
                 

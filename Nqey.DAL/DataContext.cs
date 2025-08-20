@@ -19,16 +19,27 @@ namespace Nqey.DAL
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>().UseTptMappingStrategy();
+
             base.OnModelCreating(modelBuilder);
 
             var passwordHasher = new PasswordHasher<Provider>();
+
+            modelBuilder.Entity<User>()
+                .HasKey(u=> u.UserId);
+            
+
+            modelBuilder.Entity<User>().ToTable("Users");
+            modelBuilder.Entity<Client>().ToTable("Clients");
+            modelBuilder.Entity<Provider>().ToTable("Providers");
+
 
             modelBuilder.Entity<Location>().OwnsOne(l=> l.Position);
            
             modelBuilder.Entity<Provider>()
                 .HasMany(p => p.Portfolio)
                 .WithOne(i => i.Provider)
-                .HasForeignKey(i => i.ProviderId)
+                .HasForeignKey(i => i.ProviderUserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<User>()
@@ -36,18 +47,6 @@ namespace Nqey.DAL
                 .WithOne(p => p.User)
                 .HasForeignKey<ProfileImage>(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Provider>()
-                .HasOne(p => p.ProfileImage)
-                .WithOne()
-                .HasForeignKey<Provider>(p => p.PImageId)
-                .IsRequired(false);
-
-            modelBuilder.Entity<Client>()
-                .HasOne(c => c.ProfileImage)
-                .WithOne()
-                .HasForeignKey<Client>(c => c.PImageId)
-                .IsRequired(false);
 
             modelBuilder.Entity<Service>()
                 .HasOne(s => s.ServiceImage)
@@ -58,8 +57,8 @@ namespace Nqey.DAL
             modelBuilder.Entity<SubService>()
                 .HasOne(s => s.Provider)
                 .WithMany(p => p.SubServices)
-                .HasForeignKey(s => s.ProviderId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(s => s.ProviderUserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             modelBuilder.Entity<Reservation>()
@@ -67,19 +66,22 @@ namespace Nqey.DAL
                  .WithOne(e => e.Reservation)
                  .HasForeignKey(r => r.ReservationId)
                  .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Reservation>()
+                .HasOne(r => r.Client)
+                .WithMany()
+                .HasForeignKey(r => r.ClientUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Reservation>()
+                .HasOne(r => r.Provider)
+                .WithMany()
+                .HasForeignKey(r => r.ProviderUserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ReservationEvent>()
                 .Property(e => e.ReservationEventType)
                 .HasConversion<string>();
 
-            modelBuilder.Entity<Provider>()
-                .Property(p=>p.AccountStatus)
-                .HasConversion<string>();
-
-            modelBuilder.Entity<Client>()
-                .Property(c => c.Status)
-                .HasConversion<string>();
-
+   
             modelBuilder.Entity<User>()
                 .Property(u => u.AccountStatus)
                 .HasConversion<string>();
@@ -91,13 +93,7 @@ namespace Nqey.DAL
             modelBuilder.Entity<Reservation>()
                 .Property(r => r.Status)
                 .HasConversion<string>();
-            modelBuilder.Entity<Provider>()
-                .Property(u => u.UserRole)
-                .HasConversion<string>();
-
-            modelBuilder.Entity<Client>()
-               .Property(u => u.UserRole)
-               .HasConversion<string>();
+            
 
             modelBuilder.Entity<JobDescription>()
                 .HasOne(j => j.Reservation)
@@ -115,6 +111,18 @@ namespace Nqey.DAL
                 .WithOne()
                 .HasForeignKey<Provider>(p => p.IdentityId)
                 .IsRequired(false);
+            
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Client)
+                .WithMany() // one-way: client has no collection
+                .HasForeignKey(r => r.ClientUserId)
+                .OnDelete(DeleteBehavior.Restrict); // prevent cascade
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Provider)
+                .WithMany(p => p.Reviews) // provider has the collection
+                .HasForeignKey(r => r.ProviderUserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             //modelBuilder.Entity<User>()
             //    .ToTable("Users");
@@ -130,6 +138,7 @@ namespace Nqey.DAL
         public DbSet<ReservationEvent> ReservationEvents { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<JobDescription> JobDescriptions  { get; set; }
+        public DbSet<Admin> Admins { get; set; }
 
     }
 }

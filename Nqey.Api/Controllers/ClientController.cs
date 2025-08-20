@@ -81,26 +81,26 @@ namespace Nqey.Api.Controllers
 
             var domainClient = _mapper.Map<Client>(clientPostPut);
           
-            var userPostPut = _mapper.Map<UserPostPutDto>(clientPostPut);
-            var domainUser = _mapper.Map<User>(userPostPut);
+            //var userPostPut = _mapper.Map<UserPostPutDto>(clientPostPut);
+            //var domainUser = _mapper.Map<User>(userPostPut);
 
            
 
-            domainUser.SetPassword(userPostPut.Password);
-            domainUser.UserRole = Role.Client;
-            domainUser.AccountStatus = AccountStatus.Active;
-            domainUser.PhoneNumber = clientPostPut.PhoneNumber;
+            //domainUser.SetPassword(userPostPut.Password);
+            //domainUser.UserRole = Role.Client;
+            //domainUser.AccountStatus = AccountStatus.Active;
+            //domainUser.PhoneNumber = clientPostPut.PhoneNumber;
 
             domainClient.SetPassword(clientPostPut.Password);
 
             await _clientRepo.AddClientAsync(domainClient);
-            await _userRepo.AddUserAsync(domainUser);
+            //await _userRepo.AddUserAsync(domainUser);
             if (clientPostPut.ProfileImage != null)
             {
 
 
                 domainClient.ProfileImage = await _imageService.UploadImageSafe(
-                    clientPostPut.ProfileImage,domainUser.UserId
+                    clientPostPut.ProfileImage,domainClient.UserId
                     );
                 await _clientRepo.UpdateClientAsync(domainClient);
                 

@@ -68,7 +68,7 @@ namespace Nqey.Services.Services
                         images.Add(new PortfolioImage
                         {
                             ImagePath = imagePath,
-                            ProviderId = providerId,
+                            ProviderUserId = providerId,
                         });
                 }
                 return images;

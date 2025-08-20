@@ -27,7 +27,7 @@ namespace Nqey.DAL.Repositories
        public async Task<Client> DeleteClientAsync(int id)
         {
             var toDelete = await _dataContext.Clients
-                .FirstOrDefaultAsync(c => c.ClientId == id);
+                .FirstOrDefaultAsync(c => c.UserId == id);
             if (toDelete == null)
                 return null;
             _dataContext.Clients.Remove(toDelete);
@@ -41,7 +41,7 @@ namespace Nqey.DAL.Repositories
             var client = await _dataContext.Clients
                 .Include(c => c.ProfileImage)
                 .Include(c => c.Location)
-                .FirstOrDefaultAsync(c => c.ClientId == id);
+                .FirstOrDefaultAsync(c => c.UserId == id);
 
             if (client == null)
             {
@@ -79,7 +79,7 @@ namespace Nqey.DAL.Repositories
         {
             var clientId = await _dataContext.Clients
                 .Where(c => c.UserName == userName)
-                .Select(c => (int?)c.ClientId)
+                .Select(c => (int?)c.UserId)
                 .FirstOrDefaultAsync();
             if (clientId == null)
                 throw new NullReferenceException();
