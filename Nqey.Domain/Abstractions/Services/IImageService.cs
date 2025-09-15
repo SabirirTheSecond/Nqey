@@ -12,6 +12,7 @@ namespace Nqey.Domain.Abstractions.Services
     {
         Task<ProfileImage?> UploadImageSafe(IFormFile file, int userId, string errorMessage= "Image Upload Failed");
         Task<List<PortfolioImage>> UploadPortfolioImages(IEnumerable<IFormFile>? files, int providerId);
-        Task<Image?> UploadServiceImage(IFormFile file, int serviceId); 
+        Task<Image?> UploadServiceImage(IFormFile file, int serviceId);
+        Task<List<ComplaintAttachement>> UploadAttachmentImages(IEnumerable<IFormFile>? files, int complaintId);
     }
 }

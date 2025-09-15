@@ -18,12 +18,12 @@ namespace Nqey.Domain.Helpers
                 Console.WriteLine("One of the positions is null. Skipping score calculation.");
                 return score;
             }
-            if (client?.Location?.Position != null && provider != null)
-            {
+            //if (client?.Location?.Position != null && provider != null)
+            //{
                 var distance = GetDistance(client.Location.Position, provider.Location.Position);
                 // Normalization: inverse scale (0 if >100km 1, if the same) 
                  distanceScore = 1 - Math.Min(distance, 100) / 100.0;
-            }
+            //}
 
             double ratingScore = 0;
             if(provider.Reviews != null && provider.Reviews.Any())
@@ -50,6 +50,35 @@ namespace Nqey.Domain.Helpers
 
 
             return score;
+        }
+        public static double CalculateScoreWithoutDistance(Provider provider)
+        {
+            double score = 0;
+            double ratingScore = 0;
+            if (provider.Reviews != null && provider.Reviews.Any())
+            {
+                var avgRating = provider.Reviews.Average(r => r.Stars);
+                ratingScore = avgRating / 5.0;
+            }
+            // Normalization (on 100 jobs) 
+            double jobScore = Math.Min(provider.JobsDone, 100) / 100;
+            // Account active
+            double accountScore = provider.AccountStatus == AccountStatus.Active ? 1.0 : 0.0;
+            // Portfolio size
+            double portfolioScore = provider.Portfolio != null && provider.Portfolio.Count >= 3 ? 1.0 : 0.0;
+
+            // Weighted sum
+            score = 
+                    ratingScore * 0.3 +
+                    jobScore * 0.4 +
+                    accountScore * 0.1 +
+                    portfolioScore * 0.1
+                    ;
+
+
+            return score;
+            
+
         }
 
         private static double GetDistance(Position p1, Position p2)

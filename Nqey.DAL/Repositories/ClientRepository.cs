@@ -41,6 +41,8 @@ namespace Nqey.DAL.Repositories
             var client = await _dataContext.Clients
                 .Include(c => c.ProfileImage)
                 .Include(c => c.Location)
+                .Include(c=>c.SentMessages)
+                .Include(c=>c.ReceivedMessages)
                 .FirstOrDefaultAsync(c => c.UserId == id);
 
             if (client == null)
@@ -59,6 +61,8 @@ namespace Nqey.DAL.Repositories
             var clients = await _dataContext.Clients
                 .Include(c => c.ProfileImage)
                 .Include(c=> c.Location)
+                 .Include(c => c.SentMessages)
+                .Include(c => c.ReceivedMessages)
                 .ToListAsync();
             if (clients == null)
                 return null;
@@ -81,8 +85,9 @@ namespace Nqey.DAL.Repositories
                 .Where(c => c.UserName == userName)
                 .Select(c => (int?)c.UserId)
                 .FirstOrDefaultAsync();
+
             if (clientId == null)
-                throw new NullReferenceException();
+                return null;
 
             return clientId;
         }

@@ -9,7 +9,7 @@ namespace Nqey.Domain.Abstractions.Repositories
 {
     public interface IProviderRepository
     {
-        Task<Provider> GetProviderByIdAsync(int providerId);
+        Task<Provider> GetProviderByIdAsync(int userId);
         Task<List<Provider>> GetAllProvidersAsync();
         
         //Task<Provider> CreateProviderWithUserAndImages();

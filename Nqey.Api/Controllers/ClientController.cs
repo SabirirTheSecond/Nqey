@@ -19,18 +19,15 @@ namespace Nqey.Api.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IClientRepository _clientRepo;
-        private readonly IUserRepository _userRepo;
-        private readonly IImageUploaderService _imageUploaderService;
+        
         private readonly IImageService _imageService;
         public ClientController(IMapper mapper, IClientRepository clientRepo
-            , IUserRepository userRepository, IImageUploaderService imageUploader
-            , IImageService imageService)
+            ,  IImageService imageService)
         {
 
             _mapper = mapper;
             _clientRepo = clientRepo;
-            _userRepo = userRepository;
-            _imageUploaderService = imageUploader;
+            
             _imageService = imageService;
         }
 
@@ -75,26 +72,11 @@ namespace Nqey.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddClient([FromForm] ClientPostPutDto clientPostPut)
         {
-
-           
-
-
             var domainClient = _mapper.Map<Client>(clientPostPut);
-          
-            //var userPostPut = _mapper.Map<UserPostPutDto>(clientPostPut);
-            //var domainUser = _mapper.Map<User>(userPostPut);
-
-           
-
-            //domainUser.SetPassword(userPostPut.Password);
-            //domainUser.UserRole = Role.Client;
-            //domainUser.AccountStatus = AccountStatus.Active;
-            //domainUser.PhoneNumber = clientPostPut.PhoneNumber;
-
-            domainClient.SetPassword(clientPostPut.Password);
+             domainClient.SetPassword(clientPostPut.Password);
 
             await _clientRepo.AddClientAsync(domainClient);
-            //await _userRepo.AddUserAsync(domainUser);
+           
             if (clientPostPut.ProfileImage != null)
             {
 
@@ -111,20 +93,29 @@ namespace Nqey.Api.Controllers
         }
 
         [Authorize(Roles ="Admin,Client")]
+        
         [HttpPut]
         [Route("{id}")]
-        public async Task<IActionResult> UpdateClient(int id, ClientPostPutDto clientPostPut)
+        public async Task<IActionResult> UpdateClient(int id,[FromForm] ClientPostPutDto clientPostPut)
         {
             var oldClient = await _clientRepo.GetClientByIdAsync(id);
             if (oldClient == null)
                 return NotFound(new ApiResponse<Client>(false, "Client not found"));
            
             _mapper.Map(clientPostPut, oldClient);
-            
 
-            await _clientRepo.UpdateClientAsync(oldClient);
+            if (clientPostPut.ProfileImage != null)
+            {
+
+
+                oldClient.ProfileImage = await _imageService.UploadImageSafe(
+                    clientPostPut.ProfileImage, oldClient.UserId
+                    );
+            }
+                await _clientRepo.UpdateClientAsync(oldClient);
 
             var mappedClient = _mapper.Map<ClientPublicGetDto>(oldClient);
+
             return Ok(new ApiResponse<ClientPublicGetDto>(true,"Client Updated Successfully", mappedClient));
         }
 

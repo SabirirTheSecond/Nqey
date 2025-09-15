@@ -7,6 +7,7 @@ namespace Nqey.Api.Dtos.ReviewDto
     {
 
         public int ReviewId { get; set; }
+        public int ReservationId { get; set; }
         public int Stars { get; set; }
         public string? Feedback { get; set; }
         public ClientPublicGetDto Client { get; set; }

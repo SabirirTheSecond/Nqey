@@ -22,17 +22,16 @@ namespace Nqey.Domain
        
         public string ServiceDescription { get; set; } 
         public  Location? Location { get; set; } 
-        public int ServiceId { get; set; }
-        public Service Service { get; set; }      
+        public int? ServiceId { get; set; }
+        public Service? Service { get; set; }      
         public List<Review>? Reviews { get; set; } = new List<Review>();
         public List<SubService>? SubServices { get; set; } = new List<SubService>();
-        public  ICollection<Message>? SentMessages { get; set; } = new List<Message>();
-        public  ICollection<Message>? ReceivedMessages { get; set; } = new List<Message>();
+        
         public List<PortfolioImage>? Portfolio{ get; set; } = new List<PortfolioImage>();
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
         public int JobsDone { get; set; } = 0;
         public bool IsIdentityVerified { get; set; } = false;
-
+        public ServiceRequest? ServiceRequest { get; set; }
         
         public Provider()
         {

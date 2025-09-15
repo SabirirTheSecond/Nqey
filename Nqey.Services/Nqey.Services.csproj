@@ -27,6 +27,7 @@
    
     <ProjectReference Include="..\Nqey.DAL\Nqey.DAL.csproj" />
     <ProjectReference Include="..\Nqey.Domain\Nqey.Domain.csproj" />
+	  
   </ItemGroup>
 
 </Project>

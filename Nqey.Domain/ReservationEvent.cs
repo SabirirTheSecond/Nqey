@@ -12,7 +12,7 @@ namespace Nqey.Domain
         Accepted,
         Changed,
         InProgres,
-        Finished,
+        Completed,
         Cancelled,
         Rejected
     }

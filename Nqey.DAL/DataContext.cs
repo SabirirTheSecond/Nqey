@@ -77,6 +77,16 @@ namespace Nqey.DAL
                 .HasForeignKey(r => r.ProviderUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Reservation)
+                .WithMany(res => res.Reviews)
+                .HasForeignKey(r => r.ReservationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => r.ReservationId)
+                .IsUnique();
+
             modelBuilder.Entity<ReservationEvent>()
                 .Property(e => e.ReservationEventType)
                 .HasConversion<string>();
@@ -92,6 +102,10 @@ namespace Nqey.DAL
 
             modelBuilder.Entity<Reservation>()
                 .Property(r => r.Status)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Complaint>()
+                .Property(c => c.ComplaintStatus)
                 .HasConversion<string>();
             
 
@@ -124,11 +138,51 @@ namespace Nqey.DAL
                 .HasForeignKey(r => r.ProviderUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //modelBuilder.Entity<User>()
-            //    .ToTable("Users");
-            //modelBuilder.Entity<Provider>()
-            //    .ToTable("Providers");
+            modelBuilder.Entity<ServiceRequest>()
+                .HasOne(sr => sr.Provider)
+                .WithOne(p => p.ServiceRequest)
+                .HasForeignKey<ServiceRequest>(sr =>  sr.ProviderUserId )
+                .OnDelete(DeleteBehavior.SetNull);
+            
+            modelBuilder.Entity<ServiceRequest>()
+                .Property(sr => sr.ServiceRequestStatus)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Message>(b=>
+            {
+                b.HasOne(m => m.Sender)
+                .WithMany(u => u.SentMessages)
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                b.HasOne(m => m.Receiver)
+                .WithMany(u=> u.ReceivedMessages)
+                .HasForeignKey(m=> m.RecieverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                b.HasIndex(m => new { m.SenderId, m.RecieverId, m.TimeStamp });
+                b.HasIndex(m => new { m.RecieverId, m.IsRead, m.TimeStamp });
+
+                // Filtered Index for Sql Server use (unread messages)
+                b.HasIndex(m => new { m.RecieverId, m.TimeStamp })
+                .HasFilter("[IsRead]=0");
+
+            });
+
+            modelBuilder.Entity<Complaint>(c =>
+            {
+                c.HasOne(c=>c.Reporter)
+                .WithMany(r=>r.FiledComplaints)
+                .HasForeignKey(c=>c.ReporterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                c.HasOne(c => c.ReportedUser)
+                .WithMany(r => r.ComplaintsAgainst)
+                .HasForeignKey(c => c.ReportedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
         }
+
 
         public DbSet<User> Users { get; set; }
         public DbSet<Client> Clients { get; set; }
@@ -139,6 +193,8 @@ namespace Nqey.DAL
         public DbSet<Review> Reviews { get; set; }
         public DbSet<JobDescription> JobDescriptions  { get; set; }
         public DbSet<Admin> Admins { get; set; }
-
+        public DbSet<ServiceRequest> ServicesRequests { get; set; }
+        public DbSet<Message> Messages  { get; set; }
+        public DbSet<Complaint> Complaints { get; set; }
     }
 }

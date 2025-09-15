@@ -41,15 +41,12 @@ namespace Nqey.Api.Controllers
                     return NotFound(new ApiResponse<Reservation>(false, "Reservations Not Found"));
                 var mappedReservations = _mapper.Map<List<ReservationGetDto>>(reservations);
                 return Ok(new ApiResponse<List<ReservationGetDto>>(true, "Reservations Retrieved Succussfully"
-                    , mappedReservations));
-
-           
-            
+                    , mappedReservations));     
         }
 
         [Authorize(Roles ="Admin,Provider,Client")]
         [Authorize(Policy ="ActiveAccountOnly")]
-        [Authorize(Policy ="IsOwner")]
+        [Authorize(Policy = "IsReservationOwner")]
         [HttpGet]
 
         [Route("{id}")]
@@ -75,11 +72,10 @@ namespace Nqey.Api.Controllers
         //}
         [Authorize(Roles = "Admin,Client")]
         [Authorize(Policy = "ActiveAccountOnly")]
-        [Authorize(Policy = "IsOwner")]
+        //[Authorize(Policy = "IsReservationOwner")]
         [HttpGet]
-
         [Route("client_reservations")]
-        public async Task<ActionResult> GetReservationByClienId()
+        public async Task<ActionResult> GetReservationByClientId()
         {
             var userIdClaim = User.FindFirstValue("userId");
             Console.WriteLine($" userIdClaim value after declaration : {userIdClaim}");
@@ -113,15 +109,28 @@ namespace Nqey.Api.Controllers
 
         [Authorize(Roles = "Admin,Provider")]
         [Authorize(Policy = "ActiveAccountOnly")]
-        [Authorize(Policy = "IsOwner")]
+        //[Authorize(Policy = "IsReservationOwner")]
         [HttpGet]
 
-        [Route("provider_reservations/{providerId}")]
-        public async Task<ActionResult> GetReservationByProviderId(int providerId)
+        [Route("provider_reservations")]
+        public async Task<ActionResult> GetReservationByProvider()
         {
-            var reservations = await _reservationService.GetReservationByProviderIdAsync(providerId);
+            var userIdClaim = User.FindFirstValue("userId");
+            Console.WriteLine($" userIdClaim value after declaration : {userIdClaim}");
+            if (userIdClaim == null)
+            {
+                Console.WriteLine($" userIdClaim error : {userIdClaim}");
+                return BadRequest(new ApiResponse<Reservation>(false, "Issue With Your Authentication"));
+            }
+
+            if(!int.TryParse(userIdClaim, out var userId))
+            {
+                return NotFound(new ApiResponse<Object>(false, "Not Authorized"));
+            }
+
+            var reservations = await _reservationService.GetReservationByProviderIdAsync(userId);
             if (reservations == null)
-                return NotFound(new ApiResponse<Reservation>(false, $"Provider With Id n°={providerId} has no reservations"));
+                return NotFound(new ApiResponse<Reservation>(false, $"Provider With Id n°={userId} has no reservations"));
             var mappedReservations = _mapper.Map<List<ReservationGetDto>>(reservations);
             return Ok(new ApiResponse<List<ReservationGetDto>>(true,
                 "Reservations retrieved Successfully", mappedReservations));
@@ -166,9 +175,7 @@ namespace Nqey.Api.Controllers
             domainReservation.Status = ReservationStatus.Pending;
             domainReservation.Location = location;
             Console.WriteLine($"domainReservation.ClientId {domainReservation.ClientUserId.GetType()}");
-            
-            
-
+                        
             // 4. Ensure JobDescription exists
             //var jobDescription = new JobDescription();
             var images = reservationPostPut.JobDescription?.Images;
@@ -218,9 +225,15 @@ namespace Nqey.Api.Controllers
         [Authorize(Roles = "Client")]
         [HttpPut]
         [Route("{id}/change")]
-        public async Task<IActionResult> ChangeReservation(int clientId,int providerId,
-            int id, [FromBody] ReservationPostPutDto reservationPostPut)
+        public async Task<IActionResult> ChangeReservation(int providerId,
+            int id, [FromForm] ReservationPostPutDto reservationPostPut)
         {
+            var userIdClaim = User.FindFirstValue("userId");
+            if(!int.TryParse(userIdClaim, out var userId))
+            {
+                return NotFound(new ApiResponse<Object>(false, "Authentication Error, Try To Login Again"));
+            }
+            var user = await _userRepository.GetByIdAsync(userId);
             
             var existingReservation = await _reservationService.GetReservationByIdAsync(id);
             
@@ -229,13 +242,16 @@ namespace Nqey.Api.Controllers
             
             if (existingReservation.Status == ReservationStatus.Accepted)
                 return BadRequest(new ApiResponse<Reservation>(false, "Reservation Is Already Accepted"));
-
-            _mapper.Map(reservationPostPut, existingReservation);
-            existingReservation.ProviderUserId = providerId;
-            existingReservation.ClientUserId = clientId;
             
-            await _reservationService.UpdateReservationAsync(id, existingReservation);
-            var mappedReservation = _mapper.Map<ReservationGetDto>(existingReservation);
+            var updatedData = _mapper.Map<Reservation>(reservationPostPut);
+            updatedData.ClientUserId = existingReservation.ClientUserId;
+            updatedData.ProviderUserId= existingReservation.ProviderUserId;
+            updatedData.Status = existingReservation.Status;
+            updatedData.CreatedAt= existingReservation.CreatedAt;
+            
+            var updatedReservation = await _reservationService.UpdateReservationAsync(id, updatedData);
+            var mappedReservation = _mapper.Map<ReservationGetDto>(updatedReservation);
+
             return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Updated Successfully", mappedReservation));
         }
 
@@ -259,7 +275,7 @@ namespace Nqey.Api.Controllers
 
         [Authorize(Roles ="Provider")]
         [Authorize(Policy ="ActiveAccountOnly")]
-        [Authorize(Policy = "IsOwner")]
+        [Authorize(Policy = "IsReservationOwner")]
         [HttpPut]
         [Route("{id}/accept")]
         public async Task<IActionResult> AcceptReservation(int id)
@@ -276,6 +292,27 @@ namespace Nqey.Api.Controllers
                 return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Accepted",mappedReservation));
             }
             return BadRequest(new ApiResponse<Reservation>(false, "Reservation Is Either Accepted Already Or Cancelled"));
+
+        }
+        [Authorize(Roles = "Provider")]
+        [Authorize(Policy = "ActiveAccountOnly")]
+        [Authorize(Policy = "IsReservationOwner")]
+        [HttpPut]
+        [Route("{id}/completed")]
+        public async Task<IActionResult> CompletedtReservation(int id)
+        {
+            var existing = await _reservationService.GetReservationByIdAsync(id);
+
+            if (existing == null)
+                return NotFound(new ApiResponse<Reservation>(false, "Reservation Not Found"));
+
+            if (existing.Status == ReservationStatus.Accepted)
+            {
+                await _reservationService.CompletedReservationAsync(id);
+                var mappedReservation = _mapper.Map<ReservationGetDto>(existing);
+                return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Completed", mappedReservation));
+            }
+            return BadRequest(new ApiResponse<Reservation>(false, "You Can Only Mark An Accepted Reservation As Completed"));
 
         }
 

@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Nqey.Api.Dtos.ReviewDto;
+using Nqey.DAL;
 using Nqey.Domain;
 using Nqey.Domain.Abstractions.Repositories;
 using Nqey.Domain.Abstractions.Services;
@@ -18,16 +20,20 @@ namespace Nqey.Api.Controllers
         private readonly IServiceRepository _serviceRepository;
         private readonly IUserRepository _userRepository;
         private readonly IClientRepository _clientRepository;
+        private readonly IReservationService _reservationService;
+        private readonly DataContext _dataContext;
 
         public ReviewController(IMapper mapper, IReviewService reviewService
             , IServiceRepository serviceRepository, IUserRepository userRepository,
-            IClientRepository clientRepository)
+            IClientRepository clientRepository, IReservationService reservationService, DataContext dataContext)
         {
             _mapper = mapper;
             _reviewService = reviewService;
             _serviceRepository = serviceRepository;
             _userRepository = userRepository;
             _clientRepository = clientRepository;
+            _reservationService = reservationService;
+            _dataContext = dataContext;
         }
         [Authorize(Roles ="Client")]
         [HttpPost]
@@ -36,26 +42,45 @@ namespace Nqey.Api.Controllers
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
             Console.WriteLine($"userIdClaim = {userIdClaim}");
-
-            var domainReview = _mapper.Map<Review>(reviewPostPut);
-            var provider = await _serviceRepository.GetProviderByIdAsync(reviewPostPut.ProviderId);
+ 
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new ApiResponse<Review>(false, "Invalid user ID"));
+            }
+            var reservation = await _reservationService.GetReservationByIdAsync(reviewPostPut.ReservationId);
+            var provider = await _serviceRepository.GetProviderByIdAsync(reservation.ProviderUserId);
             if (provider == null)
                 return NotFound(new ApiResponse<Review>(false, "Could Not Find The Provider"));
 
-            if(int.TryParse(userIdClaim, out var userId))
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            var clientId = userId;
+            if (clientId == 0)
+                return NotFound(new ApiResponse<Reservation>(false, "Cannot determine client id"));
+
+            var hasReservation = await _dataContext.Reservations
+                .AnyAsync(r => r.ProviderUserId == provider.UserId
+                    && r.ClientUserId == clientId
+                    && (r.Status == ReservationStatus.Accepted 
+                            || r.Status == ReservationStatus.Completed));
+            var hasReview = await _reviewService.AlreadyReviewed(reviewPostPut.ReservationId);
+
+            if (hasReview)
             {
-                var user = await _userRepository.GetByIdAsync(userId);
-                if(user.UserRole == Domain.Role.Client)
-                {
-                    var clientId = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
-                    if (clientId== null)
-                        return NotFound(new ApiResponse<Reservation>(false, "Cannot determine client id"));
-
-                    domainReview.ClientUserId =(int)clientId;
-                }
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    new ApiResponse<Review>(false, "You can post only one review per reservation"));
             }
-            await _reviewService.AddReviewAsync(domainReview);
+            if(!hasReservation)
+             {
+               return BadRequest(new ApiResponse<Reservation>(false, "You can't review a provider without" +
+                            "a confirmed reservation !"));
+                    }
 
+            var domainReview = _mapper.Map<Review>(reviewPostPut);
+            domainReview.ClientUserId =(int)clientId;
+            domainReview.ProviderUserId = provider.UserId;
+
+            await _reviewService.AddReviewAsync(domainReview);
             var mappedReview = _mapper.Map<ReviewGetDto>(domainReview);
 
             return Ok(new ApiResponse<ReviewGetDto>(true, "Review posted successfully",mappedReview));

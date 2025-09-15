@@ -49,7 +49,10 @@ namespace Nqey.Api.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Role, user.UserRole.ToString())
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.MobilePhone, user.PhoneNumber),
+                new Claim(ClaimTypes.Role, user.UserRole.ToString()),                                             
+            
             };
 
             var identity = new ClaimsIdentity(claims);
@@ -59,7 +62,10 @@ namespace Nqey.Api.Controllers
             {
                 UserId = user.UserId,
                 UserName = user.UserName,
+                Email= user.Email,
+                PhoneNumber= user.PhoneNumber,
                 Role = user.UserRole.ToString(),
+                ProfileImagePath= user.ProfileImage?.ImagePath,
                 Exp = new DateTimeOffset(token.Expiration).ToUnixTimeSeconds(),
                 Iss = "Nqey",
                 Aud = $"Nqey-{user.UserRole.ToString().ToLower()}"

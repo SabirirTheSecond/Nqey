@@ -20,5 +20,6 @@ namespace Nqey.Api.Dtos
         public Role UserRole { get; set; }
         
         public AccountStatus AccountStatus { get; set; }
+        //public int UnreadMessagesCount { get; set; }
     }
 }

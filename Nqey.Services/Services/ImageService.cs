@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Nqey.Domain.Abstractions.Services;
 using Nqey.Domain.Common;
 
+
 namespace Nqey.Services.Services
 {
     public class ImageService: IImageService
@@ -16,6 +17,25 @@ namespace Nqey.Services.Services
         public ImageService(IImageUploaderService imageUploaderService)
         {
             _imageUploaderService = imageUploaderService;
+        }
+
+        public async Task<List<ComplaintAttachement>> UploadAttachmentImages(IEnumerable<IFormFile>? files, int complaintId)
+        {
+            var attachments = new List<ComplaintAttachement>();
+
+            if (files != null && files.Any())
+            {
+                foreach (var file in files)
+                {
+                    var imagePath = await _imageUploaderService.UploadImageToSupabase(file);
+                    attachments.Add(new ComplaintAttachement
+                    {
+                        FileUrl = imagePath,
+                        ComplaintId = complaintId
+                    });
+                }
+            }
+            return attachments;
         }
 
         public async Task<ProfileImage?> UploadImageSafe(IFormFile file,int userId, string errorMessage = "Image Upload Failed")

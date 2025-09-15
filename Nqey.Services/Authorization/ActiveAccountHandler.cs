@@ -40,22 +40,11 @@ namespace Nqey.Services.Authorization
             var userId = int.Parse(userIdClaim.Value);
             var user = await _userRepo.GetByIdAsync(userId);
 
-            object fullUser = null;
+            
             AccountStatus accountStatus = user.AccountStatus;
            
-            switch (user.UserRole)
-            {
-                case Role.Provider:
-                    fullUser = await _serviceRepo.GetProviderIdByUserNameAsync(user.UserName);
-                    break;
-                case Role.Client:
-                    fullUser = await _clientRepo.GetClientIdByUserNameAsync(user.UserName);
-                    break;
-                default:
-                    
-                    throw new Exception("Unsupported role");
-            }
-            if(fullUser == null)
+            
+            if(user == null)
             {
                 Console.WriteLine($"ActiveAccount policy failed: User ID {userId} not found", userId);
                 context.Fail();

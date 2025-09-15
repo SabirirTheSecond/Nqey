@@ -220,6 +220,28 @@ namespace Nqey.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Nqey.Domain.Common.ComplaintAttachement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ComplaintId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComplaintId");
+
+                    b.ToTable("ComplaintAttachement");
+                });
+
             modelBuilder.Entity("Nqey.Domain.Common.Image", b =>
                 {
                     b.Property<int>("imageId")
@@ -329,6 +351,9 @@ namespace Nqey.DAL.Migrations
                     b.Property<int>("ProviderUserId")
                         .HasColumnType("int");
 
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Stars")
                         .HasColumnType("int");
 
@@ -338,7 +363,56 @@ namespace Nqey.DAL.Migrations
 
                     b.HasIndex("ProviderUserId");
 
+                    b.HasIndex("ReservationId")
+                        .IsUnique();
+
                     b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("Nqey.Domain.Complaint", b =>
+                {
+                    b.Property<int>("ComplaintId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ComplaintId"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ComplaintStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReportedUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReporterId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ComplaintId");
+
+                    b.HasIndex("ReportedUserId");
+
+                    b.HasIndex("ReporterId");
+
+                    b.HasIndex("ReservationId");
+
+                    b.ToTable("Complaints");
                 });
 
             modelBuilder.Entity("Nqey.Domain.JobDescription", b =>
@@ -369,17 +443,11 @@ namespace Nqey.DAL.Migrations
 
             modelBuilder.Entity("Nqey.Domain.Message", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("MessageId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("ClientUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ClientUserId1")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageId"));
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -387,12 +455,6 @@ namespace Nqey.DAL.Migrations
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
-
-                    b.Property<int?>("ProviderUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProviderUserId1")
-                        .HasColumnType("int");
 
                     b.Property<int>("RecieverId")
                         .HasColumnType("int");
@@ -403,17 +465,16 @@ namespace Nqey.DAL.Migrations
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.HasKey("MessageId");
 
-                    b.HasIndex("ClientUserId");
+                    b.HasIndex("RecieverId", "TimeStamp")
+                        .HasFilter("[IsRead]=0");
 
-                    b.HasIndex("ClientUserId1");
+                    b.HasIndex("RecieverId", "IsRead", "TimeStamp");
 
-                    b.HasIndex("ProviderUserId");
+                    b.HasIndex("SenderId", "RecieverId", "TimeStamp");
 
-                    b.HasIndex("ProviderUserId1");
-
-                    b.ToTable("Message");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Reservation", b =>
@@ -429,6 +490,9 @@ namespace Nqey.DAL.Migrations
 
                     b.Property<int?>("ClientUserId1")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
@@ -448,9 +512,6 @@ namespace Nqey.DAL.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("createdAt")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("ReservationId");
 
@@ -525,6 +586,38 @@ namespace Nqey.DAL.Migrations
                         .HasFilter("[ServiceImageId] IS NOT NULL");
 
                     b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("Nqey.Domain.ServiceRequest", b =>
+                {
+                    b.Property<int>("ServiceRequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServiceRequestId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ProviderUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RequestName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ServiceRequestStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ServiceRequestId");
+
+                    b.HasIndex("ProviderUserId")
+                        .IsUnique()
+                        .HasFilter("[ProviderUserId] IS NOT NULL");
+
+                    b.ToTable("ServicesRequests");
                 });
 
             modelBuilder.Entity("Nqey.Domain.SubService", b =>
@@ -655,7 +748,7 @@ namespace Nqey.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ServiceId")
+                    b.Property<int?>("ServiceId")
                         .HasColumnType("int");
 
                     b.HasIndex("IdentityId")
@@ -722,6 +815,17 @@ namespace Nqey.DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Nqey.Domain.Common.ComplaintAttachement", b =>
+                {
+                    b.HasOne("Nqey.Domain.Complaint", "Complaint")
+                        .WithMany("Attachments")
+                        .HasForeignKey("ComplaintId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Complaint");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Common.Image", b =>
@@ -795,9 +899,41 @@ namespace Nqey.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Nqey.Domain.Reservation", "Reservation")
+                        .WithMany("Reviews")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Client");
 
                     b.Navigation("Provider");
+
+                    b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("Nqey.Domain.Complaint", b =>
+                {
+                    b.HasOne("Nqey.Domain.User", "ReportedUser")
+                        .WithMany("ComplaintsAgainst")
+                        .HasForeignKey("ReportedUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Nqey.Domain.User", "Reporter")
+                        .WithMany("FiledComplaints")
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Nqey.Domain.Reservation", "Reservation")
+                        .WithMany()
+                        .HasForeignKey("ReservationId");
+
+                    b.Navigation("ReportedUser");
+
+                    b.Navigation("Reporter");
+
+                    b.Navigation("Reservation");
                 });
 
             modelBuilder.Entity("Nqey.Domain.JobDescription", b =>
@@ -813,21 +949,21 @@ namespace Nqey.DAL.Migrations
 
             modelBuilder.Entity("Nqey.Domain.Message", b =>
                 {
-                    b.HasOne("Nqey.Domain.Client", null)
+                    b.HasOne("Nqey.Domain.User", "Receiver")
                         .WithMany("ReceivedMessages")
-                        .HasForeignKey("ClientUserId");
+                        .HasForeignKey("RecieverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.HasOne("Nqey.Domain.Client", null)
+                    b.HasOne("Nqey.Domain.User", "Sender")
                         .WithMany("SentMessages")
-                        .HasForeignKey("ClientUserId1");
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.HasOne("Nqey.Domain.Provider", null)
-                        .WithMany("ReceivedMessages")
-                        .HasForeignKey("ProviderUserId");
+                    b.Navigation("Receiver");
 
-                    b.HasOne("Nqey.Domain.Provider", null)
-                        .WithMany("SentMessages")
-                        .HasForeignKey("ProviderUserId1");
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Reservation", b =>
@@ -883,6 +1019,16 @@ namespace Nqey.DAL.Migrations
                     b.Navigation("ServiceImage");
                 });
 
+            modelBuilder.Entity("Nqey.Domain.ServiceRequest", b =>
+                {
+                    b.HasOne("Nqey.Domain.Provider", "Provider")
+                        .WithOne("ServiceRequest")
+                        .HasForeignKey("Nqey.Domain.ServiceRequest", "ProviderUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Provider");
+                });
+
             modelBuilder.Entity("Nqey.Domain.SubService", b =>
                 {
                     b.HasOne("Nqey.Domain.Provider", "Provider")
@@ -934,9 +1080,7 @@ namespace Nqey.DAL.Migrations
 
                     b.HasOne("Nqey.Domain.Service", "Service")
                         .WithMany("Providers")
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ServiceId");
 
                     b.HasOne("Nqey.Domain.User", null)
                         .WithOne()
@@ -953,6 +1097,11 @@ namespace Nqey.DAL.Migrations
                     b.Navigation("Service");
                 });
 
+            modelBuilder.Entity("Nqey.Domain.Complaint", b =>
+                {
+                    b.Navigation("Attachments");
+                });
+
             modelBuilder.Entity("Nqey.Domain.JobDescription", b =>
                 {
                     b.Navigation("Images");
@@ -964,6 +1113,8 @@ namespace Nqey.DAL.Migrations
 
                     b.Navigation("JobDescription")
                         .IsRequired();
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Service", b =>
@@ -973,29 +1124,31 @@ namespace Nqey.DAL.Migrations
 
             modelBuilder.Entity("Nqey.Domain.User", b =>
                 {
+                    b.Navigation("ComplaintsAgainst");
+
+                    b.Navigation("FiledComplaints");
+
                     b.Navigation("ProfileImage");
+
+                    b.Navigation("ReceivedMessages");
+
+                    b.Navigation("SentMessages");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Client", b =>
                 {
-                    b.Navigation("ReceivedMessages");
-
                     b.Navigation("Reservations");
-
-                    b.Navigation("SentMessages");
                 });
 
             modelBuilder.Entity("Nqey.Domain.Provider", b =>
                 {
                     b.Navigation("Portfolio");
 
-                    b.Navigation("ReceivedMessages");
-
                     b.Navigation("Reservations");
 
                     b.Navigation("Reviews");
 
-                    b.Navigation("SentMessages");
+                    b.Navigation("ServiceRequest");
 
                     b.Navigation("SubServices");
                 });

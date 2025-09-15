@@ -76,18 +76,23 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IAuthorizationHandler, ActiveAccountHandler>();
-builder.Services.AddScoped<IAuthorizationHandler, IsOwnerHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, IsReservationOwnerHandler>();
 builder.Services.AddHttpClient<IImageUploaderService, SupabaseUploaderService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IRecommendationService, RecommandationService>();
 builder.Services.AddScoped<IFaceRecognitionService, FaceRecognitionService>();
-
+builder.Services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>();
 builder.Services.Configure<MLApiOptions>(builder.Configuration.GetSection("MLApi"));
 
-// Add services to the container.
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
 
-// 1 load jwtSettings from config 
+
+// Add services to the container.
+// 1 load jwtSettings from config
+
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(nameof(JwtSettings)));
 var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -112,7 +117,7 @@ builder.Services.AddAuthorization(options =>
         policy.AddRequirements(new ActiveAccountRequirement());
     });
 
-    options.AddPolicy("IsOwner", policy =>
+    options.AddPolicy("IsReservationOwner", policy =>
     {
         policy.RequireAuthenticatedUser();
         policy.AddRequirements(new IsOwnerRequirement());

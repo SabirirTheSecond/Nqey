@@ -44,93 +44,16 @@ namespace Nqey.Api.Controllers
             _faceRecognitionService = faceRecognition;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetPreRegisteredProviders()
-        {
-            var providers = await _serviceRepository.GetPreRegisteredProviders();
-            if (!providers.Any())
-            {
-                return NotFound(new ApiResponse<Provider>(false, "Providers Null Or Not Found"));
-            }
-            var mappedProviders = _mapper.Map<List<ProviderPublicGetDto>>(providers);
-            return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true, "List Of Pre-registered providers", mappedProviders));
-        }
-
-        [HttpGet]
-        [Route("${providerId}/preRegisteredProvider")]
-
-        public async Task<IActionResult> GetPreRegisteredProviderById(int providerId)
-        {
-            var provider = await _serviceRepository.GetPreRegisteredProviderById(providerId);
-            if (provider == null)
-                return NotFound(new ApiResponse<Provider>(false, "Provider Not Found"));
-            var mappedProvider = _mapper.Map<ProviderPublicGetDto>(provider);
-            return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider", mappedProvider));
-        }
-        [HttpPost]
-        [Route("PreRegister")]
-        public async Task<IActionResult> PreRegister([FromForm] ProviderPostPutDto providerPostPut)
-        {
-            
-            var serviceId = 35;
-
-            var idImagePath = await _imageUploader.UploadImageToSupabase(
-                providerPostPut.IdentityPiece);
-
-            var selfiPath = await _imageUploader.UploadImageToSupabase(
-                providerPostPut.SelfieImage);
-
-           
-            var isMatch = await _faceRecognitionService.VerifyFacesAsync(idImagePath, selfiPath);
-
-            
-            var domainProvider = _mapper.Map<Provider>(providerPostPut);
-
-            var userPostPut = _mapper.Map<UserPostPutDto>(providerPostPut);
-            var domainUser = _mapper.Map<User>(userPostPut);
-            domainUser.SetPassword(userPostPut.Password);
-            domainUser.UserRole = Role.Provider;
-            domainUser.AccountStatus = AccountStatus.Blocked;
-            domainUser.PhoneNumber = providerPostPut.PhoneNumber;
-
-            domainProvider.SetPassword(providerPostPut.Password);
-            if(isMatch) domainProvider.IsIdentityVerified = true;
-            Console.WriteLine($"Identity  verified ? :{isMatch}");
-
-            await _serviceRepository.AddProviderAsync(serviceId, domainProvider);
-            await _userRepository.AddUserAsync(domainUser);
-
-            // uploads the profile image
-            if (providerPostPut.ProfileImage != null)
-            {
-
-                domainProvider.ProfileImage = await _imageService.UploadImageSafe(
-                    providerPostPut.ProfileImage, domainUser.UserId);
-
-            }
-            //Uploads portfolio images:
-            if (providerPostPut.Portfolio != null && providerPostPut.Portfolio.Any())
-            {
-                domainProvider.Portfolio = await _imageService.UploadPortfolioImages(providerPostPut.Portfolio, domainProvider.UserId);
-
-            }
-
-            await _serviceRepository.UpdateProviderAsync(serviceId, domainProvider.UserId, domainProvider);
-
-            var mappedProvider = _mapper.Map<ProviderPublicGetDto>(domainProvider);
-
-            return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider Added Successfully", mappedProvider));
-        }
-
+       
 
         // Validate a provider's account
         [Authorize(Roles = "Admin")]
         [HttpPut]
-        [Route("{providerId}/ActivateProvider")]
+        [Route("{userId}/ActivateProvider")]
 
-        public async Task<IActionResult> ActivateProviderAccount( int providerId)
+        public async Task<IActionResult> ActivateProviderAccount( int userId)
         {
-            var provider = await _providerRepository.GetProviderByIdAsync(providerId);
+            var provider = await _providerRepository.GetProviderByIdAsync(userId);
             var service = await _serviceRepository.GetServiceByIdAsync(provider.ServiceId);
             if (service == null)
                 return NotFound(new ApiResponse<Service>(false, "Service Not Found"));
@@ -146,18 +69,66 @@ namespace Nqey.Api.Controllers
         [Authorize(Roles = ("Provider,Admin"))]
         //[Authorize(Policy ="IsOwner")] IsOwner is only for reservations for the moment
         [HttpPut]
-        [Route("{serviceId}/providers/{providerId}/update")]
-        public async Task<IActionResult> UpdateProvider(int serviceId, int providerId, [FromForm] ProviderPostPutDto providerPostPut)
+        [Route("{serviceId}/providers/{userId}/update")]
+        public async Task<IActionResult> UpdateProvider(int serviceId, int userId, [FromForm] ProviderPostPutDto providerPostPut)
         {
 
-            var service = _serviceRepository.GetServiceByIdAsync(serviceId);
+            var service = await _serviceRepository.GetServiceByIdAsync(serviceId);
 
             if (service == null)
                 return NotFound(new ApiResponse<Service>(false, "Service Not Found"));
 
-            var existingProvider = await _serviceRepository.GetProviderByIdAsync(providerId);
-
+            var existingProvider = await _serviceRepository.GetProviderByIdAsync(userId);
             _mapper.Map(providerPostPut, existingProvider);
+
+            var idImagePath = providerPostPut.IdentityPiece != null
+                 ? await _imageUploader.UploadImageToSupabase(providerPostPut.IdentityPiece)
+                 : existingProvider.IdentityPiece?.ImagePath;
+
+            var selfiPath = providerPostPut.SelfieImage != null
+                ? await _imageUploader.UploadImageToSupabase(providerPostPut.SelfieImage)
+                : existingProvider.SelfieImage?.ImagePath;
+
+
+            if (!existingProvider.IsIdentityVerified && idImagePath != null && selfiPath != null)
+            {
+                var isMatch = await _faceRecognitionService.VerifyFacesAsync(idImagePath, selfiPath);
+                existingProvider.IsIdentityVerified = isMatch;
+            }
+
+            // Profile Image
+            if (providerPostPut.ProfileImage != null)
+            {
+                existingProvider.ProfileImage = await _imageService.UploadImageSafe(
+                    providerPostPut.ProfileImage, existingProvider.UserId);
+            }
+
+            // Portfolio Images
+            if (providerPostPut.Portfolio != null && providerPostPut.Portfolio.Any())
+            {
+                existingProvider.Portfolio = await _imageService.UploadPortfolioImages(
+                    providerPostPut.Portfolio, existingProvider.UserId);
+            }
+
+            // IdentityPiece
+            if (providerPostPut.IdentityPiece != null)
+            {
+                existingProvider.IdentityPiece = new Image
+                {
+                    ImagePath = idImagePath,
+                };
+            }
+
+            // SelfieImage
+            if (providerPostPut.SelfieImage != null)
+            {
+                existingProvider.SelfieImage = new Image
+                {
+                    ImagePath = selfiPath,
+                };
+            }
+            await _serviceRepository.UpdateProviderAsync(serviceId, existingProvider);
+            
 
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(existingProvider);
             return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider Updated Successfully", mappedProvider));
@@ -169,7 +140,7 @@ namespace Nqey.Api.Controllers
         [Route("providers/{providerId}")]
         public async Task<IActionResult> GetProviderById(int providerId)
         {
-            var provider = await _serviceRepository.GetProviderByIdAsync(providerId);
+            var provider = await _providerRepository.GetProviderByIdAsync(providerId);
             if (provider == null)
                 return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "provider not found", null));
 
@@ -178,57 +149,40 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider retrieved successfully", mappedProvider));
 
         }
-        // --- difference here is the service Id.. yes i should probably drop this endpoint
-        //[Authorize(Roles = "Client,Admin,Provider")]
-        //[AllowAnonymous]
-        //[HttpGet]
-        //[Route("{serviceId}/providers/{providerId}")]
-        //public async Task<IActionResult> GetServiceProviderById(int providerId)
-        //{
-        //    var provider = await _serviceRepository.GetProviderByIdAsync(providerId);
-        //    if (provider == null)
-        //        return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "provider not found", null));
-
-        //    var mappedProvider = _mapper.Map<ProviderPublicGetDto>(provider);
-
-        //    return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider retrieved successfully", mappedProvider));
-
-        //}
-        //[Authorize(Roles = "Admin,Provider")]
+        
         [HttpPost]
         [Route("{serviceId}/providers")]
-        public async Task<IActionResult> AddProvider(int serviceId, [FromForm] ProviderPostPutDto providerPostPut)
+        public async Task<IActionResult> AddProvider(int? serviceId, [FromForm] ProviderPostPutDto providerPostPut)
         {
 
-            var idImagePath = await _imageUploader.UploadImageToSupabase(
-               providerPostPut.IdentityPiece);
+            var idImagePath = providerPostPut.IdentityPiece != null ?
+                 await _imageUploader.UploadImageToSupabase(providerPostPut.IdentityPiece)
+                 : null;
 
-            var selfiPath = await _imageUploader.UploadImageToSupabase(
-                providerPostPut.SelfieImage);
-
-            var isMatch = await _faceRecognitionService.VerifyFacesAsync(idImagePath, selfiPath);
+            var selfiPath = providerPostPut.SelfieImage != null ?
+                
+                await _imageUploader.UploadImageToSupabase(
+                providerPostPut.SelfieImage)
+                : null
+                ;
+            var isMatch = false;
+            if (idImagePath != null && selfiPath != null)
+            {
+                 isMatch = await _faceRecognitionService.VerifyFacesAsync(idImagePath, selfiPath);
+            }
 
             var domainProvider = _mapper.Map<Provider>(providerPostPut);
-
-            var userPostPut = _mapper.Map<UserPostPutDto>(providerPostPut);
-            var domainUser = _mapper.Map<User>(userPostPut);
-            domainUser.SetPassword(userPostPut.Password);
-            domainUser.UserRole = Role.Provider;
-            domainUser.AccountStatus = AccountStatus.Blocked;
-            domainUser.PhoneNumber = providerPostPut.PhoneNumber;
             domainProvider.SetPassword(providerPostPut.Password);
 
             if (isMatch) domainProvider.IsIdentityVerified = true;
             Console.WriteLine($"Identity  verified ? :{isMatch}");
 
-            await _serviceRepository.AddProviderAsync(serviceId, domainProvider);
-            await _userRepository.AddUserAsync(domainUser);
-
+            await _serviceRepository.AddProviderAsync(serviceId, domainProvider);         
             if (providerPostPut.ProfileImage != null)
             {
 
                 domainProvider.ProfileImage = await _imageService.UploadImageSafe(
-                    providerPostPut.ProfileImage, domainUser.UserId);
+                    providerPostPut.ProfileImage, domainProvider.UserId);
 
             }
             //Uploading Portfolio images:
@@ -255,7 +209,7 @@ namespace Nqey.Api.Controllers
             }
 
 
-            await _serviceRepository.UpdateProviderAsync(serviceId, domainProvider.UserId, domainProvider);
+            await _serviceRepository.UpdateProviderAsync(serviceId, domainProvider);
 
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(domainProvider);
 
@@ -270,15 +224,11 @@ namespace Nqey.Api.Controllers
             var providers = await _providerRepository.GetAllProvidersAsync();
 
 
-            /* check if the providers list isn't empty and notify if otherwise*/
+            
             if (providers == null)
                 return Ok(new ApiResponse<Provider>(true, $"Proivders list is empty "));
 
 
-            foreach (var claim in User.Claims)
-            {
-                Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
-            }
             var roleClaim = User.FindFirst(ClaimTypes.Role);
             Console.WriteLine($"roleClaim = {roleClaim}");
 
@@ -288,15 +238,19 @@ namespace Nqey.Api.Controllers
             var role = roleClaim?.Value;
             Console.WriteLine($"before if statement , role = {role}");
 
-
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if(!int.TryParse(userIdClaim, out var userId) )
+            {
+                    
+            }
+            var user = await _userRepository.GetByIdAsync(userId);
             if (role == "Client")
             {
 
-                var userIdClaim = User.FindFirst("userId")?.Value;
+                
                 Console.WriteLine($"Inside the if role part and userIdClaim= {userIdClaim}");
-                if (int.TryParse(userIdClaim, out var userId))
-                {
-                    var user = await _userRepository.GetByIdAsync(userId);
+                
+                     
                     if (user != null)
                     {
                         Console.WriteLine($"Inside the if 'user!=null' part and user= {user}");
@@ -309,10 +263,12 @@ namespace Nqey.Api.Controllers
                             return BadRequest(new ApiResponse<Reservation>(false, "Cannot determine client id"));
                         }
                         var client = await _clientRepository.GetClientByIdAsync(clientId);
-                        providers = _recommendationService.GetSortedProviders(client, providers);
+                        providers = _recommendationService.GetSortedProvidersForClients(client, providers)
+                            .Where(p=>p.AccountStatus != AccountStatus.Blocked)
+                            .ToList();
                     }
                 }
-            }
+            
             var mappedProviders = _mapper.Map<List<ProviderPublicGetDto>>(providers);
             return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true, $"List of all providers", mappedProviders));
 

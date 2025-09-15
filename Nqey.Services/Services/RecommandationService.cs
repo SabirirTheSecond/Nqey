@@ -15,7 +15,17 @@ namespace Nqey.Services.Services
         
         }
 
-        public List<Provider> GetSortedProviders(Client? client, List<Provider> providers)
+        public List<Provider> GetSortedProvidersForAnonymous(List<Provider> providers)
+        {
+            var sortedProviders= providers
+                .Select(p=>new { Provider=p, Score= ScoreCalculator.CalculateScoreWithoutDistance(p)})
+                .OrderByDescending(p=>p.Score)
+                .Select(p=>p.Provider)
+                .ToList();
+            return sortedProviders;
+        }
+
+        public List<Provider> GetSortedProvidersForClients(Client? client, List<Provider> providers)
         {
             if(client?.Location?.Position == null) {
                 Console.WriteLine($"the Position is null? {client?.Location?.Position}" +
@@ -31,5 +41,6 @@ namespace Nqey.Services.Services
 
             return sortedProviders;
         }
+        
     }
 }

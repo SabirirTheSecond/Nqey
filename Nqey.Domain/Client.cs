@@ -15,8 +15,8 @@ namespace Nqey.Domain
 
         public Location? Location { get; set; }
 
-        public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();
-        public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
+        //public  ICollection<Message> SentMessages { get; set; } = new List<Message>();
+        //public  ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
         public Client()

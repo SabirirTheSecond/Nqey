@@ -16,15 +16,15 @@ namespace Nqey.Services.Services
         private readonly DataContext _dataContext;
         private readonly IServiceRepository _serviceRepo;
         private readonly IClientRepository _clientRepo;
-
+        private readonly IReservationService _reservationService;
 
         public ReviewService(DataContext dataContext, IServiceRepository serviceRepository,
-            IClientRepository clientRepository) 
+            IClientRepository clientRepository, IReservationService reservationService) 
         {
            _dataContext = dataContext;
             _serviceRepo = serviceRepository;
             _clientRepo = clientRepository;
-
+            _reservationService = reservationService;
         }
 
         public async Task<Review> AddReviewAsync(Review review)
@@ -37,9 +37,9 @@ namespace Nqey.Services.Services
             await _dataContext.Reviews.AddAsync(review);
             await _dataContext.SaveChangesAsync();
 
-            review.Client = await _dataContext.Clients
-            .Include(c => c.ProfileImage)
-            .FirstOrDefaultAsync(c => c.UserId == review.ClientUserId);
+            //review.Client = await _dataContext.Clients
+            //.Include(c => c.ProfileImage)
+            //.FirstOrDefaultAsync(c => c.UserId == review.ClientUserId);
 
             return review ;
             
@@ -61,8 +61,8 @@ namespace Nqey.Services.Services
                     .ThenInclude(c=> c.ProfileImage)
                 
                 .ToListAsync();
-            if (reviews == null)
-                throw new NullReferenceException();
+            if (reviews.Count >0)
+                return null;
 
                 
             return reviews;
@@ -73,8 +73,9 @@ namespace Nqey.Services.Services
             var review = await _dataContext.Reviews
                 .Where(r => r.ReviewId == reviewId)
                 .Include(r => r.Client)
+                .ThenInclude(c=>c.ProfileImage)
                 .FirstOrDefaultAsync();
-            return review == null ? throw new NullReferenceException() : review;
+            return review ?? null ;
         }
 
         public Task<Review> UpdateReviewAsync(Review review)
@@ -85,6 +86,13 @@ namespace Nqey.Services.Services
         public async Task<List<Review>> GetAllReviewsAsync()
         {
             throw new NotImplementedException();
+        }
+        public async Task<bool> AlreadyReviewed(int reservationId)
+        {
+            var reservation = await _dataContext.Reservations
+                .AnyAsync(r => r.ReservationId == reservationId && r.Reviews.Any());
+                
+                return reservation;
         }
     }
 }

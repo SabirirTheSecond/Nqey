@@ -15,13 +15,13 @@ using Nqey.Domain.Authorization;
 namespace Nqey.Services.Authorization
 {
     // This class serves as an ownership-based guard to a reservation ressource 
-    public class IsOwnerHandler : AuthorizationHandler<IsOwnerRequirement>
+    public class IsReservationOwnerHandler : AuthorizationHandler<IsOwnerRequirement>
     {
         private readonly IReservationService _reservationService;
         private readonly IServiceRepository _serviceRepo;
         private readonly IUserRepository _userRepo;
         private readonly IClientRepository _clientRepo;
-        public IsOwnerHandler(IServiceRepository serviceRepo, IReservationService reservationService,
+        public IsReservationOwnerHandler(IServiceRepository serviceRepo, IReservationService reservationService,
             IUserRepository userRepo, IClientRepository clientRepo)
         {
             _serviceRepo = serviceRepo;
@@ -64,12 +64,12 @@ namespace Nqey.Services.Authorization
                     context.Fail();
                     return ;
                 }
-
-                var clientId = await _clientRepo.GetClientIdByUserNameAsync(user.UserName);
-                var providerId = await _serviceRepo.GetProviderIdByUserNameAsync(user.UserName);
+                
+               
 
                 
-                    if(reservation?.ProviderUserId == providerId || reservation?.ClientUserId == clientId)
+                    if(reservation?.ProviderUserId == userId || reservation?.ClientUserId == userId
+                    || user.UserRole== Role.Admin)
                     {
                         context.Succeed(requirement);
                     return;
@@ -78,47 +78,9 @@ namespace Nqey.Services.Authorization
                 return ;
             }
 
-            //Case 2: route has clientId:
-
-            //if (routeValues.TryGetValue("clientId", out var clientIdObj) &&
-            //    int.TryParse(clientIdObj?.ToString(), out var clientIdFromRoute))
-            //{
-            //    if (user.UserRole == Role.Client)
-            //    {
-            //        var clientId = await _clientRepo.GetClientIdByUserNameAsync(user.UserName);
-            //        if (clientId == clientIdFromRoute)
-            //        {
-            //            Console.WriteLine($"IsOwner Policy Succeeded for ClientId route {clientId}");
-            //            context.Succeed(requirement);
-            //            return;
-            //        }
-            //    }
-            //}
-
-            //// Case 3: route has providerId:
-            //int? providerIdFromRequest = null;
-            //if (routeValues.TryGetValue("providerId", out var providerIdObj) &&
-            //int.TryParse(providerIdObj?.ToString(), out var providerIdFromRoute))
-            //{
-            //    if (user.UserRole == Role.Provider)
-            //    {
-            //        var providerId = await _serviceRepo.GetProviderIdByUserNameAsync(user.UserName);
-            //        if (providerId == providerIdFromRoute)
-            //        {
-            //            Console.WriteLine($"IsOwner Policy Succeeded for ProviderId route {providerId}");
-            //            context.Succeed(requirement);
-            //            return;
-            //        }
-            //    }
-            //}
           
             
-            else if (user.UserRole == Role.Admin)
-            {
-                Console.WriteLine($"IsOwner Policy Succeeded for Admin");
-                context.Succeed(requirement);
-
-            }
+            
         }
     }
 }

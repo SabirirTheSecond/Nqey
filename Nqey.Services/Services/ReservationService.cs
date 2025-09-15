@@ -30,25 +30,27 @@ namespace Nqey.Services.Services
 
         }
 
-        public async Task<Reservation> UpdateReservationAsync(int id, Reservation reservation)
+        public async Task<Reservation> UpdateReservationAsync(int id, Reservation updatedData)
         {
             var existing = await GetReservationByIdAsync(id);
             if (existing == null)
                 return null;
-
-            reservation.Events.Add(new ReservationEvent
+            existing.StartDate = updatedData.StartDate;
+            existing.EndDate = updatedData.EndDate;
+     
+           existing.Events.Add(new ReservationEvent
             { ReservationEventType = ReservationEventType.Changed,
                 CreatedAt = DateTime.UtcNow,
             Notes = "Reservation updated"
             }
             );
-            _dataContext.Reservations.Update(reservation);
+
+            // modify this so it can only updates dates
+            
             await _dataContext.SaveChangesAsync();
+            return existing;
 
-            return reservation;
-
-        }
-
+        } 
         public async Task<Reservation> AcceptReservationAsync(int id)
         {
             var toAccept = await _dataContext.Reservations
@@ -71,6 +73,30 @@ namespace Nqey.Services.Services
                 );
             await _dataContext.SaveChangesAsync();
             return toAccept;
+
+        }
+        public async Task<Reservation> CompletedReservationAsync(int id)
+        {
+            var toComplete = await _dataContext.Reservations
+                .Include(r => r.Client)
+                .Include(r => r.Provider)
+                .FirstOrDefaultAsync(r => r.ReservationId == id);
+
+            if (toComplete == null)
+                return null;
+
+            toComplete.Status = ReservationStatus.Completed;
+            // Booking timeline tracker
+            toComplete.Events.Add(
+                new ReservationEvent
+                {
+                    ReservationEventType = ReservationEventType.Completed,
+                    CreatedAt = DateTime.UtcNow,
+                    Notes = "Reservation Completed"
+                }
+                );
+            await _dataContext.SaveChangesAsync();
+            return toComplete;
 
         }
         public async Task<Reservation> CancelReservationAsync(int id)
@@ -120,12 +146,16 @@ namespace Nqey.Services.Services
         public async Task<Reservation> GetReservationByIdAsync(int id)
         {
             var reservation = await _dataContext.Reservations
-                .Include(r=> r.Provider)
+                .Include(r => r.Provider)
+                    .ThenInclude(p => p.ProfileImage)
+                 .Include(r=>r.Provider)
+                    .ThenInclude(p=>p.Portfolio)
                 .Include(r=> r.Client)
                 .Include(r => r.Events)
                 .Include(r => r.Location)
                 .Include(r => r.JobDescription)
                     .ThenInclude(j=> j.Images)
+                .Include(r=>r.Reviews)
                 .FirstOrDefaultAsync(r => r.ReservationId == id);
 
             if (reservation == null)
@@ -135,16 +165,19 @@ namespace Nqey.Services.Services
             
         }
 
-
        public async Task<List<Reservation>> GetReservationsAsync()
         {
             var reservations = await _dataContext.Reservations
                 .Include(r => r.Client)
                 .Include(r => r.Provider)
+                 .ThenInclude(p => p.ProfileImage)
+                 .Include(r => r.Provider)
+                    .ThenInclude(p => p.Portfolio)
                 .Include(r => r.Events)
                 .Include(r=> r.Location)
                 .Include(r => r.JobDescription)
                     .ThenInclude(j=> j.Images)
+                .Include(r => r.Reviews)
                 .ToListAsync();
             if (reservations == null)
                 //throw new NullReferenceException();
@@ -185,42 +218,40 @@ namespace Nqey.Services.Services
                 .Where(r=> r.ClientUserId == clientId)
                 .Include(r => r.Client)
                 .Include(r => r.Provider)
+                    .ThenInclude(p => p.ProfileImage)
+                 .Include(r => r.Provider)
+                    .ThenInclude(p => p.Portfolio)
                 .Include(r => r.Events)
                 .Include(r => r.Location)
                 .Include(r => r.JobDescription)
                     .ThenInclude(j => j.Images)
+                .Include(r => r.Reviews)
                 .ToListAsync();
             if (reservations == null)
-                //throw new NullReferenceException();
+                
                 return null;
 
             return reservations;
             
         }
-       //public async Task<List<Domain.Reservation>> GetMyReservationsAsync(int userId)
-       // {
-       //     var user = await _userRepository.GetByIdAsync(userId);
-       //     var clientId = await _clientRepository.GetClientIdByUserNameAsync(user.UserName);
-         
-       //     var reservations = await _dataContext.Reservations
-       //        .Where(r => r.Client == userId || r.Provider.UserId == userId)
-       //        .ToListAsync();
-
-
-       // }
+    
         public async Task<List<Reservation>> GetReservationByProviderIdAsync(int providerId)
         {
             var reservations = await _dataContext.Reservations
                 .Where(r => r.ProviderUserId == providerId)
                 .Include(r => r.Client)
                 .Include(r => r.Provider)
+                     .ThenInclude(p => p.ProfileImage)
+                 .Include(r => r.Provider)
+                    .ThenInclude(p => p.Portfolio)
                 .Include(r => r.Events)
                 .Include(r => r.Location)
                 .Include(r => r.JobDescription)
                     .ThenInclude(j => j.Images)
+                .Include(r => r.Reviews)
                 .ToListAsync();
             if (reservations == null)
-                //throw new NullReferenceException();
+                
                 return null;
 
             return reservations;

@@ -23,32 +23,33 @@ namespace Nqey.DAL.Repositories
         public async Task<List<Provider>> GetAllProvidersAsync()
         {
             var providers = await _dataContext.Providers
+                .Where(p=>p.AccountStatus != AccountStatus.Blocked)
                 .Include(p=> p.Reviews)
                 .Include(p=>p.ProfileImage)
                 .Include(p => p.Portfolio)
                 .Include (p => p.Location)
+                 .Include(p => p.SentMessages)
+                .Include(p => p.ReceivedMessages)
                 .ToListAsync();
 
-            if (!providers.Any())
-            {
-                throw new NullReferenceException();
-            }
-                
 
             return providers;
             
         }
 
-        public async Task<Provider> GetProviderByIdAsync(int providerId)
+        public async Task<Provider> GetProviderByIdAsync(int userId)
         {
             var provider = await _dataContext.Providers
+                .Where(p => p.AccountStatus != AccountStatus.Blocked)
                .Include(p => p.Reviews)
                .Include(p => p.ProfileImage)
                .Include(p => p.Location)
                .Include(p => p.Portfolio)
+                .Include(p => p.SentMessages)
+                .Include(p => p.ReceivedMessages)
                .FirstOrDefaultAsync(p =>
 
-                       p.UserId == providerId
+                       p.UserId == userId
                    );
 
             if (provider == null)

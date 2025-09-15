@@ -8,6 +8,7 @@ namespace Nqey.Domain.Abstractions.Services
 {
     public interface IRecommendationService
     {
-        List<Provider> GetSortedProviders(Client client, List<Provider> providers);
+        List<Provider> GetSortedProvidersForClients(Client client, List<Provider> providers);
+        List<Provider> GetSortedProvidersForAnonymous( List<Provider> providers);
     }
 }

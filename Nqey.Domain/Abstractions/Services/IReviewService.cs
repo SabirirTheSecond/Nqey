@@ -16,5 +16,6 @@ namespace Nqey.Domain.Abstractions.Services
         public Task<Review> GetReviewByIdAsync(int reviewId);
         public Task<List<Review>> GetAllReviewsByProviderIdAsync(int providerId);
         public Task<List<Review>> GetAllReviewsAsync();
+        public Task<bool> AlreadyReviewed(int reservationId);
     }
 }

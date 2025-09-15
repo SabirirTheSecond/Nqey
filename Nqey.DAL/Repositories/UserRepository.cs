@@ -39,17 +39,24 @@ namespace Nqey.DAL.Repositories
 
         public async Task<User> GetByIdAsync(int id)
         {
-            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserId == id);
+            var user = await _dataContext.Users
+                .Include(u => u.ProfileImage)
+                .Include(u => u.ReceivedMessages)
+                .Include(u => u.SentMessages)
+                .FirstOrDefaultAsync(u => u.UserId == id);
             if (user == null)
-                 throw new NullReferenceException();
+                 return null;
             return user;
         }
 
         public async Task<List<User>> GetUsersAsync()
         {
             var users = await _dataContext.Users
-                
+                .Include(u=>u.ProfileImage)
+                .Include(u=>u.ReceivedMessages)
+                .Include(u=>u.SentMessages)
                 .ToListAsync();
+          
             if (users == null)
                 return null;
 
@@ -58,7 +65,11 @@ namespace Nqey.DAL.Repositories
         }
         public async Task<User> GetUserByUserNameAsync(string userName)
         {
-            var user = await _dataContext.Users.FirstOrDefaultAsync(u=> u.UserName == userName);
+            var user = await _dataContext.Users
+                .Include(u => u.ReceivedMessages)
+                .Include(u => u.SentMessages)
+                .Include(u => u.ProfileImage)
+                .FirstOrDefaultAsync(u=> u.UserName == userName);
             if (user == null)
                 return null;
             return user;
@@ -75,6 +86,9 @@ namespace Nqey.DAL.Repositories
         public async Task<int?> GetUserIdByUserNameAsync(string userName)
         {
             var userId = await _dataContext.Users
+                .Include(u => u.ReceivedMessages)
+                .Include(u => u.SentMessages)
+                .Include(u=>u.ProfileImage)
                 .Where(c => c.UserName == userName)
                 .Select(c => (int?)c.UserId)
                 .FirstOrDefaultAsync();

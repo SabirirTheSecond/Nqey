@@ -12,8 +12,10 @@ namespace Nqey.DAL.Repositories
 {
     public class ServiceRepository : IServiceRepository
     {
+
         private readonly DataContext _dataContext;
         private readonly IUserRepository _userRepo;
+
 
         public ServiceRepository(DataContext dataContext, IUserRepository userRepository)
         {
@@ -25,11 +27,11 @@ namespace Nqey.DAL.Repositories
         public async Task<List<Service>> GetServicesAsync()
         {
             var services = await _dataContext.Services
-                .Where(s=>s.ServiceId != 35)
+                
                 .Include(s=>s.Providers)
                 .Include(s=> s.ServiceImage)
                 .ToListAsync();
-            if (!services.Any())
+            if (services.Count==0)
             {
                 return null;
             } 
@@ -54,7 +56,7 @@ namespace Nqey.DAL.Repositories
             return service;
         }
 
-       public async Task<Service> GetServiceByIdAsync(int id)
+       public async Task<Service> GetServiceByIdAsync(int? id)
         {
             var service = await _dataContext.Services
                 .Include(s=>s.Providers)
@@ -100,7 +102,7 @@ namespace Nqey.DAL.Repositories
                 return null;
             return providers;
         }
-        public async Task<Provider> GetProviderByIdAsync( int providerId)
+        public async Task<Provider> GetProviderByIdAsync( int userId)
         {
             var provider = await _dataContext.Providers
                 .Include(p=> p.Reviews)
@@ -109,14 +111,14 @@ namespace Nqey.DAL.Repositories
                 .Include(p => p.Portfolio)
                 .FirstOrDefaultAsync(p =>  
                         
-                        p.UserId == providerId
+                        p.UserId == userId
                     );
 
             if (provider == null)
                 return null;
             return provider;
         }
-        public async Task<Provider> AddProviderAsync(int serviceId,Provider provider)
+        public async Task<Provider> AddProviderAsync(int? serviceId,Provider provider)
         {
             var service = await _dataContext.Services
                 .Include(s=> s.Providers)
@@ -127,6 +129,8 @@ namespace Nqey.DAL.Repositories
             service.Providers.Add(provider);
 
             await _dataContext.SaveChangesAsync();
+            // Ensure EF re-hydrates the keys (important with TPT inheritance)
+            await _dataContext.Entry(provider).ReloadAsync();
             return provider;
         }
         public async Task<Provider> ActivateProviderAsync( Provider provider)
@@ -135,9 +139,9 @@ namespace Nqey.DAL.Repositories
             if (service == null)
                 return null;
 
-            var user = await _userRepo.GetUserByUserNameAsync(provider.UserName);
+            
             provider.AccountStatus = AccountStatus.Active;
-            user.AccountStatus = AccountStatus.Active;
+            
             _dataContext.Providers.Update(provider);
             
             await _dataContext.SaveChangesAsync();
@@ -158,7 +162,7 @@ namespace Nqey.DAL.Repositories
 
         }
 
-        public async Task<Provider> UpdateProviderAsync(int serviceId,int providerId, Provider provider)
+        public async Task<Provider> UpdateProviderAsync(int? serviceId, Provider provider)
         {
            var service = _dataContext.Services.FirstOrDefault(s => s.ServiceId== serviceId);
            
@@ -180,11 +184,11 @@ namespace Nqey.DAL.Repositories
                 .ToListAsync();
             if (!providers.Any())
             {
-                throw new NullReferenceException();
+                return null;
             }
             return providers;
         }
-        public async Task<Provider> GetPreRegisteredProviderById(int providerId)
+        public async Task<Provider> GetPreRegisteredProviderById(int userId)
         {
             var provider = await _dataContext.Providers
                 .Where(p => p.ServiceId == 35)
@@ -192,9 +196,9 @@ namespace Nqey.DAL.Repositories
                 .Include(p => p.ProfileImage)
                 .Include(p => p.Location)
                 .Include(p => p.Portfolio)
-                .FirstOrDefaultAsync(p=>p.UserId == providerId);
+                .FirstOrDefaultAsync(p=>p.UserId == userId);
             if (provider == null)
-                throw new NullReferenceException();
+                return null;
             return provider;
 
 
