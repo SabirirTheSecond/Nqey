@@ -59,7 +59,7 @@ namespace Nqey.Services.Services
             if (toAccept == null)
                 return null;
             var provider = await _dataContext.Providers.FirstOrDefaultAsync(p => p.UserId == toAccept.ProviderUserId);
-            provider.AnalyticalVariables.Accepts++;
+            provider.ProviderAnalytics.Accepts++;
             toAccept.Status = ReservationStatus.Accepted;
             // Booking timeline tracker
             toAccept.Events.Add(
@@ -84,7 +84,7 @@ namespace Nqey.Services.Services
             if (toRefuse == null)
                 return null;
             var provider =await _dataContext.Providers.FirstOrDefaultAsync(p=>p.UserId== toRefuse.ProviderUserId);
-            provider.AnalyticalVariables.Refuses++;
+            provider.ProviderAnalytics.Refuses++;
             toRefuse.Status = ReservationStatus.Cancelled;
             // Booking timeline tracker
             toRefuse.Events.Add(
@@ -108,7 +108,7 @@ namespace Nqey.Services.Services
             if (toComplete == null)
                 return null;
             var provider = await _dataContext.Providers.FirstOrDefaultAsync(p => p.UserId == toComplete.ProviderUserId);
-            provider.AnalyticalVariables.Completions++;
+            provider.ProviderAnalytics.Completions++;
             toComplete.Status = ReservationStatus.Completed;
             // Booking timeline tracker
             toComplete.Events.Add(
@@ -180,6 +180,7 @@ namespace Nqey.Services.Services
                 .Include(r => r.JobDescription)
                     .ThenInclude(j=> j.Images)
                 .Include(r=>r.Reviews)
+                
                 .FirstOrDefaultAsync(r => r.ReservationId == id);
 
             if (reservation == null)
@@ -250,6 +251,7 @@ namespace Nqey.Services.Services
                 .Include(r => r.JobDescription)
                     .ThenInclude(j => j.Images)
                 .Include(r => r.Reviews)
+                .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
             if (reservations == null)
                 
@@ -262,6 +264,7 @@ namespace Nqey.Services.Services
         public async Task<List<Reservation>> GetReservationByProviderIdAsync(int providerId)
         {
             var reservations = await _dataContext.Reservations
+                .OrderByDescending(r=>r.CreatedAt)
                 .Where(r => r.ProviderUserId == providerId)
                 .Include(r => r.Client)
                 .Include(r => r.Provider)
@@ -273,6 +276,7 @@ namespace Nqey.Services.Services
                 .Include(r => r.JobDescription)
                     .ThenInclude(j => j.Images)
                 .Include(r => r.Reviews)
+               
                 .ToListAsync();
             if (reservations == null)
                 

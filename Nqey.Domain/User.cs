@@ -38,7 +38,7 @@ namespace Nqey.Domain
         public List<Complaint>? FiledComplaints { get; set; } = new List<Complaint>();
         public List<Complaint>? ComplaintsAgainst { get; set; } = new List<Complaint>();
 
-        
+        public UserAnalytics UserAnalytics { get; set; } = new UserAnalytics();
         public void SetPassword(string password)
         {
             var hasher = new PasswordHasher<User>();

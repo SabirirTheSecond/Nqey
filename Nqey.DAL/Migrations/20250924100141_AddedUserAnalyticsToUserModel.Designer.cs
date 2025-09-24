@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nqey.DAL;
 
@@ -11,9 +12,11 @@ using Nqey.DAL;
 namespace Nqey.DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250924100141_AddedUserAnalyticsToUserModel")]
+    partial class AddedUserAnalyticsToUserModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1044,14 +1047,10 @@ namespace Nqey.DAL.Migrations
                                 .HasColumnType("int");
 
                             b1.Property<int>("ComplaintsAgainstCount")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasDefaultValue(0);
+                                .HasColumnType("int");
 
                             b1.Property<int>("FiledComplaintsCount")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasDefaultValue(0);
+                                .HasColumnType("int");
 
                             b1.HasKey("UserId");
 
@@ -1086,30 +1085,22 @@ namespace Nqey.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Nqey.Domain.Common.ClientAnalytics", "ClientAnalytics", b1 =>
+                    b.OwnsOne("Nqey.Domain.Common.ClientAnalyticalVariables", "AnalyticVariables", b1 =>
                         {
                             b1.Property<int>("ClientUserId")
                                 .HasColumnType("int");
 
                             b1.Property<int>("Bookings")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasDefaultValue(0);
+                                .HasColumnType("int");
 
                             b1.Property<int>("Cancelations")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasDefaultValue(0);
+                                .HasColumnType("int");
 
                             b1.Property<int>("ComplaintsAgainstCount")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasDefaultValue(0);
+                                .HasColumnType("int");
 
                             b1.Property<int>("FiledComplaintsCount")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasDefaultValue(0);
+                                .HasColumnType("int");
 
                             b1.HasKey("ClientUserId");
 
@@ -1119,7 +1110,7 @@ namespace Nqey.DAL.Migrations
                                 .HasForeignKey("ClientUserId");
                         });
 
-                    b.Navigation("ClientAnalytics")
+                    b.Navigation("AnalyticVariables")
                         .IsRequired();
 
                     b.Navigation("Location");
@@ -1149,7 +1140,7 @@ namespace Nqey.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Nqey.Domain.Common.ProviderAnalytics", "ProviderAnalytics", b1 =>
+                    b.OwnsOne("Nqey.Domain.Common.ProviderAnalyticalVariables", "AnalyticalVariables", b1 =>
                         {
                             b1.Property<int>("ProviderUserId")
                                 .HasColumnType("int");
@@ -1192,12 +1183,12 @@ namespace Nqey.DAL.Migrations
                                 .HasForeignKey("ProviderUserId");
                         });
 
+                    b.Navigation("AnalyticalVariables")
+                        .IsRequired();
+
                     b.Navigation("IdentityPiece");
 
                     b.Navigation("Location");
-
-                    b.Navigation("ProviderAnalytics")
-                        .IsRequired();
 
                     b.Navigation("SelfieImage");
 

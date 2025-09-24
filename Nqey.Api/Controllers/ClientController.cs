@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Nqey.Api.Dtos.ClientDtos;
 using System.Security.Claims;
 using Nqey.Domain.Abstractions.Services;
+using Nqey.Api.Dtos.ProviderDtos;
 namespace Nqey.Api.Controllers
 {
 
@@ -134,6 +135,20 @@ namespace Nqey.Api.Controllers
             await _clientRepo.DeleteClientAsync(id);
             return Ok(new ApiResponse<Client>(true, "Client Deleted Successfully"));
         }
-        
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        [Route("{clientId}/statistics")]
+        public async Task<IActionResult> GetClientStatistics(int clientId)
+        {
+            var client = await _clientRepo.GetClientByIdAsync(clientId);
+            if (client == null)
+                return NotFound(new ApiResponse<ClientPublicGetDto>(false, "Client Not Found"));
+            var statistics = client.ClientAnalytics;
+            //var mappedStatistics = _mapper.Map<An>
+            return Ok(new ApiResponse<ClientAnalytics>(true, $"Client {client.UserName}'s " +
+                $"Analytics", statistics));
+        }
+
     }
 }

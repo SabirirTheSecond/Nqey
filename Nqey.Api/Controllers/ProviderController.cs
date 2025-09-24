@@ -367,8 +367,19 @@ namespace Nqey.Api.Controllers
 
 
         }
-        
-
+        [Authorize(Roles ="Admin")]
+        [HttpGet]
+        [Route("{providerId}/statistics")]
+        public async Task<IActionResult> GetProviderStatistics(int providerId)
+        {
+            var provider = await _providerRepository.GetProviderByIdAsync(providerId);
+            if (provider == null)
+                return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "Provider Not Found"));
+            var statistics = provider.ProviderAnalytics;
+            //var mappedStatistics = _mapper.Map<An>
+            return Ok(new ApiResponse<ProviderAnalytics>(true, $"Provider {provider.UserName}'s " +
+                $"Analytics", statistics));
+        }
     }
 
 }

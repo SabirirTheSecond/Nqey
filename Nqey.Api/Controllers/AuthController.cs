@@ -30,11 +30,11 @@ namespace Nqey.Api.Controllers
         {
             var user = await _userRepository.GetUserByUserNameAsync(loginDto.Username);
 
-            Console.WriteLine($"your userRole is : {user.UserRole}");
+           
 
             if (user == null || !user.VerifyPassword(loginDto.Password))
                 return Unauthorized(new ApiResponse<string>(false, "Invalid credentials", null));
-
+            Console.WriteLine($"your userRole is : {user.UserRole}");
             if (!Enum.TryParse<Role>(loginDto.AppType, true, out var parsedRole))
             {
                 return BadRequest(new ApiResponse<string>(false, "Invalid AppType", null));

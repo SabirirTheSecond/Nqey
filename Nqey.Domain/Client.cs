@@ -14,11 +14,9 @@ namespace Nqey.Domain
 
 
         public Location? Location { get; set; }
-
-        //public  ICollection<Message> SentMessages { get; set; } = new List<Message>();
-        //public  ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
+        public ClientAnalytics ClientAnalytics { get; set; } = new ClientAnalytics();
         public Client()
         {
             base.UserRole= Role.Client;

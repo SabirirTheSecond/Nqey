@@ -65,11 +65,9 @@ namespace Nqey.Api.Controllers
                 domainComplaint.Attachments = await imageService.UploadAttachmentImages(
                     complaintPostPut.Attachments, domainComplaint.ComplaintId);
             }
-            if (reporter is Provider reportingProvider)
-                reportingProvider.AnalyticalVariables.FiledComplaintsCount++;
-
-            if (reportedUser is Provider reportedProvider)
-                reportedProvider.AnalyticalVariables.ComplaintsAgainstCount++;
+            // Updating the statistical variables for each user accordingly
+            reporter.UserAnalytics.FiledComplaintsCount++;
+            reportedUser.UserAnalytics.ComplaintsAgainstCount++;
 
             await complaintRepository.AddComplaintAsync(domainComplaint);
             var mappedComplaint = mapper.Map<ComplaintGetDto>(domainComplaint);
@@ -77,7 +75,7 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ComplaintGetDto>(true,
                      "Complaint Submitted Successfully", mappedComplaint));
         }
-        [Authorize(Roles =("Admin,Client"))]
+        [Authorize(Roles =("Admin"))]
         [HttpGet("complaints/{userId}")]
 
         public async Task<IActionResult> GetComplaintsByUserId(int userId)
@@ -92,6 +90,29 @@ namespace Nqey.Api.Controllers
 
             var mappedComplaints = mapper.Map<List<ComplaintGetDto>>(complaints);
             return Ok(new ApiResponse<List<ComplaintGetDto>>(true,$"List Of Complaints Filed By {user.UserName}",
+                mappedComplaints));
+        }
+        [Authorize(Roles = ("Provider,Client"))]
+        [HttpGet("user-complaints")]
+
+        public async Task<IActionResult> GetComplaintsByUser()
+        {
+            var userIdClaim = User.FindFirstValue("userId");
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    new ApiResponse<Complaint>(false, "Problem Occured with your authentication, Please Login"));
+            }
+
+            var user = await userRepo.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new ApiResponse<ComplaintGetDto>(false, "User Not Found"));
+            }
+            var complaints = await complaintRepository.GetComplaintsByUserIdAsync(userId);
+
+            var mappedComplaints = mapper.Map<List<ComplaintGetDto>>(complaints);
+            return Ok(new ApiResponse<List<ComplaintGetDto>>(true, $"List Of Your Submitted Complaints ",
                 mappedComplaints));
         }
         [Authorize(Roles = ("Admin"))]

@@ -8,14 +8,14 @@ using Microsoft.EntityFrameworkCore;
 namespace Nqey.Domain.Common
 {
     [Owned]
-    public class ProviderAnalyticalVariables
+    public class ProviderAnalytics : UserAnalytics
     {
         public int JobsDone { get; set; }
         public int Accepts { get; set; }
         public int Refuses { get; set; }
         public int Completions { get; set; }
-        public int FiledComplaintsCount { get; set; }
-        public int ComplaintsAgainstCount { get; set; }
+        //public int FiledComplaintsCount { get; set; }
+        //public int ComplaintsAgainstCount { get; set; }
 
     }
 }

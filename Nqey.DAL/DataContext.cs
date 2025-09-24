@@ -182,7 +182,7 @@ namespace Nqey.DAL
                 .OnDelete(DeleteBehavior.Restrict);
             });
             modelBuilder.Entity<Provider>()
-               .OwnsOne(p => p.AnalyticalVariables, av =>
+               .OwnsOne(p => p.ProviderAnalytics, av =>
                {
                    av.Property(a => a.Refuses).HasDefaultValue(0);
                    av.Property(a => a.Accepts).HasDefaultValue(0);
@@ -191,6 +191,20 @@ namespace Nqey.DAL
                    av.Property(a => a.FiledComplaintsCount).HasDefaultValue(0);
                    av.Property(a => a.ComplaintsAgainstCount).HasDefaultValue(0);
                });
+            modelBuilder.Entity<Client>()
+                .OwnsOne(cl => cl.ClientAnalytics, ca =>
+                {
+                    ca.Property(a => a.Bookings).HasDefaultValue(0);
+                    ca.Property(a => a.Cancelations).HasDefaultValue(0);
+                    ca.Property(a => a.FiledComplaintsCount).HasDefaultValue(0);
+                    ca.Property(a => a.ComplaintsAgainstCount).HasDefaultValue(0);
+                });
+            modelBuilder.Entity<User>()
+                .OwnsOne(u => u.UserAnalytics, ua =>
+                {
+                    ua.Property(a => a.ComplaintsAgainstCount).HasDefaultValue(0);
+                    ua.Property(a => a.FiledComplaintsCount).HasDefaultValue(0);
+                });
         }
 
 

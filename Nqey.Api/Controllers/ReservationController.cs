@@ -204,6 +204,7 @@ namespace Nqey.Api.Controllers
                 }
 
             }
+            var client = await _clientRepository.GetClientByIdAsync(userId);
             domainReservation.JobDescription = jobDescription;
             // Booking timeline tracker
             domainReservation.Events.Add(
@@ -214,7 +215,7 @@ namespace Nqey.Api.Controllers
                     Notes = "Reservation Added"
                 }
                 );
-
+            client.ClientAnalytics.Bookings++;
             await _reservationService.MakeReservationAsync(domainReservation);
             
             
@@ -233,7 +234,7 @@ namespace Nqey.Api.Controllers
             var userIdClaim = User.FindFirstValue("userId");
             if(!int.TryParse(userIdClaim, out var userId))
             {
-                return NotFound(new ApiResponse<Object>(false, "Authentication Error, Try To Login Again"));
+                return NotFound(new ApiResponse<Reservation>(false, "Authentication Error, Try To Login Again"));
             }
             var user = await _userRepository.GetByIdAsync(userId);
             
@@ -283,21 +284,30 @@ namespace Nqey.Api.Controllers
         }
 
         [Authorize(Roles = "Client")]
+        [Authorize(Policy = "IsReservationOwner")]
         [HttpPut]
         [Route("{id}/cancel")]
         public async Task<IActionResult> CancelReservation(int id)
         {
+            var userIdClaim = User.FindFirstValue("userId");
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return NotFound(new ApiResponse<Reservation>(false, "Could Not Determine User Identity," +
+                    "Please Log In Again Or Contact Support"));
+            }
+            var client = await _clientRepository.GetClientByIdAsync(userId);
             var existing = await _reservationService.GetReservationByIdAsync(id);
             
             if (existing == null)
                 return NotFound(new ApiResponse<Reservation>(false, "Reservation Not Found"));
             
-            if (existing.Status == ReservationStatus.Accepted)
-                return NotFound(new ApiResponse<Reservation>(false, "Reservation Is Already Accepted"));
-           
+            if (existing.Status == ReservationStatus.Completed || existing.Status == ReservationStatus.Cancelled)
+                return NotFound(new ApiResponse<Reservation>(false, "Reservation Is Already Completed" +
+                    " Or Cancelled"));
+            client.ClientAnalytics.Cancelations++;
             await _reservationService.CancelReservationAsync(id);
-
-            return Ok(new ApiResponse<Reservation>(true, "Reservation Cancelled"));
+            var mappedReservation = _mapper.Map<ReservationGetDto>(existing);
+            return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Cancelled",mappedReservation));
         }
 
         [Authorize(Roles ="Provider")]
@@ -322,7 +332,7 @@ namespace Nqey.Api.Controllers
             {
                 await _reservationService.AcceptReservationAsync(id);
                 var mappedReservation = _mapper.Map<ReservationGetDto>(existing);
-                provider.AnalyticalVariables.Accepts += 1;
+                provider.ProviderAnalytics.Accepts += 1;
                 return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Accepted",mappedReservation));
             }
             return BadRequest(new ApiResponse<Reservation>(false, "Reservation Is Either Accepted Already Or Cancelled"));
@@ -350,7 +360,7 @@ namespace Nqey.Api.Controllers
             {
                 await _reservationService.RefuseReservationAsync(id);
                 var mappedReservation = _mapper.Map<ReservationGetDto>(existing);
-                provider.AnalyticalVariables.Refuses += 1;
+                provider.ProviderAnalytics.Refuses += 1;
                 return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Rejected", mappedReservation));
             }
             return BadRequest(new ApiResponse<Reservation>(false, "Reservation Is Either Accepted Already Or Cancelled"));
@@ -372,8 +382,8 @@ namespace Nqey.Api.Controllers
             {
                 await _reservationService.CompletedReservationAsync(id);
                 var mappedReservation = _mapper.Map<ReservationGetDto>(existing);
-                provider.AnalyticalVariables.JobsDone += 1;
-                provider.AnalyticalVariables.Completions += 1;
+                provider.ProviderAnalytics.JobsDone += 1;
+                provider.ProviderAnalytics.Completions += 1;
                 provider.JobsDone += 1;
                 return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Completed", mappedReservation));
             }

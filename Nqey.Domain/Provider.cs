@@ -32,7 +32,7 @@ namespace Nqey.Domain
         public bool IsIdentityVerified { get; set; } = false;
         public ServiceRequest? ServiceRequest { get; set; }
 
-        public ProviderAnalyticalVariables AnalyticalVariables { get; set; } = new();
+        public ProviderAnalytics ProviderAnalytics { get; set; } = new();
         
         public Provider()
         {
