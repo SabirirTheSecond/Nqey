@@ -17,6 +17,7 @@ namespace Nqey.Domain.Abstractions.Services
         //Task<List<Domain.Reservation>> GetMyReservationsAsync(int userId);
         Task<Reservation> CancelReservationAsync(int id);
         Task<Reservation> AcceptReservationAsync(int id);
+        Task<Reservation> RefuseReservationAsync(int id);
         Task<Reservation> CompletedReservationAsync(int id);
         Task<Reservation> DeleteReservationAsync(int id);
         Task<Reservation> UpdateReservationAsync(int id, Reservation reservation);

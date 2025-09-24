@@ -181,6 +181,16 @@ namespace Nqey.DAL
                 .HasForeignKey(c => c.ReportedUserId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
+            modelBuilder.Entity<Provider>()
+               .OwnsOne(p => p.AnalyticalVariables, av =>
+               {
+                   av.Property(a => a.Refuses).HasDefaultValue(0);
+                   av.Property(a => a.Accepts).HasDefaultValue(0);
+                   av.Property(a => a.Completions).HasDefaultValue(0);
+                   av.Property(a => a.JobsDone).HasDefaultValue(0);
+                   av.Property(a => a.FiledComplaintsCount).HasDefaultValue(0);
+                   av.Property(a => a.ComplaintsAgainstCount).HasDefaultValue(0);
+               });
         }
 
 
@@ -196,5 +206,6 @@ namespace Nqey.DAL
         public DbSet<ServiceRequest> ServicesRequests { get; set; }
         public DbSet<Message> Messages  { get; set; }
         public DbSet<Complaint> Complaints { get; set; }
+        public DbSet<SubService> SubServices { get; set; }
     }
 }

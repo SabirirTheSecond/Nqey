@@ -15,6 +15,8 @@ namespace Nqey.Domain.Abstractions.Repositories
         Task<User> UpdateUserAsync(User user);
         Task<User> DeleteUserAsync(int id);
         Task<int?> GetUserIdByUserNameAsync(string userName);
-       
+
+        Task<User> ActivateUser(int userId);
+        Task<User> BlockUser(int userId);
     }
 }

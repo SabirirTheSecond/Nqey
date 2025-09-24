@@ -36,6 +36,19 @@ namespace Nqey.DAL.Repositories
             return providers;
             
         }
+        public async Task<List<Provider>> GetProvidersByServicAsync(int ServiceId)
+        {
+            var providers = await _dataContext.Providers
+                .Where(p => p.ServiceId == ServiceId)
+                .Include(p => p.Reviews)
+                .Include(p => p.ProfileImage)
+                .Include(p => p.Location)
+                .Include(p => p.Portfolio)
+                .ToListAsync();
+            if (providers == null)
+                return null;
+            return providers;
+        }
 
         public async Task<Provider> GetProviderByIdAsync(int userId)
         {
@@ -56,7 +69,75 @@ namespace Nqey.DAL.Repositories
                 return null;
             return provider;
         }
+        public async Task<Provider> AddProviderAsync(int? serviceId, Provider provider)
+        {
+            var service = await _dataContext.Services
+                .Include(s => s.Providers)
+                .FirstOrDefaultAsync(s => s.ServiceId == serviceId);
+            if (service == null)
+                return null;
 
-        
+            service.Providers.Add(provider);
+
+            await _dataContext.SaveChangesAsync();
+            // Ensure EF re-hydrates the keys (important with TPT inheritance)
+            await _dataContext.Entry(provider).ReloadAsync();
+            return provider;
+        }
+        public async Task<Provider> ActivateProviderAsync(Provider provider)
+        {
+            var service = await _dataContext.Services.FirstOrDefaultAsync(s => s.ServiceId == provider.ServiceId);
+            if (service == null)
+                return null;
+
+
+            provider.AccountStatus = AccountStatus.Active;
+
+            _dataContext.Providers.Update(provider);
+
+            await _dataContext.SaveChangesAsync();
+            return provider;
+        }
+
+        public async Task<int?> GetProviderIdByUserNameAsync(string userName)
+        {
+            var providerId = await _dataContext.Providers
+                .Where(p => p.UserName == userName)
+                .Select(p => (int?)p.UserId)
+                .FirstOrDefaultAsync();
+
+            if (providerId == null)
+                return null;
+
+            return providerId;
+
+        }
+
+        public async Task<Provider> UpdateProviderAsync(int? serviceId, Provider provider)
+        {
+            var service = _dataContext.Services.FirstOrDefault(s => s.ServiceId == serviceId);
+
+            _dataContext.Update(provider);
+
+            await _dataContext.SaveChangesAsync();
+
+            return provider;
+        }
+        public async Task<Provider> UpdatePortfolio(int userId,List<PortfolioImage> portfolioImages)
+        {
+            var provider = await GetProviderByIdAsync(userId);
+            if (provider != null)
+            {
+                //provider.Portfolio = portfolioImages;
+                provider.Portfolio ??= new List<PortfolioImage>();
+                provider.Portfolio.AddRange(portfolioImages);
+
+                await _dataContext.SaveChangesAsync();
+                return provider;
+            }
+            return null;
+            
+        }
+
     }
 }

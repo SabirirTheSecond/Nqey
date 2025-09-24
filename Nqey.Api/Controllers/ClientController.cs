@@ -92,24 +92,28 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<ClientPublicGetDto>(true, "Client Added Successfully ", mappedClient));
         }
 
-        [Authorize(Roles ="Admin,Client")]
+        [Authorize(Roles ="Client")]
         
-        [HttpPut]
-        [Route("{id}")]
-        public async Task<IActionResult> UpdateClient(int id,[FromForm] ClientPostPutDto clientPostPut)
+        [HttpPatch]
+        [Route("edit")]
+        public async Task<IActionResult> UpdateClient([FromForm] ClientPatchDto clientPatchDto)
         {
-            var oldClient = await _clientRepo.GetClientByIdAsync(id);
+            var userIdClaim = User.FindFirstValue("userId");
+            if (!int.TryParse(userIdClaim, out var userId)) {
+                return NotFound(new ApiResponse<ClientPublicGetDto>(false,"Could Not Determine User Identity, Please Log Again"));
+            }
+            var oldClient = await _clientRepo.GetClientByIdAsync(userId);
             if (oldClient == null)
                 return NotFound(new ApiResponse<Client>(false, "Client not found"));
            
-            _mapper.Map(clientPostPut, oldClient);
+            _mapper.Map(clientPatchDto, oldClient);
 
-            if (clientPostPut.ProfileImage != null)
+            if (clientPatchDto.ProfileImage != null)
             {
 
 
                 oldClient.ProfileImage = await _imageService.UploadImageSafe(
-                    clientPostPut.ProfileImage, oldClient.UserId
+                    clientPatchDto.ProfileImage, oldClient.UserId
                     );
             }
                 await _clientRepo.UpdateClientAsync(oldClient);

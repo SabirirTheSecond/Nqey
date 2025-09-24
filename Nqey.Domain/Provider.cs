@@ -26,17 +26,20 @@ namespace Nqey.Domain
         public Service? Service { get; set; }      
         public List<Review>? Reviews { get; set; } = new List<Review>();
         public List<SubService>? SubServices { get; set; } = new List<SubService>();
-        
         public List<PortfolioImage>? Portfolio{ get; set; } = new List<PortfolioImage>();
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
         public int JobsDone { get; set; } = 0;
         public bool IsIdentityVerified { get; set; } = false;
         public ServiceRequest? ServiceRequest { get; set; }
+
+        public ProviderAnalyticalVariables AnalyticalVariables { get; set; } = new();
         
         public Provider()
         {
+
             UserRole = Role.Provider;
             AccountStatus = AccountStatus.Blocked;
+
         }
         
 

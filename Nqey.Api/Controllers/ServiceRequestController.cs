@@ -22,8 +22,9 @@ namespace Nqey.Api.Controllers
             _serviceRequestRepo = serviceRepository;
             _mapper = mapper;
             _userRepository = userRepository;
-        }   
+        }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetServiceRequests()
         {
@@ -32,11 +33,11 @@ namespace Nqey.Api.Controllers
             { 
                 return Ok(new ApiResponse<ServiceRequest>(true, "No Service Requests"));
             }
-            return Ok(new ApiResponse<ServiceRequest>(true, "List Of Service Requests"));
+            return Ok(new ApiResponse<List<ServiceRequest>>(true, "List Of Service Requests",serviceRequests));
         }
-
+        [Authorize(Roles ="Admin")]
         [HttpGet]
-        [Route("id")]
+        [Route("{id}")]
         public async Task<IActionResult> GetServiceRequestById(int id)
         {
             var serviceRequest= await _serviceRequestRepo.GetServiceRequestByIdAsync(id);

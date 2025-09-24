@@ -10,10 +10,16 @@ namespace Nqey.Domain.Abstractions.Repositories
     {
         Task<Complaint> AddComplaintAsync(Complaint complaint);
         Task<Complaint> GetComplaintByIdAsync(int complaintId);
+        Task<List<Complaint>> GetAllUnresolvedComplaintsAsync();
+        Task<List<Complaint>> GetAllComplaintsAsync();
         Task<List<Complaint>> GetComplaintsByUserIdAsync(int userId);
+        Task<List<Complaint>> GetComplaintsAgainstUserIdAsync(int userId);
         Task<Complaint> UpdateComplaintAsync(Complaint complaint);
+        Task<Complaint> ResolveComplaintAsync(int complaintId);
+        Task<Complaint> DismissComplaintAsync(int complaintId);
 
-        //Task<Complaint> ReviewComplaintAsync();
+
+
         //Task<Complaint> Res
     }
 }

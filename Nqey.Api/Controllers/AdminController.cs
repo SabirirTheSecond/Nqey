@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Nqey.Api.Dtos;
 using Nqey.Api.Dtos.AdminDtos;
 using Nqey.DAL;
 using Nqey.Domain;
+using Nqey.Domain.Abstractions.Repositories;
 using Nqey.Domain.Common;
 
 namespace Nqey.Api.Controllers
@@ -15,10 +17,15 @@ namespace Nqey.Api.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly IMapper _mapper;
-        public AdminController(DataContext dataContext, IMapper mapper) 
+        private readonly IAdminRepository _adminRepository;
+        private readonly IUserRepository _userRepository;
+        public AdminController(DataContext dataContext, IMapper mapper, IAdminRepository adminRepository,
+            IUserRepository userRepository) 
         { 
             _dataContext = dataContext;
             _mapper = mapper;
+            _adminRepository = adminRepository;
+            _userRepository = userRepository;
         }
 
         [HttpGet]
@@ -44,5 +51,6 @@ namespace Nqey.Api.Controllers
             var mappedAdmin = _mapper.Map<AdminGetDto>(domainAdmin);
             return Ok(new ApiResponse<AdminGetDto>(true,"Admin added successfully",mappedAdmin));
         }
+      
     }
 }

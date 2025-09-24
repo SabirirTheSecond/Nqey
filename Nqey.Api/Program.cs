@@ -88,7 +88,8 @@ builder.Services.Configure<MLApiOptions>(builder.Configuration.GetSection("MLApi
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
-
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+builder.Services.AddScoped<ISubServiceRepository, SubServiceRepository>();
 
 // Add services to the container.
 // 1 load jwtSettings from config

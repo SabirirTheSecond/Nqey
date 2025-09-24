@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nqey.Api.Dtos;
 using Nqey.DAL;
+using Nqey.DAL.Repositories;
 using Nqey.Domain;
 using Nqey.Domain.Abstractions.Repositories;
 using Nqey.Domain.Common;
@@ -37,6 +39,34 @@ namespace Nqey.Api.Controllers
 
             var userGet = _mapper.Map<UserGetDto>(user);
             return Ok(new ApiResponse<UserGetDto>(true, "User:  ", userGet));
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPatch]
+        [Route("{userId}/activate")]
+        public async Task<IActionResult> ActivateUser(int userId)
+        {
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null) return NotFound(new ApiResponse<UserGetDto>(false, "User Not Found"));
+
+            await _userRepo.ActivateUser(userId);
+            var mappedUser = _mapper.Map<UserGetDto>(user);
+            return Ok(new ApiResponse<UserGetDto>(true, "User Account Activated", mappedUser));
+
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPatch]
+        [Route("{userId}/block")]
+        public async Task<IActionResult> BlockUser(int userId)
+        {
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null) return NotFound(new ApiResponse<UserGetDto>(false, "User Not Found"));
+
+            await _userRepo.BlockUser(userId);
+            var mappedUser = _mapper.Map<UserGetDto>(user);
+            return Ok(new ApiResponse<UserGetDto>(true, "User Account Blocked", mappedUser));
+
         }
 
 

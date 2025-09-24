@@ -19,6 +19,10 @@ namespace Nqey.Api.Automapper
                  .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.ProfileImage));
 
             CreateMap<ClientPostPutDto, UserPostPutDto>();
+            CreateMap<ClientPatchDto, Client>()
+                .ForMember(dest => dest.ProfileImage, opt => opt.Ignore())
+                .ForAllMembers(opt=> opt.Condition((src, dest, srcMember)=> srcMember!=null))
+                ;
 
         }
     }

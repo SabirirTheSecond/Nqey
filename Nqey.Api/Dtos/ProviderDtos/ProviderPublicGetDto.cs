@@ -26,6 +26,7 @@ namespace Nqey.Api.Dtos.ProviderDtos
         public int ServiceId { get; set; }
         //public Service Service { get; set; }
         public List<ReviewGetDto>? Reviews { get; set; }
+        public List<SubService>? SubServices { get; set; }
 
     }
 }

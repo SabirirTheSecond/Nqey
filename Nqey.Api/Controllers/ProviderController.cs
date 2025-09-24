@@ -68,25 +68,27 @@ namespace Nqey.Api.Controllers
 
         [Authorize(Roles = ("Provider,Admin"))]
         //[Authorize(Policy ="IsOwner")] IsOwner is only for reservations for the moment
-        [HttpPut]
-        [Route("{serviceId}/providers/{userId}/update")]
-        public async Task<IActionResult> UpdateProvider(int serviceId, int userId, [FromForm] ProviderPostPutDto providerPostPut)
+        [HttpPatch]
+        [Route("edit")]
+        public async Task<IActionResult> EditProvider([FromForm] ProviderPatchDto providerPatchDto)
         {
+            var userIdClaim = User.FindFirstValue("userId");
+            if(!int.TryParse(userIdClaim, out var userId))
+            {
+                return NotFound(new ApiResponse<Object>(false, "Could Not Determine User Identity, Please Log In" +
+                    "Again"));
+            }
+            
 
-            var service = await _serviceRepository.GetServiceByIdAsync(serviceId);
+            var existingProvider = await _providerRepository.GetProviderByIdAsync(userId);
+            _mapper.Map(providerPatchDto, existingProvider);
 
-            if (service == null)
-                return NotFound(new ApiResponse<Service>(false, "Service Not Found"));
-
-            var existingProvider = await _serviceRepository.GetProviderByIdAsync(userId);
-            _mapper.Map(providerPostPut, existingProvider);
-
-            var idImagePath = providerPostPut.IdentityPiece != null
-                 ? await _imageUploader.UploadImageToSupabase(providerPostPut.IdentityPiece)
+            var idImagePath = providerPatchDto.IdentityPiece != null
+                 ? await _imageUploader.UploadImageToSupabase(providerPatchDto.IdentityPiece)
                  : existingProvider.IdentityPiece?.ImagePath;
 
-            var selfiPath = providerPostPut.SelfieImage != null
-                ? await _imageUploader.UploadImageToSupabase(providerPostPut.SelfieImage)
+            var selfiPath = providerPatchDto.SelfieImage != null
+                ? await _imageUploader.UploadImageToSupabase(providerPatchDto.SelfieImage)
                 : existingProvider.SelfieImage?.ImagePath;
 
 
@@ -97,21 +99,21 @@ namespace Nqey.Api.Controllers
             }
 
             // Profile Image
-            if (providerPostPut.ProfileImage != null)
+            if (providerPatchDto.ProfileImage != null)
             {
                 existingProvider.ProfileImage = await _imageService.UploadImageSafe(
-                    providerPostPut.ProfileImage, existingProvider.UserId);
+                    providerPatchDto.ProfileImage, existingProvider.UserId);
             }
 
             // Portfolio Images
-            if (providerPostPut.Portfolio != null && providerPostPut.Portfolio.Any())
+            if (providerPatchDto.Portfolio != null && providerPatchDto.Portfolio.Any())
             {
                 existingProvider.Portfolio = await _imageService.UploadPortfolioImages(
-                    providerPostPut.Portfolio, existingProvider.UserId);
+                    providerPatchDto.Portfolio, existingProvider.UserId);
             }
 
             // IdentityPiece
-            if (providerPostPut.IdentityPiece != null)
+            if (providerPatchDto.IdentityPiece != null)
             {
                 existingProvider.IdentityPiece = new Image
                 {
@@ -120,21 +122,48 @@ namespace Nqey.Api.Controllers
             }
 
             // SelfieImage
-            if (providerPostPut.SelfieImage != null)
+            if (providerPatchDto.SelfieImage != null)
             {
                 existingProvider.SelfieImage = new Image
                 {
                     ImagePath = selfiPath,
                 };
             }
-            await _serviceRepository.UpdateProviderAsync(serviceId, existingProvider);
+            await _serviceRepository.UpdateProviderAsync(existingProvider.ServiceId, existingProvider);
             
-
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(existingProvider);
             return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider Updated Successfully", mappedProvider));
 
 
         }
+
+        [HttpPatch]
+        [Route("upload-portfolio")]
+        public async Task<IActionResult> UpdatePortfolio(List<IFormFile> portfolio)
+        {
+            var userIdClaim = User.FindFirstValue("userId");
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "Could Not Determine User Identity, Please Log In" +
+                    "Again"));
+            }
+            var provider = await _providerRepository.GetProviderByIdAsync(userId);
+            if (provider == null)
+            {
+                return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "Provider Not Found"));
+            }
+            if (portfolio == null || !portfolio.Any())
+            {
+                return BadRequest(new ApiResponse<ProviderPublicGetDto>(false, "Please Add At Least One Image"));
+               
+            }
+           var portfolioImages= await _imageService.UploadPortfolioImages(
+                      portfolio, provider.UserId);
+            await _providerRepository.UpdatePortfolio(userId, portfolioImages);
+            var mappedProvider = _mapper.Map<ProviderPublicGetDto>(provider);
+            return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Portfolio Uploaded Successfully",mappedProvider));
+        }
+
         [AllowAnonymous]
         [HttpGet]
         [Route("providers/{providerId}")]
@@ -273,6 +302,72 @@ namespace Nqey.Api.Controllers
             return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true, $"List of all providers", mappedProviders));
 
         }
+        // For Admin use:
+        [Authorize(Roles = ("Admin"))]
+        //[Authorize(Policy ="IsOwner")] IsOwner is only for reservations for the moment
+        [HttpPatch]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateProvider(int id,[FromForm] ProviderPatchDto providerPatchDto)
+        {
+           
+            var existingProvider = await _serviceRepository.GetProviderByIdAsync(id);
+            _mapper.Map(providerPatchDto, existingProvider);
+
+            var idImagePath = providerPatchDto.IdentityPiece != null
+                 ? await _imageUploader.UploadImageToSupabase(providerPatchDto.IdentityPiece)
+                 : existingProvider.IdentityPiece?.ImagePath;
+
+            var selfiPath = providerPatchDto.SelfieImage != null
+                ? await _imageUploader.UploadImageToSupabase(providerPatchDto.SelfieImage)
+                : existingProvider.SelfieImage?.ImagePath;
+
+
+            if (!existingProvider.IsIdentityVerified && idImagePath != null && selfiPath != null)
+            {
+                var isMatch = await _faceRecognitionService.VerifyFacesAsync(idImagePath, selfiPath);
+                existingProvider.IsIdentityVerified = isMatch;
+            }
+
+            // Profile Image
+            if (providerPatchDto.ProfileImage != null)
+            {
+                existingProvider.ProfileImage = await _imageService.UploadImageSafe(
+                    providerPatchDto.ProfileImage, existingProvider.UserId);
+            }
+
+            // Portfolio Images
+            if (providerPatchDto.Portfolio != null && providerPatchDto.Portfolio.Any())
+            {
+                existingProvider.Portfolio = await _imageService.UploadPortfolioImages(
+                    providerPatchDto.Portfolio, existingProvider.UserId);
+            }
+
+            // IdentityPiece
+            if (providerPatchDto.IdentityPiece != null)
+            {
+                existingProvider.IdentityPiece = new Image
+                {
+                    ImagePath = idImagePath,
+                };
+            }
+
+            // SelfieImage
+            if (providerPatchDto.SelfieImage != null)
+            {
+                existingProvider.SelfieImage = new Image
+                {
+                    ImagePath = selfiPath,
+                };
+            }
+            await _serviceRepository.UpdateProviderAsync(existingProvider.ServiceId, existingProvider);
+
+
+            var mappedProvider = _mapper.Map<ProviderPublicGetDto>(existingProvider);
+            return Ok(new ApiResponse<ProviderPublicGetDto>(true, "Provider Updated Successfully", mappedProvider));
+
+
+        }
+        
 
     }
 

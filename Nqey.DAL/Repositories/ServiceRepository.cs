@@ -50,6 +50,8 @@ namespace Nqey.DAL.Repositories
         {
             var service = await _dataContext.Services
                 .FirstOrDefaultAsync(s=>s.ServiceId == id);
+            if (service == null)
+                return null;
             _dataContext.Services.Remove(service);
             await _dataContext.SaveChangesAsync();
 
@@ -173,35 +175,7 @@ namespace Nqey.DAL.Repositories
             return provider;
         }
 
-        public async Task<List<Provider>> GetPreRegisteredProviders()
-        {
-            var providers = await _dataContext.Providers
-                .Where(p => p.ServiceId == 35)
-                .Include(p => p.Reviews)
-                .Include(p => p.ProfileImage)
-                .Include(p => p.Location)
-                .Include(p => p.Portfolio)
-                .ToListAsync();
-            if (!providers.Any())
-            {
-                return null;
-            }
-            return providers;
-        }
-        public async Task<Provider> GetPreRegisteredProviderById(int userId)
-        {
-            var provider = await _dataContext.Providers
-                .Where(p => p.ServiceId == 35)
-                .Include(p => p.Reviews)
-                .Include(p => p.ProfileImage)
-                .Include(p => p.Location)
-                .Include(p => p.Portfolio)
-                .FirstOrDefaultAsync(p=>p.UserId == userId);
-            if (provider == null)
-                return null;
-            return provider;
-
-
-        }
+       
+       
     }
 }

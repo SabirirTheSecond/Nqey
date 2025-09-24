@@ -20,15 +20,17 @@ namespace Nqey.Api.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IClientRepository _clientRepository;
         private readonly IImageUploaderService _imageUploader;
+        private readonly IProviderRepository _providerRepository;
        public ReservationController(IMapper mapper, IReservationService reservationService,
            IUserRepository userRepository, IClientRepository clientRepository,
-           IImageUploaderService imageUploader) 
+           IImageUploaderService imageUploader, IProviderRepository providerRepo) 
         {
             _mapper = mapper;
             _reservationService = reservationService;
             _userRepository = userRepository;
             _clientRepository = clientRepository;
             _imageUploader = imageUploader;
+            _providerRepository = providerRepo;
         }
         [HttpGet]
         [Authorize(Roles ="Admin")]
@@ -225,7 +227,7 @@ namespace Nqey.Api.Controllers
         [Authorize(Roles = "Client")]
         [HttpPut]
         [Route("{id}/change")]
-        public async Task<IActionResult> ChangeReservation(int providerId,
+        public async Task<IActionResult> ChangeReservation(
             int id, [FromForm] ReservationPostPutDto reservationPostPut)
         {
             var userIdClaim = User.FindFirstValue("userId");
@@ -242,14 +244,39 @@ namespace Nqey.Api.Controllers
             
             if (existingReservation.Status == ReservationStatus.Accepted)
                 return BadRequest(new ApiResponse<Reservation>(false, "Reservation Is Already Accepted"));
+
+            var location = _mapper.Map<Location>(reservationPostPut.LocationDto);
+            var jobDescription = _mapper.Map<JobDescription>(reservationPostPut.JobDescription);
             
-            var updatedData = _mapper.Map<Reservation>(reservationPostPut);
-            updatedData.ClientUserId = existingReservation.ClientUserId;
-            updatedData.ProviderUserId= existingReservation.ProviderUserId;
-            updatedData.Status = existingReservation.Status;
-            updatedData.CreatedAt= existingReservation.CreatedAt;
-            
-            var updatedReservation = await _reservationService.UpdateReservationAsync(id, updatedData);
+            string? imagePath = null;
+            existingReservation.Location = location;
+            var images = reservationPostPut.JobDescription?.Images;
+
+            if (images != null && images.Any())
+            {
+                jobDescription.Images = new List<Image>();
+                foreach (var file in reservationPostPut.JobDescription.Images)
+
+                {
+                    try
+                    {
+                        imagePath = await _imageUploader.UploadImageToSupabase((IFormFile)file);
+                        jobDescription.Images.Add(new Image
+                        {
+                            ImagePath = imagePath
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(500, new ApiResponse<string>(false, "Failed to upload job images to Supabase", ex.Message));
+
+                    }
+                }
+
+            }
+            existingReservation.JobDescription = jobDescription;
+
+            var updatedReservation = await _reservationService.UpdateReservationAsync(id, existingReservation);
             var mappedReservation = _mapper.Map<ReservationGetDto>(updatedReservation);
 
             return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Updated Successfully", mappedReservation));
@@ -281,7 +308,13 @@ namespace Nqey.Api.Controllers
         public async Task<IActionResult> AcceptReservation(int id)
         {
             var existing = await _reservationService.GetReservationByIdAsync(id);
-
+            var userIdClaim = User.FindFirstValue("userId");
+            if(!int.TryParse(userIdClaim, out var userId))
+            {
+                return NotFound(new ApiResponse<Reservation>(false, "Could Not Determine User Identity," +
+                    "Please Log In Again Or Contact Support"));
+            }
+            var provider = await _providerRepository.GetProviderByIdAsync(userId);
             if (existing == null)
                 return NotFound(new ApiResponse<Reservation>(false, "Reservation Not Found"));
 
@@ -289,7 +322,36 @@ namespace Nqey.Api.Controllers
             {
                 await _reservationService.AcceptReservationAsync(id);
                 var mappedReservation = _mapper.Map<ReservationGetDto>(existing);
+                provider.AnalyticalVariables.Accepts += 1;
                 return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Accepted",mappedReservation));
+            }
+            return BadRequest(new ApiResponse<Reservation>(false, "Reservation Is Either Accepted Already Or Cancelled"));
+
+        }
+        [Authorize(Roles = "Provider")]
+        [Authorize(Policy = "ActiveAccountOnly")]
+        [Authorize(Policy = "IsReservationOwner")]
+        [HttpPut]
+        [Route("{id}/refuse")]
+        public async Task<IActionResult> RefuseReservation(int id)
+        {
+            var existing = await _reservationService.GetReservationByIdAsync(id);
+            var userIdClaim = User.FindFirstValue("userId");
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return NotFound(new ApiResponse<Reservation>(false, "Could Not Determine User Identity," +
+                    "Please Log In Again Or Contact Support"));
+            }
+            var provider = await _providerRepository.GetProviderByIdAsync(userId);
+            if (existing == null)
+                return NotFound(new ApiResponse<Reservation>(false, "Reservation Not Found"));
+
+            if (existing.Status == ReservationStatus.Pending)
+            {
+                await _reservationService.RefuseReservationAsync(id);
+                var mappedReservation = _mapper.Map<ReservationGetDto>(existing);
+                provider.AnalyticalVariables.Refuses += 1;
+                return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Rejected", mappedReservation));
             }
             return BadRequest(new ApiResponse<Reservation>(false, "Reservation Is Either Accepted Already Or Cancelled"));
 
@@ -305,11 +367,14 @@ namespace Nqey.Api.Controllers
 
             if (existing == null)
                 return NotFound(new ApiResponse<Reservation>(false, "Reservation Not Found"));
-
+            var provider = await _providerRepository.GetProviderByIdAsync(existing.ProviderUserId);
             if (existing.Status == ReservationStatus.Accepted)
             {
                 await _reservationService.CompletedReservationAsync(id);
                 var mappedReservation = _mapper.Map<ReservationGetDto>(existing);
+                provider.AnalyticalVariables.JobsDone += 1;
+                provider.AnalyticalVariables.Completions += 1;
+                provider.JobsDone += 1;
                 return Ok(new ApiResponse<ReservationGetDto>(true, "Reservation Completed", mappedReservation));
             }
             return BadRequest(new ApiResponse<Reservation>(false, "You Can Only Mark An Accepted Reservation As Completed"));

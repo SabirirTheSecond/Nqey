@@ -13,8 +13,30 @@ namespace Nqey.Api.Controllers
     [ApiController]
     [Route("api/[Controller]")]
     public class ComplaintController(IComplaintRepository complaintRepository,
-        IMapper mapper, IUserRepository userRepo, IImageService imageService) : Controller
+        IMapper mapper, IUserRepository userRepo, IImageService imageService,
+        IProviderRepository providerRepository, IClientRepository clientRepository) : Controller
     {
+
+        [Authorize(Roles ="Admin")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllComplaints()
+        {
+           var complaints= await complaintRepository.GetAllComplaintsAsync();
+            var mappedComplaints = mapper.Map<List<ComplaintGetDto>>(complaints);
+
+            return Ok(new ApiResponse<List<ComplaintGetDto>>(true, "List Of All Complaints", mappedComplaints));
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpGet("unresolved")]
+        public async Task<IActionResult> GetAllUnresolvedComplaints()
+        {
+            var complaints = await complaintRepository.GetAllUnresolvedComplaintsAsync();
+            var mappedComplaints = mapper.Map<List<ComplaintGetDto>>(complaints);
+
+            return Ok(new ApiResponse<List<ComplaintGetDto>>(true, "List Of All Unresolved Complaints", mappedComplaints));
+        }
+        
+
 
         [Authorize]
         [HttpPost]
@@ -26,11 +48,12 @@ namespace Nqey.Api.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden,
                     new ApiResponse<Complaint>(false, "Problem Occured with your authentication, Please Login"));
             }
+            var reporter = await userRepo.GetByIdAsync(userId);
             var reportedUser = await userRepo.GetByIdAsync(complaintPostPut.ReportedUserId!.Value);
 
             if (reportedUser == null || reportedUser.AccountStatus == AccountStatus.Blocked)
             {
-                return NotFound(new ApiResponse<Complaint>(false, "User Not Found, Either Don't Exist Or Suspended"));
+                return NotFound(new ApiResponse<Complaint>(false, "User Not Found, Either Not Existing Or Suspended"));
             }
 
             var domainComplaint = mapper.Map<Complaint>(complaintPostPut);
@@ -42,30 +65,54 @@ namespace Nqey.Api.Controllers
                 domainComplaint.Attachments = await imageService.UploadAttachmentImages(
                     complaintPostPut.Attachments, domainComplaint.ComplaintId);
             }
+            if (reporter is Provider reportingProvider)
+                reportingProvider.AnalyticalVariables.FiledComplaintsCount++;
+
+            if (reportedUser is Provider reportedProvider)
+                reportedProvider.AnalyticalVariables.ComplaintsAgainstCount++;
+
             await complaintRepository.AddComplaintAsync(domainComplaint);
             var mappedComplaint = mapper.Map<ComplaintGetDto>(domainComplaint);
 
             return Ok(new ApiResponse<ComplaintGetDto>(true,
                      "Complaint Submitted Successfully", mappedComplaint));
         }
-        [Authorize(Roles =("Admin"))]
+        [Authorize(Roles =("Admin,Client"))]
         [HttpGet("complaints/{userId}")]
 
         public async Task<IActionResult> GetComplaintsByUserId(int userId)
         {
           
             var user = await userRepo.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new ApiResponse<ComplaintGetDto>(false, "User Not Found"));
+            }
             var complaints = await complaintRepository.GetComplaintsByUserIdAsync(userId);
 
             var mappedComplaints = mapper.Map<List<ComplaintGetDto>>(complaints);
             return Ok(new ApiResponse<List<ComplaintGetDto>>(true,$"List Of Complaints Filed By {user.UserName}",
                 mappedComplaints));
         }
+        [Authorize(Roles = ("Admin"))]
+        [HttpGet("complaints-against/{userId}")]
 
-        // --- Implement ComplaintsAgainstUser later--------
-        //------
+        public async Task<IActionResult> GetComplaintsAgainstUserId(int userId)
+        {
 
-        [HttpGet("complaintId")]
+            var user = await userRepo.GetByIdAsync(userId);
+            if( user == null)
+            {
+                return NotFound(new ApiResponse<ComplaintGetDto>(false, "User Not Found"));
+            }
+            var complaints = await complaintRepository.GetComplaintsAgainstUserIdAsync(userId);
+
+            var mappedComplaints = mapper.Map<List<ComplaintGetDto>>(complaints);
+            return Ok(new ApiResponse<List<ComplaintGetDto>>(true, $"List Of Complaints Filed Against {user.UserName}",
+                mappedComplaints));
+        }
+
+        [HttpGet("{complaintId}")]
 
         public async Task<IActionResult> GetComplaintById(int complaintId)
         {
@@ -78,6 +125,28 @@ namespace Nqey.Api.Controllers
                 mappedComplaint));
         }
 
+        [Authorize(Roles ="Admin")]
+        [HttpPatch("{complaintId}/resolve")]
+        public async Task<IActionResult> ResolveComplaint(int complaintId)
+        {
+            var complaint = await complaintRepository.GetComplaintByIdAsync(complaintId);
+            if (complaint == null)
+                return NotFound(new ApiResponse<ComplaintGetDto>(false, "Complaint Not Found"));
+            await complaintRepository.ResolveComplaintAsync(complaintId);
+            var mappedComplaint = mapper.Map<ComplaintGetDto>(complaint);
+            return Ok(new ApiResponse<ComplaintGetDto>(true, "Complaint Resolved",mappedComplaint));
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("{complaintId}/dismiss")]
+        public async Task<IActionResult> DismissComplaint(int complaintId)
+        {
+            var complaint = await complaintRepository.GetComplaintByIdAsync(complaintId);
+            if (complaint == null)
+                return NotFound(new ApiResponse<ComplaintGetDto>(false, "Complaint Not Found"));
+            await complaintRepository.DismissComplaintAsync(complaintId);
+            var mappedComplaint = mapper.Map<ComplaintGetDto>(complaint);
+            return Ok(new ApiResponse<ComplaintGetDto>(true, "Complaint Dismissed", mappedComplaint));
+        }
 
 
     }

@@ -35,10 +35,8 @@ namespace Nqey.Services.Services
             var existing = await GetReservationByIdAsync(id);
             if (existing == null)
                 return null;
-            existing.StartDate = updatedData.StartDate;
-            existing.EndDate = updatedData.EndDate;
-     
-           existing.Events.Add(new ReservationEvent
+           
+            existing.Events.Add(new ReservationEvent
             { ReservationEventType = ReservationEventType.Changed,
                 CreatedAt = DateTime.UtcNow,
             Notes = "Reservation updated"
@@ -46,7 +44,7 @@ namespace Nqey.Services.Services
             );
 
             // modify this so it can only updates dates
-            
+             _dataContext.Update(updatedData);
             await _dataContext.SaveChangesAsync();
             return existing;
 
@@ -60,7 +58,8 @@ namespace Nqey.Services.Services
 
             if (toAccept == null)
                 return null;
-
+            var provider = await _dataContext.Providers.FirstOrDefaultAsync(p => p.UserId == toAccept.ProviderUserId);
+            provider.AnalyticalVariables.Accepts++;
             toAccept.Status = ReservationStatus.Accepted;
             // Booking timeline tracker
             toAccept.Events.Add(
@@ -75,6 +74,30 @@ namespace Nqey.Services.Services
             return toAccept;
 
         }
+        public async Task<Reservation> RefuseReservationAsync(int id)
+        {
+            var toRefuse = await _dataContext.Reservations
+                .Include(r => r.Client)
+                .Include(r => r.Provider)
+                .FirstOrDefaultAsync(r => r.ReservationId == id);
+
+            if (toRefuse == null)
+                return null;
+            var provider =await _dataContext.Providers.FirstOrDefaultAsync(p=>p.UserId== toRefuse.ProviderUserId);
+            provider.AnalyticalVariables.Refuses++;
+            toRefuse.Status = ReservationStatus.Cancelled;
+            // Booking timeline tracker
+            toRefuse.Events.Add(
+                new ReservationEvent
+                {
+                    ReservationEventType = ReservationEventType.Rejected,
+                    CreatedAt = DateTime.UtcNow,
+                    Notes = "Reservation Rejected"
+                }
+                );
+            await _dataContext.SaveChangesAsync();
+            return toRefuse;
+        }
         public async Task<Reservation> CompletedReservationAsync(int id)
         {
             var toComplete = await _dataContext.Reservations
@@ -84,7 +107,8 @@ namespace Nqey.Services.Services
 
             if (toComplete == null)
                 return null;
-
+            var provider = await _dataContext.Providers.FirstOrDefaultAsync(p => p.UserId == toComplete.ProviderUserId);
+            provider.AnalyticalVariables.Completions++;
             toComplete.Status = ReservationStatus.Completed;
             // Booking timeline tracker
             toComplete.Events.Add(

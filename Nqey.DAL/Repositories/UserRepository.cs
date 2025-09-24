@@ -97,5 +97,26 @@ namespace Nqey.DAL.Repositories
 
             return userId;
         }
+        public async Task<User> ActivateUser(int userId)
+        {
+            var user = await GetByIdAsync(userId);
+            if (user == null)
+                return null;
+
+            user.AccountStatus = AccountStatus.Active;
+            await _dataContext.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<User> BlockUser(int userId)
+        {
+            var user = await GetByIdAsync(userId);
+            if (user == null)
+                return null;
+
+            user.AccountStatus = AccountStatus.Blocked;
+            await _dataContext.SaveChangesAsync();
+            return user;
+        }
     }
 }
