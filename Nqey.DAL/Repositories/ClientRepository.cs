@@ -31,6 +31,7 @@ namespace Nqey.DAL.Repositories
             if (toDelete == null)
                 return null;
             _dataContext.Clients.Remove(toDelete);
+            _dataContext.Users.Remove(toDelete);
             await _dataContext.SaveChangesAsync();
             return toDelete;
         }

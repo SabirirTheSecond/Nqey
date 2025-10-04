@@ -6,7 +6,7 @@ namespace Nqey.Api.Dtos.ProviderDtos
 {
     public class ProviderPostPutDto
     {
-        //public int ProviderId { get; set; }
+        public int? ServiceId { get; set; }
         public string UserName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -17,6 +17,8 @@ namespace Nqey.Api.Dtos.ProviderDtos
         public string ServiceDescription { get; set; }
         //public SubService SubService { get; set; }
         public string Email { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public Sex? Sex { get; set; }
         public string Password { get; set; }
         public string PhoneNumber { get; set; }
         public LocationDto Location { get; set; }

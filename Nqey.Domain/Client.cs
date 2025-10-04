@@ -8,7 +8,7 @@ using Nqey.Domain.Common;
 
 namespace Nqey.Domain
 {
-    public enum AccountStatus { Active, Blocked };
+    public enum AccountStatus { Active, Blocked, Processing };
     public class Client: User
     {
 

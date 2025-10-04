@@ -69,6 +69,17 @@ namespace Nqey.DAL.Repositories
             return service;
             
         }
+        public async Task<Service> GetServiceByServiceName(string serviceName)
+        {
+            var service = await _dataContext.Services
+                .Include(s=>s.Providers)
+                .Include(s=>s.ServiceImage)
+                .FirstOrDefaultAsync(s=> s.NameEn == serviceName|| s.NameFr== serviceName 
+                || s.NameAr == serviceName);
+            if (service == null)
+                return null;
+            return service;
+        }
 
         public async Task<Service> UpdateServiceAsync(Service updatedService)
         {

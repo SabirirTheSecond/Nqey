@@ -11,7 +11,7 @@ using Nqey.Domain.Common;
 namespace Nqey.Domain
 {
     public enum Role { Client, Provider, Admin }
-    
+    public enum Sex { Male, Female}
 
     public abstract class User
     {
@@ -22,6 +22,8 @@ namespace Nqey.Domain
         [Required]
         public required string Email { get; set; }
         [Required]
+        public DateTime? BirthDate { get; set; }
+        public Sex? Sex { get; set; }
         public  string PasswordHash { get;  set; }
         public string PhoneNumber { get; set; }
         public string? EmailConfirmed { get; set; }

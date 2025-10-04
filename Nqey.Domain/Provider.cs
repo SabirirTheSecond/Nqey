@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,12 +34,32 @@ namespace Nqey.Domain
         public ServiceRequest? ServiceRequest { get; set; }
 
         public ProviderAnalytics ProviderAnalytics { get; set; } = new();
-        
+
+        [NotMapped]
+        public double AverageRating
+        {
+            
+            get
+            {
+                //double sum = 0;
+                //foreach (var item in Reviews)
+                //{
+                //    sum += item.Stars;
+                //}
+                //return sum / Reviews.Count;
+                if (Reviews == null || Reviews.Count == 0)
+                    return 0;
+
+                return Reviews.Average(r => (double)r.Stars);
+            }
+
+        }
+
         public Provider()
         {
 
             UserRole = Role.Provider;
-            AccountStatus = AccountStatus.Blocked;
+            AccountStatus = AccountStatus.Processing;
 
         }
         

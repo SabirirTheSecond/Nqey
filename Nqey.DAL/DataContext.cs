@@ -95,6 +95,9 @@ namespace Nqey.DAL
             modelBuilder.Entity<User>()
                 .Property(u => u.AccountStatus)
                 .HasConversion<string>();
+            modelBuilder.Entity<User>()
+                .Property(u => u.Sex)
+                .HasConversion<string>();
 
             modelBuilder.Entity<User>()
                 .Property(u => u.UserRole)

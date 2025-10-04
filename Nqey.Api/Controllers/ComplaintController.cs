@@ -39,6 +39,7 @@ namespace Nqey.Api.Controllers
 
 
         [Authorize]
+        //[Authorize(Policy ="IsActiveAccount")]
         [HttpPost]
         public async Task<IActionResult> SendComplaint([FromForm] ComplaintPostPutDto complaintPostPut)
         {
@@ -48,6 +49,8 @@ namespace Nqey.Api.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden,
                     new ApiResponse<Complaint>(false, "Problem Occured with your authentication, Please Login"));
             }
+            if (complaintPostPut.ReportedUserId == null || complaintPostPut.ReportedUserId == 0)
+                complaintPostPut.ReportedUserId = 1;
             var reporter = await userRepo.GetByIdAsync(userId);
             var reportedUser = await userRepo.GetByIdAsync(complaintPostPut.ReportedUserId!.Value);
 

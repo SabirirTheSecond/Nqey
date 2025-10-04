@@ -22,6 +22,7 @@ namespace Nqey.Api.Controllers
             _mapper = mapper;
 
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult> GetAllUsers()
         {
@@ -29,6 +30,7 @@ namespace Nqey.Api.Controllers
             var usersGet = _mapper.Map<List<UserGetDto>>(users);
             return Ok(new ApiResponse<List<UserGetDto>>(true, "List of users ",usersGet));
         }
+        [Authorize(Roles ="Admin")]
         [HttpGet]
         [Route("userId")]
         public async Task<ActionResult> GetUserById(int userId)

@@ -23,13 +23,17 @@ namespace Nqey.DAL.Repositories
         public async Task<List<Provider>> GetAllProvidersAsync()
         {
             var providers = await _dataContext.Providers
-                .Where(p=>p.AccountStatus != AccountStatus.Blocked)
+                //.Where(p=>p.AccountStatus != AccountStatus.Blocked)
                 .Include(p=> p.Reviews)
                 .Include(p=>p.ProfileImage)
                 .Include(p => p.Portfolio)
                 .Include (p => p.Location)
+                .Include(p => p.IdentityPiece)
+               .Include(p => p.SelfieImage)
                  .Include(p => p.SentMessages)
                 .Include(p => p.ReceivedMessages)
+                .Include(p=>p.FiledComplaints)
+                .Include(p=>p.ComplaintsAgainst)
                 .ToListAsync();
 
 
@@ -44,6 +48,8 @@ namespace Nqey.DAL.Repositories
                 .Include(p => p.ProfileImage)
                 .Include(p => p.Location)
                 .Include(p => p.Portfolio)
+                .Include(p => p.FiledComplaints)
+                .Include(p => p.ComplaintsAgainst)
                 .ToListAsync();
             if (providers == null)
                 return null;
@@ -58,12 +64,17 @@ namespace Nqey.DAL.Repositories
                .Include(p => p.ProfileImage)
                .Include(p => p.Location)
                .Include(p => p.Portfolio)
+               .Include(p=>p.IdentityPiece)
+               .Include(p=>p.SelfieImage)
                 .Include(p => p.SentMessages)
                 .Include(p => p.ReceivedMessages)
+                .Include(p => p.FiledComplaints)
+                .Include(p => p.ComplaintsAgainst)
                .FirstOrDefaultAsync(p =>
 
                        p.UserId == userId
                    );
+            Console.WriteLine(provider.AverageRating);
 
             if (provider == null)
                 return null;

@@ -180,8 +180,8 @@ namespace Nqey.Api.Controllers
         }
         
         [HttpPost]
-        [Route("{serviceId}/providers")]
-        public async Task<IActionResult> AddProvider(int? serviceId, [FromForm] ProviderPostPutDto providerPostPut)
+        [Route("providers")]
+        public async Task<IActionResult> AddProvider( [FromForm] ProviderPostPutDto providerPostPut)
         {
 
             var idImagePath = providerPostPut.IdentityPiece != null ?
@@ -206,7 +206,7 @@ namespace Nqey.Api.Controllers
             if (isMatch) domainProvider.IsIdentityVerified = true;
             Console.WriteLine($"Identity  verified ? :{isMatch}");
 
-            await _serviceRepository.AddProviderAsync(serviceId, domainProvider);         
+            await _serviceRepository.AddProviderAsync(providerPostPut.ServiceId, domainProvider);         
             if (providerPostPut.ProfileImage != null)
             {
 
@@ -238,7 +238,7 @@ namespace Nqey.Api.Controllers
             }
 
 
-            await _serviceRepository.UpdateProviderAsync(serviceId, domainProvider);
+            await _serviceRepository.UpdateProviderAsync(providerPostPut.ServiceId, domainProvider);
 
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(domainProvider);
 
@@ -307,7 +307,7 @@ namespace Nqey.Api.Controllers
         //[Authorize(Policy ="IsOwner")] IsOwner is only for reservations for the moment
         [HttpPatch]
         [Route("{id}")]
-        public async Task<IActionResult> UpdateProvider(int id,[FromForm] ProviderPatchDto providerPatchDto)
+        public async Task<IActionResult> UpdateProvider(int id,[FromForm] ProviderAdminPatchDto providerPatchDto)
         {
            
             var existingProvider = await _serviceRepository.GetProviderByIdAsync(id);

@@ -226,10 +226,10 @@ namespace Nqey.Api.Controllers
         }
 
         [Authorize(Roles = "Client")]
-        [HttpPut]
+        [HttpPatch]
         [Route("{id}/change")]
         public async Task<IActionResult> ChangeReservation(
-            int id, [FromForm] ReservationPostPutDto reservationPostPut)
+            int id, [FromForm] ReservationPatchDto reservationPatchDto)
         {
             var userIdClaim = User.FindFirstValue("userId");
             if(!int.TryParse(userIdClaim, out var userId))
@@ -246,17 +246,17 @@ namespace Nqey.Api.Controllers
             if (existingReservation.Status == ReservationStatus.Accepted)
                 return BadRequest(new ApiResponse<Reservation>(false, "Reservation Is Already Accepted"));
 
-            var location = _mapper.Map<Location>(reservationPostPut.LocationDto);
-            var jobDescription = _mapper.Map<JobDescription>(reservationPostPut.JobDescription);
+            var location = _mapper.Map<Location>(reservationPatchDto.LocationDto);
+            var jobDescription = _mapper.Map<JobDescription>(reservationPatchDto.JobDescription);
             
             string? imagePath = null;
-            existingReservation.Location = location;
-            var images = reservationPostPut.JobDescription?.Images;
+            
+            var images = reservationPatchDto.JobDescription?.Images;
 
             if (images != null && images.Any())
             {
                 jobDescription.Images = new List<Image>();
-                foreach (var file in reservationPostPut.JobDescription.Images)
+                foreach (var file in reservationPatchDto.JobDescription.Images)
 
                 {
                     try
@@ -275,7 +275,14 @@ namespace Nqey.Api.Controllers
                 }
 
             }
-            existingReservation.JobDescription = jobDescription;
+            if(location != null)
+                existingReservation.Location = location;
+            if (jobDescription !=null)
+                existingReservation.JobDescription = jobDescription;
+            if(reservationPatchDto.StartDate != null)
+                existingReservation.StartDate = (DateTime)reservationPatchDto.StartDate;
+            if (reservationPatchDto.EndDate != null)
+                existingReservation.EndDate = (DateTime)reservationPatchDto.EndDate;
 
             var updatedReservation = await _reservationService.UpdateReservationAsync(id, existingReservation);
             var mappedReservation = _mapper.Map<ReservationGetDto>(updatedReservation);

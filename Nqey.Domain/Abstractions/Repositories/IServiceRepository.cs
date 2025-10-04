@@ -10,6 +10,7 @@ namespace Nqey.Domain.Abstractions.Repositories
     {
         Task<List<Service>> GetServicesAsync();
         Task<Service> GetServiceByIdAsync(int? id);
+        Task<Service> GetServiceByServiceName(string serviceName);
         Task<Service> AddServiceAsync(Service service);
         Task<Service> UpdateServiceAsync(Service service);
         Task<Service> DeleteServiceAsync(int id);

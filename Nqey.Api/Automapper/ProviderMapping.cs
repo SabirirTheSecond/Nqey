@@ -24,7 +24,13 @@ namespace Nqey.Api.Automapper
             .ForMember(dest => dest.SelfieImage, opt => opt.Ignore())
             .ForAllMembers(opt=>opt.Condition((src,dest,srcMember)=>srcMember !=null))
             ;
-
+            CreateMap<ProviderAdminPatchDto, Provider>()
+           .ForMember(dest => dest.ProfileImage, opt => opt.Ignore())
+           .ForMember(dest => dest.Portfolio, opt => opt.Ignore())
+           .ForMember(dest => dest.IdentityPiece, opt => opt.Ignore())
+           .ForMember(dest => dest.SelfieImage, opt => opt.Ignore())
+           .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null))
+           ;
             CreateMap<Provider, ProviderPublicGetDto>()
                 .ForMember(dest => dest.ProfileImage, opt => opt
                     .MapFrom(src => src.ProfileImage != null ? 
@@ -35,8 +41,9 @@ namespace Nqey.Api.Automapper
                          } : null 
                          ))
                 .ForMember(dest => dest.Portfolio, opt => opt.MapFrom(src => src.Portfolio))
-                .ForMember(dest => dest.IdentityPiece, opt => opt.MapFrom(src => src.IdentityPiece))
-                .ForMember(dest => dest.SelfieImage, opt => opt.MapFrom(src => src.SelfieImage)); ;
+                //.ForMember(dest => dest.IdentityPiece, opt => opt.MapFrom(src => src.IdentityPiece))
+                //.ForMember(dest => dest.SelfieImage, opt => opt.MapFrom(src => src.SelfieImage)); 
+            ;
                 
             CreateMap<Provider, ProviderAdminGetDto>()
                 .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src => src.ProfileImage))

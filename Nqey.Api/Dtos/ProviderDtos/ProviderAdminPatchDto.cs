@@ -2,10 +2,9 @@
 
 namespace Nqey.Api.Dtos.ProviderDtos
 {
-    public class ProviderPatchDto
+    public class ProviderAdminPatchDto
     {
-
-
+        public int? ServiceId { get; set; }
         public string? UserName { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
@@ -21,8 +20,5 @@ namespace Nqey.Api.Dtos.ProviderDtos
         public string? Password { get; set; }
         public string? PhoneNumber { get; set; }
         public LocationDto? Location { get; set; }
-
-
-
     }
 }

@@ -17,6 +17,11 @@ namespace Nqey.Api.Automapper
                 .ForMember(dest => dest.Location, opt => opt.Ignore())
                 .ForPath(dest => dest.JobDescription.Images, opt=> opt.Ignore())
                 ;
+            CreateMap<ReservationPatchDto, Reservation>()
+                .ForMember(dest => dest.JobDescription, opt => opt.Ignore())
+                .ForMember(dest => dest.Location, opt => opt.Ignore())
+                .ForPath(dest => dest.JobDescription.Images, opt => opt.Ignore())
+                ;
             CreateMap<Reservation, ReservationGetDto>();
             CreateMap<ReservationEvent, ReservationEventDto>()
                 ;

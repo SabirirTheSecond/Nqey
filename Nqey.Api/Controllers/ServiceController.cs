@@ -54,8 +54,17 @@ namespace Nqey.Api.Controllers
             var servicesGet = _mapper.Map<List<ServicePublicGetDto>>(services);
             return Ok(new ApiResponse<List<ServicePublicGetDto>>(true, "Services List", servicesGet));
         }
-
-        //[Authorize(Roles = "Client,Admin")]
+        [HttpGet("service-name")]
+        public async Task<IActionResult> GetServiceByName(string serviceName)
+        {
+            var service = await _serviceRepository.GetServiceByServiceName(serviceName);
+            if (service == null) {
+                return NotFound(new ApiResponse<Service>(false, "Service Not Found"));
+            }
+            var mappedService = _mapper.Map<ServicePublicGetDto>(service);
+            return Ok(new ApiResponse<ServicePublicGetDto>(true, $"Service {mappedService.NameEn}", mappedService));
+        }
+                //[Authorize(Roles = "Client,Admin")]
         [Route("{serviceId}")]
         [HttpGet]
         public async Task<IActionResult> GetServiceById(int serviceId)
