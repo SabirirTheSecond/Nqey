@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Nqey.Domain;
 using Nqey.Domain.Abstractions.Repositories;
+using Nqey.Domain.Common;
 
 namespace Nqey.DAL.Repositories
 {
@@ -34,7 +35,9 @@ namespace Nqey.DAL.Repositories
         {
             var complaint = await dataContext.Complaints
                  .Include(c => c.Reporter)
+                    .ThenInclude(c=>c.ProfileImage)
                 .Include(c => c.ReportedUser)
+                    .ThenInclude(c =>c.ProfileImage)
                 .Include(c => c.Attachments)
                 .FirstOrDefaultAsync(c=> c.ComplaintId == complaintId);
            

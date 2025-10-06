@@ -15,7 +15,7 @@ namespace Nqey.Domain
         public int? ProviderUserId { get; set; }
         public Provider? Provider { get; set; }
 
-        public ServiceRequestStatus ServiceRequestStatus = ServiceRequestStatus.Pending;
+        public ServiceRequestStatus ServiceRequestStatus { get; set; } = ServiceRequestStatus.Pending;
 
     }
 }

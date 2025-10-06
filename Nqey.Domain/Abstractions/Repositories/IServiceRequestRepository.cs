@@ -13,6 +13,8 @@ namespace Nqey.Domain.Abstractions.Repositories
         Task<ServiceRequest> UpdateServiceRequestAsync(ServiceRequest serviceRequest);
         Task<ServiceRequest> DeleteServiceRequestAsync(int id);
         Task<ServiceRequest> AddServiceRequestAsync(ServiceRequest serviceRequest, int providerUserId);
+         Task<ServiceRequest> RefuseServiceRequestAsync(int id);
+        Task<ServiceRequest> AcceptServiceRequestAsync(int id);
 
     }
 }

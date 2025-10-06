@@ -28,48 +28,74 @@ namespace Nqey.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetServiceRequests()
         {
-            var serviceRequests= await _serviceRequestRepo.GetAllServiceReqquestsAsync();
+            var serviceRequests = await _serviceRequestRepo.GetAllServiceReqquestsAsync();
             if (serviceRequests == null)
-            { 
+            {
                 return Ok(new ApiResponse<ServiceRequest>(true, "No Service Requests"));
             }
-            return Ok(new ApiResponse<List<ServiceRequest>>(true, "List Of Service Requests",serviceRequests));
+            return Ok(new ApiResponse<List<ServiceRequest>>(true, "List Of Service Requests", serviceRequests));
         }
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetServiceRequestById(int id)
         {
-            var serviceRequest= await _serviceRequestRepo.GetServiceRequestByIdAsync(id);
+            var serviceRequest = await _serviceRequestRepo.GetServiceRequestByIdAsync(id);
             if (serviceRequest == null)
             {
                 return NotFound(new ApiResponse<ServiceRequest>(false, "Service Request Not Found"));
             }
             var mappedRequest = _mapper.Map<ServiceRequestGetDto>(serviceRequest);
 
-            return Ok(new ApiResponse<ServiceRequestGetDto>(true,"Service Request Retrieved", mappedRequest));
+            return Ok(new ApiResponse<ServiceRequestGetDto>(true, "Service Request Retrieved", mappedRequest));
 
         }
-        [Authorize(Roles =("Admin,Provider"))]
+        [Authorize(Roles = ("Admin,Provider"))]
         [HttpPost]
         public async Task<IActionResult> AddServiceRequest(ServiceRequestPostPutDto serviceReqPostDto)
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
-            var domainServiceReq= _mapper.Map<ServiceRequest>(serviceReqPostDto);
+            var domainServiceReq = _mapper.Map<ServiceRequest>(serviceReqPostDto);
 
-            if(int.TryParse(userIdClaim, out var userId))
+            if (int.TryParse(userIdClaim, out var userId))
             {
                 var user = await _userRepository.GetByIdAsync(userId);
-                if(user == null)
+                if (user == null)
                 {
                     return BadRequest(new ApiResponse<ServiceRequest>(false, "Invalid User"));
                 }
 
             }
-            domainServiceReq.ProviderUserId= userId;
+            domainServiceReq.ProviderUserId = userId;
             await _serviceRequestRepo.AddServiceRequestAsync(domainServiceReq, userId);
             var mappedServiceReq = _mapper.Map<ServiceRequestGetDto>(domainServiceReq);
             return Ok(new ApiResponse<ServiceRequestGetDto>(true, "Your New Service Request Is Sent", mappedServiceReq));
+
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("accept")]
+        public async Task<IActionResult> AcceptServiceRequest(int id)
+        {
+            var serviceRequest = await _serviceRequestRepo.GetServiceRequestByIdAsync(id);
+            if (serviceRequest == null)
+                return NotFound(new ApiResponse<ServiceRequest>(false, "Service Request Not Found"));
+            var acceptedRequest = await _serviceRequestRepo.AcceptServiceRequestAsync(id);
+
+            var mappedServiceRequest = _mapper.Map<ServiceRequestGetDto>(acceptedRequest);
+            return Ok(new ApiResponse<ServiceRequestGetDto>(true, "Service Request Accepted !", mappedServiceRequest));
+
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("refuse")]
+        public async Task<IActionResult> RefuseServiceRequest(int id)
+        {
+            var serviceRequest = await _serviceRequestRepo.GetServiceRequestByIdAsync(id);
+            if (serviceRequest == null)
+                return NotFound(new ApiResponse<ServiceRequest>(false, "Service Request Not Found"));
+            var refusedRequest = await _serviceRequestRepo.RefuseServiceRequestAsync(id);
+
+            var mappedServiceRequest = _mapper.Map<ServiceRequestGetDto>(refusedRequest);
+            return Ok(new ApiResponse<ServiceRequestGetDto>(true, "Service Request Refused ", mappedServiceRequest));
 
         }
 
