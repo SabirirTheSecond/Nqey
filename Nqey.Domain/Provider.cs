@@ -49,8 +49,9 @@ namespace Nqey.Domain
                 //return sum / Reviews.Count;
                 if (Reviews == null || Reviews.Count == 0)
                     return 0;
-
-                return Reviews.Average(r => (double)r.Stars);
+                var average = Reviews.Average(r => (double)r.Stars);
+                var toDisplayAverage = average.ToString("F1");
+                return Convert.ToDouble(toDisplayAverage);
             }
 
         }

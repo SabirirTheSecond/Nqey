@@ -28,12 +28,12 @@ namespace Nqey.DAL.Repositories
                 .Include(p=>p.ProfileImage)
                 .Include(p => p.Portfolio)
                 .Include (p => p.Location)
-                .Include(p => p.IdentityPiece)
-               .Include(p => p.SelfieImage)
-                 .Include(p => p.SentMessages)
-                .Include(p => p.ReceivedMessages)
-                .Include(p=>p.FiledComplaints)
-                .Include(p=>p.ComplaintsAgainst)
+               // .Include(p => p.IdentityPiece)
+               //.Include(p => p.SelfieImage)
+                // .Include(p => p.SentMessages)
+                //.Include(p => p.ReceivedMessages)
+                //.Include(p=>p.FiledComplaints)
+                //.Include(p=>p.ComplaintsAgainst)
                 .ToListAsync();
 
 
@@ -59,21 +59,18 @@ namespace Nqey.DAL.Repositories
         public async Task<Provider> GetProviderByIdAsync(int userId)
         {
             var provider = await _dataContext.Providers
-                .Where(p => p.AccountStatus != AccountStatus.Blocked)
+               //.Where(p => p.AccountStatus != AccountStatus.Blocked)
                .Include(p => p.Reviews)
                .Include(p => p.ProfileImage)
                .Include(p => p.Location)
                .Include(p => p.Portfolio)
-               .Include(p=>p.IdentityPiece)
-               .Include(p=>p.SelfieImage)
-                .Include(p => p.SentMessages)
-                .Include(p => p.ReceivedMessages)
-                .Include(p => p.FiledComplaints)
-                .Include(p => p.ComplaintsAgainst)
-               .FirstOrDefaultAsync(p =>
-
-                       p.UserId == userId
-                   );
+               .Include(p => p.IdentityPiece)
+               .Include(p => p.SelfieImage)
+                //.Include(p => p.SentMessages)
+                //.Include(p => p.ReceivedMessages)
+                //.Include(p => p.FiledComplaints)
+                //.Include(p => p.ComplaintsAgainst)
+               .FirstOrDefaultAsync(p => p.UserId == userId);
             Console.WriteLine(provider.AverageRating);
 
             if (provider == null)

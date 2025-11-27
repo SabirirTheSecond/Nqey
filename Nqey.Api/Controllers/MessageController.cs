@@ -125,17 +125,18 @@ namespace Nqey.Api.Controllers
                 return BadRequest(new ApiResponse<Message>(false, "An error Occured While processing your Credentials" +
                     ", Please Login Again"));
             }
-            var unreadMessages= await _messageService.CountUnreadMessagesAsync(myId);
-            var result = unreadMessages.Select(g => new UnreadMessageWithSenderDto
-            {
-                SenderId = g.SenderId,
-                SenderName = g.SenderName,
-                SenderAvatar = g.SenderAvatar,
-                UnreadCount = g.UnreadCount
-            }).ToList();
+            var unreadMessages=  _messageService.CountUnreadMessagesAsync(myId);
+            //var result = unreadMessages.Select(g => new UnreadMessageWithSenderDto
+            //{
+            //    SenderId = g.SenderId,
+            //    SenderName = g.SenderName,
+            //    SenderAvatar = g.SenderAvatar,
+            //    UnreadCount = g.UnreadCount
+            //}).ToList();
 
-            return Ok(new ApiResponse<List<UnreadMessageWithSenderDto>>(true,
-                $"You Have Unread Messages From {result.Count} Conversations",result));
+
+            return Ok(new ApiResponse<int>(true,
+                $"You Have {unreadMessages} Unread Messages",unreadMessages));
         }
 
 

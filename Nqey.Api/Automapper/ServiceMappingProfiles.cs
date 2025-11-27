@@ -11,6 +11,10 @@ namespace Nqey.Api.Automapper
             CreateMap<ServicePostPutDto, Service>()
                 .ForMember(dest => dest.ServiceImage, opt => opt.Ignore())
                 ;
+            CreateMap<ServicePatchDto, Service>()
+                .ForMember(dest => dest.ServiceImage, opt => opt.Ignore())
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null))
+                ;
 
             CreateMap<Service, ServiceAdminGetDto>()
      .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.ServiceImage)); // Map the entire Image object

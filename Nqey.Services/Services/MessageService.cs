@@ -14,8 +14,8 @@ namespace Nqey.Services.Services
     {
        
 
-        public async Task<List<(int SenderId, string SenderName, string? SenderAvatar, int UnreadCount)>> CountUnreadMessagesAsync(int receiverId)  
-            => await messageRepo.CountUnreadMessagesAsync(receiverId);
+        public int CountUnreadMessagesAsync(int receiverId)  
+            =>  messageRepo.CountUnreadMessagesAsync(receiverId);
             
         
 

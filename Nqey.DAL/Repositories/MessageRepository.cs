@@ -23,34 +23,22 @@ namespace Nqey.DAL.Repositories
             
         }
 
-        public async Task<List<(int SenderId, string SenderName, string? SenderAvatar, int UnreadCount)>>
+        public int
             CountUnreadMessagesAsync(int receiverId)
         {
-            var grouped= await dataContext.Messages
+            var grouped =  dataContext.Messages
                 .AsNoTracking()
                 .Where(m => m.RecieverId == receiverId && !m.IsRead)
                 .Include(m => m.Sender)
                     .ThenInclude(s => s.ProfileImage)
-                .GroupBy(m => new
-                {
-                    m.Sender.UserId,
-                    m.Sender.UserName,
-                    Avatar = m.Sender.ProfileImage.ImagePath
-                })
 
-                .Select(g => new
-                {
-                    SenderId = g.Key.UserId,
-                    SenderName = g.Key.UserName,
-                    SenderAvatar = g.Key.Avatar,
-                    UnreadCount = g.Count()
+                .Count();
 
+                
 
-                })
+                
 
-                .ToListAsync();
-
-            return grouped.Select(g=> (g.SenderId, g.SenderName, g.SenderAvatar, g.UnreadCount)).ToList();          
+            return grouped;          
 
         }
 

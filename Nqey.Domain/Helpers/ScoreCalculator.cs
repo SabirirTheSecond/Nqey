@@ -33,19 +33,19 @@ namespace Nqey.Domain.Helpers
             }
 
             // Normalization (on 100 jobs) 
-            double jobScore = Math.Min(provider.JobsDone, 100) / 100;
+            double jobScore = Math.Min(provider.ProviderAnalytics.JobsDone, 100) / 100;
             // Account active
             double accountScore = provider.AccountStatus == AccountStatus.Active ? 1.0 : 0.0;
             // Portfolio size
             double portfolioScore = provider.Portfolio != null && provider.Portfolio.Count >= 3 ? 1.0 : 0.0;
            
             // Weighted sum
-            score = distanceScore * 0.35 +
+            score = distanceScore * 0.3 +
                     ratingScore * 0.3 +
                     jobScore * 0.2 +
                     accountScore * 0.1 
                     
-                    + portfolioScore * 0.05
+                    + portfolioScore * 0.1
                     ;
 
 
@@ -61,7 +61,7 @@ namespace Nqey.Domain.Helpers
                 ratingScore = avgRating / 5.0;
             }
             // Normalization (on 100 jobs) 
-            double jobScore = Math.Min(provider.JobsDone, 100) / 100;
+            double jobScore = Math.Min(provider.ProviderAnalytics.JobsDone, 100) / 100;
             // Account active
             double accountScore = provider.AccountStatus == AccountStatus.Active ? 1.0 : 0.0;
             // Portfolio size

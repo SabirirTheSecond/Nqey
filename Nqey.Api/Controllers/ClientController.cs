@@ -91,6 +91,7 @@ namespace Nqey.Api.Controllers
 
             var mappedClient = _mapper.Map<ClientPublicGetDto>(domainClient);
             return Ok(new ApiResponse<ClientPublicGetDto>(true, "Client Added Successfully ", mappedClient));
+         
         }
 
         [Authorize(Roles ="Client")]

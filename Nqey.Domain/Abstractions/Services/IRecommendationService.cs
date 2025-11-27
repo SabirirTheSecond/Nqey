@@ -10,5 +10,6 @@ namespace Nqey.Domain.Abstractions.Services
     {
         List<Provider> GetSortedProvidersForClients(Client client, List<Provider> providers);
         List<Provider> GetSortedProvidersForAnonymous( List<Provider> providers);
+
     }
 }

@@ -12,4 +12,14 @@ namespace Nqey.Api.Dtos.ServiceDtos
         public IFormFile? Image { get; set; }
 
     }
+    public class ServicePatchDto
+    {
+
+
+        public string? NameEn { get; set; }
+        public string? NameFr { get; set; }
+        public string? NameAr { get; set; }
+        public IFormFile? Image { get; set; }
+
+    }
 }

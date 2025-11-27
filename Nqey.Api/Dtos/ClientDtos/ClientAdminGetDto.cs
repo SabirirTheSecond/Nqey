@@ -10,11 +10,13 @@ namespace Nqey.Api.Dtos.ClientDtos
         public string Username { get; set; }
 
         public string Email { get; set; }
-
+        public DateTime? BirthDate { get; set; }
+        public Sex? Sex { get; set; }
         public ProfileImage ProfileImage { get; set; }
         public AccountStatus Status { get; set; } = AccountStatus.Active;
         public LocationDto Location { get; set; }
         public ICollection<Message> SentMessages { get; set; }
         public ICollection<Message> ReceivedMessages { get; set; }
     }
+
 }

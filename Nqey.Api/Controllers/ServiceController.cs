@@ -111,9 +111,9 @@ namespace Nqey.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut]
+        [HttpPatch]
         [Route("{id}")]
-        public async Task<IActionResult> UpdateService(ServicePostPutDto servicePostPut, int id)
+        public async Task<IActionResult> UpdateService([FromForm] ServicePatchDto servicePatch, int id)
         {
             var existingService = await _serviceRepository.GetServiceByIdAsync(id);
            
@@ -121,12 +121,21 @@ namespace Nqey.Api.Controllers
             {
                 return NotFound(new ApiResponse<ServicePublicGetDto>(false, "Service not found", null));
             }
+            if (servicePatch.Image != null)
+            {
 
-             _mapper.Map(servicePostPut, existingService);
+
+                existingService.ServiceImage = await _imageService.UploadServiceImage(
+                    servicePatch.Image, existingService.ServiceId);
+
+                await _serviceRepository.UpdateServiceAsync(existingService);
+
+            }
+            _mapper.Map(servicePatch, existingService);
            
             await _serviceRepository.UpdateServiceAsync(existingService);
             var mappedService = _mapper.Map<ServicePublicGetDto>(existingService);
-            return Ok(new ApiResponse<ServicePublicGetDto>(true,$" Service is updated to {mappedService.NameEn}",null));
+            return Ok(new ApiResponse<ServicePublicGetDto>(true,$" Service  {mappedService.NameEn} is updated ",null));
 
 
         }
