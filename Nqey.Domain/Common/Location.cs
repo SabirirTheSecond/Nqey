@@ -9,8 +9,8 @@ namespace Nqey.Domain.Common
     public class Position
     {
 
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        public double Latitude { get; set; } = 0;
+        public double Longitude { get; set; } = 0;
         public double? Accuracy  { get; set; }
 
 
@@ -21,7 +21,7 @@ namespace Nqey.Domain.Common
         public int LocationId { get; set; }
         public string? Name { get; set; }
         public string? Address { get; set; }
-        public Position Position { get; set; }
+        public Position? Position { get; set; }
         public string? City { get; set; }
         public string? Wilaya  { get; set; }
     

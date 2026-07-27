@@ -68,12 +68,13 @@ namespace Nqey.DAL
                  .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Client)
-                .WithMany()
+                .WithMany(c=> c.Reservations)
                 .HasForeignKey(r => r.ClientUserId)
                 .OnDelete(DeleteBehavior.Restrict);
+            
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Provider)
-                .WithMany()
+                .WithMany(p=>p.Reservations)
                 .HasForeignKey(r => r.ProviderUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 

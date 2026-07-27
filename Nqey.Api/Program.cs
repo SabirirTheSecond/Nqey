@@ -35,6 +35,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 }); 
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
@@ -89,6 +90,8 @@ builder.Services.AddScoped<IRecommendationService, RecommandationService>();
 builder.Services.AddScoped<IFaceRecognitionService, FaceRecognitionService>();
 builder.Services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>();
 builder.Services.Configure<MLApiOptions>(builder.Configuration.GetSection("MLApi"));
+
+
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<ProviderRecommender>();

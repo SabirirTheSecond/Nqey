@@ -129,6 +129,23 @@ namespace Nqey.Api.Controllers
                     ImagePath = selfiPath,
                 };
             }
+            if(providerPatchDto.Location  != null)
+            {
+                existingProvider.Location = new Location
+                {
+                    Address = providerPatchDto.Location?.Address,
+                    Name = providerPatchDto.Location?.Name,
+                    City = providerPatchDto.Location?.City,
+                    Position = new Position
+                    {
+                        Latitude = providerPatchDto.Location.Position.Latitude,
+                        Longitude = providerPatchDto.Location.Position.Longitude,
+                        Accuracy = providerPatchDto.Location.Position.Accuracy
+                    },
+                    Wilaya = providerPatchDto.Location.Wilaya
+
+                };
+            }
             await _serviceRepository.UpdateProviderAsync(existingProvider.ServiceId, existingProvider);
             
             var mappedProvider = _mapper.Map<ProviderPublicGetDto>(existingProvider);
@@ -147,12 +164,12 @@ namespace Nqey.Api.Controllers
                 return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "Could Not Determine User Identity, Please Log In" +
                     "Again"));
             }
-            var provider = await _providerRepository.GetProviderByIdAsync(userId);
+            var provider = await _providerRepository.GetProviderByIdForAnalyticsAsync(userId);
             if (provider == null)
             {
                 return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "Provider Not Found"));
             }
-            if (portfolio == null || !portfolio.Any())
+            if (portfolio == null || portfolio.Count == 0)
             {
                 return BadRequest(new ApiResponse<ProviderPublicGetDto>(false, "Please Add At Least One Image"));
                
@@ -270,7 +287,7 @@ namespace Nqey.Api.Controllers
             var userIdClaim = User.FindFirst("userId")?.Value;
             if(!int.TryParse(userIdClaim, out var userId) )
             {
-                    
+                return NotFound(new ApiResponse<ProviderAdminGetDto>(false, "Not Found"));   
             }
             var user = await _userRepository.GetByIdAsync(userId);
             if (role == "Client")
@@ -379,6 +396,24 @@ namespace Nqey.Api.Controllers
             //var mappedStatistics = _mapper.Map<An>
             return Ok(new ApiResponse<ProviderAnalytics>(true, $"Provider {provider.UserName}'s " +
                 $"Analytics", statistics));
+        }
+        [Authorize(Roles = "Provider")]
+        [HttpGet]
+        [Route("dashboard_statistics")]
+        public async Task<IActionResult> GetProviderDashboardStatistics()
+        {
+            var providerIdClaim = User.FindFirstValue("userId");
+            if (!int.TryParse(providerIdClaim, out var providerId)) {
+                return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "Auth Error Please Login Again"));
+            }
+
+            var provider = await _providerRepository.GetProviderByIdForAnalyticsAsync(providerId);
+            if (provider == null)
+                return NotFound(new ApiResponse<ProviderPublicGetDto>(false, "Provider Not Found"));
+            var dashboardStatistics = _mapper.Map<ProviderDashboardAnalyticsDto>(provider);
+            //var mappedStatistics = _mapper.Map<An>
+            return Ok(new ApiResponse<ProviderDashboardAnalyticsDto>(true, $"Provider {provider.UserName}'s " +
+                $"Analytics", dashboardStatistics));
         }
     }
 

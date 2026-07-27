@@ -27,9 +27,10 @@ namespace Nqey.DAL.Repositories
         public async Task<List<Service>> GetServicesAsync()
         {
             var services = await _dataContext.Services
-                
-                .Include(s=>s.Providers)
+                .Include(s=> s.Providers)
+                .ThenInclude(pr=>pr.SubServices)
                 .Include(s=> s.ServiceImage)
+                
                 .ToListAsync();
             if (services.Count==0)
             {

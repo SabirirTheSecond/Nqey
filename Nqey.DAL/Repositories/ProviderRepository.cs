@@ -66,13 +66,34 @@ namespace Nqey.DAL.Repositories
                .Include(p => p.Portfolio)
                .Include(p => p.IdentityPiece)
                .Include(p => p.SelfieImage)
+               .Include(p=> p.Reservations)
+                   .ThenInclude(r=> r.Events)
+               .Include(p=>p.SubServices)
                 //.Include(p => p.SentMessages)
                 //.Include(p => p.ReceivedMessages)
                 //.Include(p => p.FiledComplaints)
                 //.Include(p => p.ComplaintsAgainst)
                .FirstOrDefaultAsync(p => p.UserId == userId);
             Console.WriteLine(provider.AverageRating);
+            
 
+
+            if (provider == null)
+                return null;
+            return provider;
+        }
+        public async Task<Provider> GetProviderByIdForAnalyticsAsync(int userId)
+        {
+            var provider = await _dataContext.Providers
+               //.Where(p => p.AccountStatus != AccountStatus.Blocked)
+               .Include(p => p.Reviews)
+              
+               .Include(p => p.Reservations)
+                   .ThenInclude(r => r.Events)
+               .Include(p => p.SubServices)
+             
+               .FirstOrDefaultAsync(p => p.UserId == userId);
+ 
             if (provider == null)
                 return null;
             return provider;
@@ -146,6 +167,7 @@ namespace Nqey.DAL.Repositories
             return null;
             
         }
+
 
     }
 }

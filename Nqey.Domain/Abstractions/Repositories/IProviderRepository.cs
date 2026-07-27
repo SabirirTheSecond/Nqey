@@ -18,6 +18,7 @@ namespace Nqey.Domain.Abstractions.Repositories
         Task<Provider> ActivateProviderAsync(Provider provider);
         Task<Provider> UpdateProviderAsync(int? serviceId, Provider provider);
         Task<Provider> UpdatePortfolio(int userId,List<PortfolioImage> portfolioImages);
+        Task<Provider> GetProviderByIdForAnalyticsAsync(int userId);
         //Task<Provider> CreateProviderWithUserAndImages();
 
     }

@@ -87,6 +87,7 @@ namespace Nqey.DAL.Repositories
                 return null;
             }
                 serviceRequest.ServiceRequestStatus = ServiceRequestStatus.Accepted;
+            await dataContext.SaveChangesAsync();
                 return serviceRequest;     
         }
 
@@ -99,6 +100,7 @@ namespace Nqey.DAL.Repositories
                 return null;
             }
             serviceRequest.ServiceRequestStatus = ServiceRequestStatus.Refused;
+            await dataContext.SaveChangesAsync();
             return serviceRequest;
         }
 

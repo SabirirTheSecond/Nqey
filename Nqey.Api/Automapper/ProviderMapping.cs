@@ -17,6 +17,14 @@ namespace Nqey.Api.Automapper
             .ForMember(dest => dest.IdentityPiece, opt => opt.Ignore())
             .ForMember(dest => dest.SelfieImage, opt => opt.Ignore());
 
+            CreateMap<ProviderDashboardAnalyticsDto, Provider>()
+            .ForMember(dest => dest.ProfileImage, opt => opt.Ignore())
+            .ForMember(dest => dest.Portfolio, opt => opt.Ignore())
+            .ForMember(dest => dest.IdentityPiece, opt => opt.Ignore())
+            .ForMember(dest => dest.SelfieImage, opt => opt.Ignore());
+            CreateMap<Provider, ProviderDashboardAnalyticsDto>()
+            ;
+
             CreateMap<ProviderPatchDto, Provider>()
             .ForMember(dest => dest.ProfileImage, opt => opt.Ignore())
             .ForMember(dest => dest.Portfolio, opt => opt.Ignore())
