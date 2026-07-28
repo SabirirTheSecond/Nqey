@@ -59,6 +59,7 @@ namespace Nqey.DAL.Repositories
         public async Task<Provider> GetProviderByIdAsync(int userId)
         {
             var provider = await _dataContext.Providers
+                .AsNoTracking()
                //.Where(p => p.AccountStatus != AccountStatus.Blocked)
                .Include(p => p.Reviews)
                .Include(p => p.ProfileImage)
