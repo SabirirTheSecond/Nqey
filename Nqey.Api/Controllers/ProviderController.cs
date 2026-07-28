@@ -287,7 +287,14 @@ namespace Nqey.Api.Controllers
             var userIdClaim = User.FindFirst("userId")?.Value;
             if(!int.TryParse(userIdClaim, out var userId) )
             {
-                return NotFound(new ApiResponse<ProviderAdminGetDto>(false, "Not Found"));   
+                //return NotFound(new ApiResponse<ProviderAdminGetDto>(false, "Not Found you're not logged in " +
+                //    "which is obviously a bug since we're allowing anonymous acces"));
+                providers = _recommendationService.GetSortedProvidersForAnonymous(providers)
+                            .Where(p => p.AccountStatus != AccountStatus.Blocked)
+                            .ToList();
+                var localMappedProviders = _mapper.Map<List<ProviderPublicGetDto>>(providers);
+
+                return Ok(new ApiResponse<List<ProviderPublicGetDto>>(true, "List Of All Providers", localMappedProviders));
             }
             var user = await _userRepository.GetByIdAsync(userId);
             if (role == "Client")

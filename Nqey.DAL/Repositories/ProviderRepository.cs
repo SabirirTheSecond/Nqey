@@ -52,7 +52,7 @@ namespace Nqey.DAL.Repositories
                 .Include(p => p.ComplaintsAgainst)
                 .ToListAsync();
             if (providers == null)
-                return null;
+                return [];
             return providers;
         }
 
