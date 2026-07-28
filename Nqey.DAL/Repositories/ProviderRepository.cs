@@ -74,6 +74,7 @@ namespace Nqey.DAL.Repositories
                 //.Include(p => p.ReceivedMessages)
                 //.Include(p => p.FiledComplaints)
                 //.Include(p => p.ComplaintsAgainst)
+                .AsSplitQuery()
                .FirstOrDefaultAsync(p => p.UserId == userId);
             Console.WriteLine(provider.AverageRating);
             

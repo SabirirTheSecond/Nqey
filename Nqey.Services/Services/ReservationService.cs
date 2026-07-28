@@ -109,6 +109,7 @@ namespace Nqey.Services.Services
                 return null;
             var provider = await _dataContext.Providers.FirstOrDefaultAsync(p => p.UserId == toComplete.ProviderUserId);
             provider.ProviderAnalytics.Completions++;
+            provider.ProviderAnalytics.JobsDone++; 
             toComplete.Status = ReservationStatus.Completed;
             // Booking timeline tracker
             toComplete.Events.Add(

@@ -14,16 +14,7 @@ namespace Nqey.Domain.Common
         public int Accepts { get; set; }
         public int Refuses { get; set; }
         public int Completions { get; set; }
-        //public int CompletionRate { get; set; } 
-        //public int CompletedThisMonth { get; set; }
-        //public int CancellationRate { get; set; }
-        //public int ServicesOffered { get; set; } 
-        //public int PendingOrders { get; set; }
-        //public DateTime NextAppointement {  get; set; }
-
-
-        //public int FiledComplaintsCount { get; set; }
-        //public int ComplaintsAgainstCount { get; set; }
+      
 
     }
 }
